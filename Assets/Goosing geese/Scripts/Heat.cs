@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Overheat : MonoBehaviour
+public class Heat : MonoBehaviour
 {
     [Range(0f, 1f)]
     [SerializeField] private float _redZoneThreshold = 0.8f; 
@@ -9,8 +9,12 @@ public class Overheat : MonoBehaviour
 
     public bool IsOverheated { get; private set; }
 
+    public float NormalizedSpeed { get; private set; } = 0f;
+
     public void Tick(float currentSpeed, RacerStats stats)
     {
+        NormalizedSpeed = currentSpeed / stats.MaxSpeed;
+
         bool speedIsInRedZone = currentSpeed > stats.MaxSpeed * _redZoneThreshold;
 
         if (speedIsInRedZone == false)

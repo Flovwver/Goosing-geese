@@ -2,16 +2,24 @@ using UnityEngine;
 
 public class InputSwitch : MonoBehaviour
 {
-    [SerializeField] private IInputSource _touchSource;   
-    [SerializeField] private IInputSource _keyboardSource; 
     [SerializeField] private Racer _racer;
 
+    private bool _pedalIsPressed;
+    private bool _keyboardIsPressed;
+
+    public void SetPedalPressed(bool isPressed)
+    {
+        _pedalIsPressed = isPressed;
+    }
+
+    public void SetKeyboardPressed(bool isPressed)
+    {
+        _keyboardIsPressed = isPressed;
+    }
 
     private void Update()
     {
-        bool touchIsAccelerating = _touchSource != null && _touchSource.IsAccelerating;
-        bool keyboardIsAccelerating = _keyboardSource != null && _keyboardSource.IsAccelerating;
-        bool isAccelerating = touchIsAccelerating || keyboardIsAccelerating;
+        bool isAccelerating = _pedalIsPressed || _keyboardIsPressed;
 
         if (isAccelerating == false)
         {

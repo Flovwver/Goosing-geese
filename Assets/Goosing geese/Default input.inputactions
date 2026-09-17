@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "Default input",
+    "maps": [
+        {
+            "name": "Moving",
+            "id": "a6791465-76d8-48b1-a69f-3444ce79e6fb",
+            "actions": [
+                {
+                    "name": "Accelerate",
+                    "type": "Button",
+                    "id": "17be1f2e-41ac-4fbe-9f08-77372c58ae82",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "66748a05-8d4b-4a49-943f-9f56467261bf",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Accelerate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

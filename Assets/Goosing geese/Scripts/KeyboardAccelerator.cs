@@ -1,14 +1,32 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class KeyboardAccelerator : MonoBehaviour, IInputSource
+public class KeyboardAccelerator : MonoBehaviour
 {
-    public bool IsAccelerating { get; private set; }
+    [SerializeField] private InputActionReference _accelerateAction;
+    [SerializeField] private InputSwitch _inputSwitch;
 
-    private void Update()
+    private void OnEnable()
     {
-        bool spaceKeyIsHeld = Input.GetKey(KeyCode.Space);
-        bool leftMouseButtonIsHeld = Input.GetMouseButton(0);
+        _accelerateAction.action.performed += HandleAccelerationPerformed;
+        _accelerateAction.action.canceled += HandleAccelerationCanceled;
+        _accelerateAction.action.Enable();
+    }
 
-        IsAccelerating = spaceKeyIsHeld || leftMouseButtonIsHeld;
+    private void OnDisable()
+    {
+        _accelerateAction.action.performed -= HandleAccelerationPerformed;
+        _accelerateAction.action.canceled -= HandleAccelerationCanceled;
+        _accelerateAction.action.Disable();
+    }
+
+    private void HandleAccelerationPerformed(InputAction.CallbackContext context)
+    {
+        _inputSwitch.SetKeyboardPressed(true);
+    }
+
+    private void HandleAccelerationCanceled(InputAction.CallbackContext context)
+    {
+        _inputSwitch.SetKeyboardPressed(false);
     }
 }
