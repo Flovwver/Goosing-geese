@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b621f69611bb6f34785e0495194aa1b0, type: 3}
   m_Name: PlayerRacerStats
   m_EditorClassIdentifier: Assembly-CSharp::RacerStats
-  MaxSpeed: 10
-  Acceleration: 5
+  MaxSpeed: 100
+  Acceleration: 50
   TimeToOverheat: 3
