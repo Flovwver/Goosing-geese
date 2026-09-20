@@ -11,7 +11,7 @@ public class RoadBuilder
         _piecePrefabsByType = piecePrefabsByType;
     }
 
-    public void Build(RoadPieceType[] layout, Transform startPoint)
+    public RoadPath Build(RoadPieceType[] layout, Transform startPoint)
     {
         Clear();
 
@@ -27,6 +27,8 @@ public class RoadBuilder
             _placedPieces.Add(placedPiece);
             previousExitPoint = placedPiece.ExitPoint;
         }
+
+        return new RoadPath(_placedPieces);
     }
 
     public void Clear()

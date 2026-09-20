@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Slider))]
-public class HeatUI : MonoBehaviour
+public class Speedometer : MonoBehaviour
 {
-    [SerializeField] private Heat _heat;
+    [SerializeField] private Racer _racer;
 
     private Slider _slider;
 
@@ -15,6 +15,6 @@ public class HeatUI : MonoBehaviour
 
     private void Update()
     {
-        _slider.value = _heat.NormalizedSpeed;
+        _slider.value = _racer.NormalizedSpeed;
     }
-}   
+}
