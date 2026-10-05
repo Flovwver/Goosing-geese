@@ -76,7 +76,7 @@ public class Racer : MonoBehaviour
             return;
         }
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed, _stats);
     }
 
     private void RaisePathCompleted()
@@ -96,6 +96,7 @@ public class Racer : MonoBehaviour
     private void OnExploded()
     {
         _currentSpeed = 0f;
+        _mover.Stop();
         Exploded?.Invoke();
     }
 }
