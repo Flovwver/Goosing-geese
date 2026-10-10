@@ -14,6 +14,14 @@ public class OverheatTracker : MonoBehaviour
     public event Action<float> ProgressChanged;
     public event Action Exploded;
 
+    public void ResetOverheat()
+    {
+        _redZoneTimer = 0f;
+        IsExploded = false;
+        Progress = 0f;
+        ProgressChanged?.Invoke(Progress);
+    }
+
     public void Tick(float currentSpeed, RacerStats stats)
     {
         if (IsExploded)

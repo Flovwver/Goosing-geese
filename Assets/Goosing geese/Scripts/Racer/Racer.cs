@@ -14,6 +14,8 @@ public class Racer : MonoBehaviour
 
     private float _currentSpeed;
     private bool _isPathCompletedRaised;
+    private Vector3 _startPosition;
+    private Quaternion _startRotation;
 
     public float CurrentSpeed => _currentSpeed;
     public float NormalizedSpeed => _currentSpeed / _stats.MaxSpeed;
@@ -21,12 +23,15 @@ public class Racer : MonoBehaviour
     public event Action<float> OverheatProgressChanged;
     public event Action Exploded;
     public event Action PathCompleted;
+    public event Action RaceRestarted;
 
     private void Awake()
     {
         _overheatTracker = GetComponent<OverheatTracker>();
         _mover = GetComponent<Mover>();
         _roadNavigator = GetComponent<RoadNavigator>();
+        _startPosition = transform.position;
+        _startRotation = transform.rotation;
     }
 
     private void OnEnable()
@@ -50,6 +55,15 @@ public class Racer : MonoBehaviour
     public void Accelerate()
     {
         Advance(_stats.MaxSpeed);
+    }
+
+    public void ResetRace()
+    {
+        _currentSpeed = 0f;
+        _isPathCompletedRaised = false;
+        _mover.TeleportTo(_startPosition, _startRotation);
+        _overheatTracker.ResetOverheat();
+        RaceRestarted?.Invoke();
     }
 
     public void Cooldown()
@@ -76,7 +90,7 @@ public class Racer : MonoBehaviour
             return;
         }
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed, _stats);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed);
     }
 
     private void RaisePathCompleted()

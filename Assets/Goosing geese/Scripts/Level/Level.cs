@@ -11,6 +11,8 @@ public class Level : MonoBehaviour
     [SerializeField] private RoadPiece _rightTurnPiecePrefab;
     [SerializeField] private int _roadPieceCount = 20;
     [SerializeField] private Racer _racer;
+    [SerializeField] private InputSwitch _inputSwitch;
+    [SerializeField] private CameraFollower _cameraFollower;
     [SerializeField] private bool _drawPathGizmos = true;
 
     private RoadLayoutGenerator _roadLayoutGenerator;
@@ -58,6 +60,18 @@ public class Level : MonoBehaviour
         _roadPath = _roadBuilder.Build(roadLayout, _roadStartPoint);
 
         _racer.SetPath(_roadPath);
+    }
+
+    public void RestartRace()
+    {
+        BuildRoad();
+        _racer.ResetRace();
+
+        if (_inputSwitch != null)
+            _inputSwitch.ReleasePedal();
+
+        if (_cameraFollower != null)
+            _cameraFollower.SnapToTarget();
     }
 
     private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType()

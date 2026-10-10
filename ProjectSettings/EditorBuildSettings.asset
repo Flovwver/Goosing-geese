@@ -4,7 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Goosing geese/Scenes/Main.unity
+    guid: 751290371d715c5418cd4dfd71c60489
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 4435d59c301fbb0459215351a00e0876, type: 3}
   m_UseUCBPForAssetBundles: 0

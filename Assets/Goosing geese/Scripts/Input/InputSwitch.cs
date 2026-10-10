@@ -7,6 +7,11 @@ public class InputSwitch : MonoBehaviour
     private bool _pedalIsPressed;
     private bool _keyboardIsPressed;
 
+    public void ReleasePedal()
+    {
+        _pedalIsPressed = false;
+    }
+
     public void SetPedalPressed(bool isPressed)
     {
         _pedalIsPressed = isPressed;

@@ -19,12 +19,14 @@ public class RacerOverheatView : MonoBehaviour
     {
         _racer.OverheatProgressChanged += OnOverheatProgressChanged;
         _racer.Exploded += OnExploded;
+        _racer.RaceRestarted += OnRaceRestarted;
     }
 
     private void OnDisable()
     {
         _racer.OverheatProgressChanged -= OnOverheatProgressChanged;
         _racer.Exploded -= OnExploded;
+        _racer.RaceRestarted -= OnRaceRestarted;
     }
 
     private void OnOverheatProgressChanged(float progress)
@@ -35,5 +37,13 @@ public class RacerOverheatView : MonoBehaviour
     private void OnExploded()
     {
         _animator.SetTrigger(ExplodedParameter);
+    }
+
+    private void OnRaceRestarted()
+    {
+        _animator.Rebind();
+        _animator.ResetTrigger(ExplodedParameter);
+        _animator.SetFloat(OverheatProgressParameter, 0f);
+        _animator.Update(0f);
     }
 }

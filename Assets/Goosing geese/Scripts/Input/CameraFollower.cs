@@ -8,6 +8,12 @@ public class CameraFollower : MonoBehaviour
 
     private Vector3 _velocity;
 
+    public void SnapToTarget()
+    {
+        _velocity = Vector3.zero;
+        transform.position = _target.position + _offset;
+    }
+
     private void LateUpdate()
     {
         Vector3 desiredPosition = _target.position + _offset;

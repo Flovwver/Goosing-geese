@@ -35,6 +35,7 @@ public class RoadBuilder
     {
         for (int pieceIndex = 0; pieceIndex < _placedPieces.Count; pieceIndex++)
         {
+            _placedPieces[pieceIndex].gameObject.SetActive(false);
             Object.Destroy(_placedPieces[pieceIndex].gameObject);
         }
 

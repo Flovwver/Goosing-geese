@@ -1,13 +1,19 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Mover : MonoBehaviour
 {
-    [SerializeField] private Rigidbody _rigidbody;
+    private Rigidbody _rigidbody;
 
-    public void MoveTowards(Vector3 targetPosition, float allowedSpeed, RacerStats stats)
+    private void Awake()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    public void MoveTowards(Vector3 targetPosition, float allowedSpeed)
     {
         FaceTowards(targetPosition);
-        PushForward(allowedSpeed, stats);
+        PushForward(allowedSpeed);
     }
 
     public void Stop()
@@ -16,6 +22,15 @@ public class Mover : MonoBehaviour
             return;
 
         _rigidbody.linearVelocity = Vector3.zero;
+        _rigidbody.angularVelocity = Vector3.zero;
+    }
+
+    public void TeleportTo(Vector3 position, Quaternion rotation)
+    {
+        Stop();
+        _rigidbody.position = position;
+        _rigidbody.rotation = rotation;
+        transform.SetPositionAndRotation(position, rotation);
     }
 
     private void FaceTowards(Vector3 targetPosition)
@@ -29,7 +44,7 @@ public class Mover : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(offsetToTarget.normalized, Vector3.up);
     }
 
-    private void PushForward(float allowedSpeed, RacerStats stats)
+    private void PushForward(float allowedSpeed)
     {
         if (_rigidbody == null || allowedSpeed <= 0f)
             return;
