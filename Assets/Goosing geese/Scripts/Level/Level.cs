@@ -3,17 +3,10 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-    private const float WaypointGizmoRadius = 0.3f;
 
     [SerializeField] private Transform _roadStartPoint;
-    [SerializeField] private RoadPiece _straightPiecePrefab;
-    [SerializeField] private RoadPiece _leftTurnPiecePrefab;
-    [SerializeField] private RoadPiece _rightTurnPiecePrefab;
-    [SerializeField] private int _roadPieceCount = 20;
+    [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
-    [SerializeField] private InputSwitch _inputSwitch;
-    [SerializeField] private CameraFollower _cameraFollower;
-    [SerializeField] private bool _drawPathGizmos = true;
 
     private RoadLayoutGenerator _roadLayoutGenerator;
     private RoadBuilder _roadBuilder;
@@ -21,7 +14,7 @@ public class Level : MonoBehaviour
 
     private void Awake()
     {
-        _roadLayoutGenerator = new RoadLayoutGenerator(new[] { RoadPieceType.Straight, RoadPieceType.LeftTurn, RoadPieceType.RightTurn });
+        _roadLayoutGenerator = new RoadLayoutGenerator(_settings.AvailablePieceTypes, _settings.MaxGenerationAttempts);
         _roadBuilder = new RoadBuilder(BuildPiecePrefabsByType());
     }
 
@@ -32,7 +25,7 @@ public class Level : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (_drawPathGizmos == false || _roadPath == null)
+        if (_settings == null || _settings.DrawPathGizmos == false || _roadPath == null)
             return;
 
         Gizmos.color = Color.yellow;
@@ -44,7 +37,7 @@ public class Level : MonoBehaviour
             if (_roadPath.TryGetWaypoint(waypointIndex, out Transform waypoint) == false || waypoint == null)
                 continue;
 
-            Gizmos.DrawWireSphere(waypoint.position, WaypointGizmoRadius);
+            Gizmos.DrawWireSphere(waypoint.position, _settings.WaypointGizmoRadius);
 
             if (previousPosition.HasValue)
                 Gizmos.DrawLine(previousPosition.Value, waypoint.position);
@@ -53,10 +46,9 @@ public class Level : MonoBehaviour
         }
     }
 
-    [ContextMenu("Build road")]
     public void BuildRoad()
     {
-        RoadPieceType[] roadLayout = _roadLayoutGenerator.Generate(_roadPieceCount);
+        RoadPieceType[] roadLayout = _roadLayoutGenerator.Generate(_settings.RoadPieceCount);
         _roadPath = _roadBuilder.Build(roadLayout, _roadStartPoint);
 
         _racer.SetPath(_roadPath);
@@ -66,21 +58,17 @@ public class Level : MonoBehaviour
     {
         BuildRoad();
         _racer.ResetRace();
-
-        if (_inputSwitch != null)
-            _inputSwitch.ReleasePedal();
-
-        if (_cameraFollower != null)
-            _cameraFollower.SnapToTarget();
     }
 
     private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType()
     {
-        return new Dictionary<RoadPieceType, RoadPiece>
+        var piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>();
+
+        foreach (RoadSettings.PiecePrefabEntry entry in _settings.PiecePrefabs)
         {
-            { RoadPieceType.Straight, _straightPiecePrefab },
-            { RoadPieceType.LeftTurn, _leftTurnPiecePrefab },
-            { RoadPieceType.RightTurn, _rightTurnPiecePrefab }
-        };
+            piecePrefabsByType.Add(entry.Type, entry.Prefab);
+        }
+
+        return piecePrefabsByType;
     }
 }

@@ -16,4 +16,3 @@ MonoBehaviour:
   Acceleration: 50
   Drag: 0.05
   TurnSpeed: 300
-  TimeToOverheat: 3

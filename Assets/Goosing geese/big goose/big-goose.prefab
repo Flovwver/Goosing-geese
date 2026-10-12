@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef672a5d702dae74e99a6a04acd9b5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OverheatTracker
-  _redZoneThreshold: 0.8
+  _settings: {fileID: 11400000, guid: f062681396bf4b35b8230cc5e6f3e648, type: 2}
 --- !u!114 &2133777799489664667
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 296f40328c6792f4f9577fe7886b45cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadNavigator
-  _arrivalDistance: 0.5
+  _settings: {fileID: 11400000, guid: 4d62e05d4a4240c8a1741403e5eed75b, type: 2}
 --- !u!114 &8610405145371556678
 MonoBehaviour:
   m_ObjectHideFlags: 0

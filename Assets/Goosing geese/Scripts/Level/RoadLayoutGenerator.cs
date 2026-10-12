@@ -3,18 +3,19 @@ using UnityEngine;
 
 public class RoadLayoutGenerator
 {
-    private const int MaxGenerationAttempts = 100;
+    private readonly int _maxGenerationAttempts;
 
     private readonly RoadPieceType[] _availablePieceTypes;
 
-    public RoadLayoutGenerator(RoadPieceType[] availablePieceTypes)
+    public RoadLayoutGenerator(RoadPieceType[] availablePieceTypes, int maxGenerationAttempts)
     {
         _availablePieceTypes = availablePieceTypes;
+        _maxGenerationAttempts = Mathf.Max(1, maxGenerationAttempts);
     }
 
     public RoadPieceType[] Generate(int pieceCount)
     {
-        for (int attempt = 0; attempt < MaxGenerationAttempts; attempt++)
+        for (int attempt = 0; attempt < _maxGenerationAttempts; attempt++)
         {
             if (TryGenerate(pieceCount, out RoadPieceType[] layout))
                 return layout;

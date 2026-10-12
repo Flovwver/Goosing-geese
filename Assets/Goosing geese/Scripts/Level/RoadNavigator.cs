@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class RoadNavigator : MonoBehaviour
 {
-    [SerializeField] private float _arrivalDistance = 0.5f;
+    [SerializeField] private NavigationSettings _settings;
 
     private RoadPath _path;
     private int _targetWaypointIndex;
@@ -31,7 +31,7 @@ public class RoadNavigator : MonoBehaviour
 
         float squaredDistance = offsetToTarget.sqrMagnitude;
 
-        if (squaredDistance > _arrivalDistance * _arrivalDistance)
+        if (squaredDistance > _settings.ArrivalDistance * _settings.ArrivalDistance)
             return;
 
         _targetWaypointIndex++;

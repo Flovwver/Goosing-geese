@@ -325,6 +325,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RestartRaceButton
   _level: {fileID: 1081964704}
+  _inputSwitch: {fileID: 280129367}
 --- !u!1 &310000011
 GameObject:
   m_ObjectHideFlags: 0
@@ -706,8 +707,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollower
   _target: {fileID: 543450651709855089}
-  _offset: {x: 34.4, y: 35, z: -32.1}
-  _smoothTime: 0.05
+  _settings: {fileID: 11400000, guid: ddaaa218710e4b57b58001fd38020a38, type: 2}
 --- !u!1 &808536909
 GameObject:
   m_ObjectHideFlags: 0
@@ -985,14 +985,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Level
   _roadStartPoint: {fileID: 1242738828}
-  _straightPiecePrefab: {fileID: 5548856659219543206, guid: aa20547dfc1c8104e9a4bb855c15ca97, type: 3}
-  _leftTurnPiecePrefab: {fileID: 7886673770279700980, guid: 4e7a44725912a6749942322285a7b9ab, type: 3}
-  _rightTurnPiecePrefab: {fileID: 3628304544319266350, guid: 5d01fbd589c6eb542ba764e2ba5d07a4, type: 3}
-  _roadPieceCount: 20
+  _settings: {fileID: 11400000, guid: a89aed623746447b9df737176ec8f8ff, type: 2}
   _racer: {fileID: 265920761}
-  _inputSwitch: {fileID: 280129367}
   _cameraFollower: {fileID: 671363156}
-  _drawPathGizmos: 1
 --- !u!4 &1081964705
 Transform:
   m_ObjectHideFlags: 0
