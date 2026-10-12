@@ -4,20 +4,43 @@ using UnityEngine;
 public class Mover : MonoBehaviour
 {
     private Rigidbody _rigidbody;
+    private Vector3 _desiredVelocity;
+    private float _maxAcceleration;
+    private bool _hasMovementTarget;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
     }
 
-    public void MoveTowards(Vector3 targetPosition, float allowedSpeed)
+    public void MoveTowards(Vector3 targetPosition, float allowedSpeed, float maxAcceleration)
     {
-        FaceTowards(targetPosition);
-        PushForward(allowedSpeed);
+        Vector3 offsetToTarget = targetPosition - _rigidbody.position;
+        offsetToTarget.y = 0f;
+        _desiredVelocity = offsetToTarget.normalized * Mathf.Max(0f, allowedSpeed);
+        _maxAcceleration = Mathf.Max(0f, maxAcceleration);
+        _hasMovementTarget = true;
+    }
+
+    private void FixedUpdate()
+    {
+        if (_hasMovementTarget == false)
+            return;
+
+        if (_desiredVelocity.sqrMagnitude > Mathf.Epsilon)
+            _rigidbody.MoveRotation(Quaternion.LookRotation(_desiredVelocity.normalized, Vector3.up));
+
+        Vector3 planarVelocity = _rigidbody.linearVelocity;
+        planarVelocity.y = 0f;
+        Vector3 acceleration = (_desiredVelocity - planarVelocity) / Time.fixedDeltaTime;
+        acceleration = Vector3.ClampMagnitude(acceleration, _maxAcceleration);
+        _rigidbody.AddForce(acceleration, ForceMode.Acceleration);
     }
 
     public void Stop()
     {
+        _desiredVelocity = Vector3.zero;
+        _hasMovementTarget = false;
         if (_rigidbody == null)
             return;
 
@@ -33,22 +56,4 @@ public class Mover : MonoBehaviour
         transform.SetPositionAndRotation(position, rotation);
     }
 
-    private void FaceTowards(Vector3 targetPosition)
-    {
-        Vector3 offsetToTarget = targetPosition - transform.position;
-        offsetToTarget.y = 0f;
-
-        if (offsetToTarget.sqrMagnitude <= Mathf.Epsilon)
-            return;
-
-        transform.rotation = Quaternion.LookRotation(offsetToTarget.normalized, Vector3.up);
-    }
-
-    private void PushForward(float allowedSpeed)
-    {
-        if (_rigidbody == null || allowedSpeed <= 0f)
-            return;
-
-        _rigidbody.AddForce(transform.forward * allowedSpeed, ForceMode.Acceleration);
-    }
 }

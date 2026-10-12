@@ -73,7 +73,7 @@ public class Racer : MonoBehaviour
 
     private void Advance(float targetSpeed)
     {
-        if (_overheatTracker.IsExploded)
+        if (_overheatTracker.IsExploded || _isPathCompletedRaised)
             return;
 
         _currentSpeed = Mathf.MoveTowards(_currentSpeed, targetSpeed, _stats.Acceleration * Time.deltaTime);
@@ -90,7 +90,7 @@ public class Racer : MonoBehaviour
             return;
         }
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed, _stats.Acceleration);
     }
 
     private void RaisePathCompleted()
@@ -99,6 +99,8 @@ public class Racer : MonoBehaviour
             return;
 
         _isPathCompletedRaised = true;
+        _currentSpeed = 0f;
+        _mover.Stop();
         PathCompleted?.Invoke();
     }
 
