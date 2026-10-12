@@ -1610,7 +1610,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1273300575}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: c19d0f071763b714682172f6a776dbd8, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1625,7 +1625,7 @@ CapsuleCollider:
   m_Radius: 0.61197704
   m_Height: 3.07
   m_Direction: 1
-  m_Center: {x: 0, y: 1.55, z: 0.43}
+  m_Center: {x: 0.15, y: 1.55, z: 0.42}
 --- !u!54 &543450651709855094
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1669,6 +1669,10 @@ PrefabInstance:
       propertyPath: looping
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1253533463864927206, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
+      propertyPath: stopAction
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2133777799489664667, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: _rigidbody
       value: 
@@ -1689,6 +1693,10 @@ PrefabInstance:
       propertyPath: looping
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3155806686187213634, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
+      propertyPath: stopAction
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4736223883380996564, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: m_Name
       value: big-goose
@@ -1707,7 +1715,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4849415397098960383, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4849415397098960383, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1715,7 +1723,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4849415397098960383, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4849415397098960383, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1753,9 +1761,17 @@ PrefabInstance:
       propertyPath: looping
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4921431533871085361, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
+      propertyPath: stopAction
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5239371774533800979, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: looping
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5239371774533800979, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
+      propertyPath: stopAction
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7159109207594585569, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: m_IsActive
@@ -1763,7 +1779,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7210258096977436899, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: stopAction
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7210258096977436899, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: lengthInSec
@@ -1779,7 +1795,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7797843709781225429, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       propertyPath: _arrivalDistance
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
