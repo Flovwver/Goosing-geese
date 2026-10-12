@@ -15,6 +15,6 @@ public class Speedometer : MonoBehaviour
 
     private void Update()
     {
-        _slider.value = _racer.NormalizedSpeed;
+        _slider.value = Mathf.Clamp01(_racer.NormalizedSpeed);
     }
 }

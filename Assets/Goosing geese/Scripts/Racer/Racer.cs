@@ -12,13 +12,12 @@ public class Racer : MonoBehaviour
     private Mover _mover;
     private RoadNavigator _roadNavigator;
 
-    private float _currentSpeed;
     private bool _isPathCompletedRaised;
     private Vector3 _startPosition;
     private Quaternion _startRotation;
 
-    public float CurrentSpeed => _currentSpeed;
-    public float NormalizedSpeed => _currentSpeed / _stats.MaxSpeed;
+    public float CurrentSpeed => _mover.CurrentSpeed;
+    public float NormalizedSpeed => _stats.MaxSpeed > 0f ? CurrentSpeed / _stats.MaxSpeed : 0f;
 
     public event Action<float> OverheatProgressChanged;
     public event Action Exploded;
@@ -29,6 +28,7 @@ public class Racer : MonoBehaviour
     {
         _overheatTracker = GetComponent<OverheatTracker>();
         _mover = GetComponent<Mover>();
+        _mover.Configure(_stats);
         _roadNavigator = GetComponent<RoadNavigator>();
         _startPosition = transform.position;
         _startRotation = transform.rotation;
@@ -54,12 +54,11 @@ public class Racer : MonoBehaviour
 
     public void Accelerate()
     {
-        Advance(_stats.MaxSpeed);
+        Advance(true);
     }
 
     public void ResetRace()
     {
-        _currentSpeed = 0f;
         _isPathCompletedRaised = false;
         _mover.TeleportTo(_startPosition, _startRotation);
         _overheatTracker.ResetOverheat();
@@ -68,16 +67,15 @@ public class Racer : MonoBehaviour
 
     public void Cooldown()
     {
-        Advance(0f);
+        Advance(false);
     }
 
-    private void Advance(float targetSpeed)
+    private void Advance(bool isAccelerating)
     {
         if (_overheatTracker.IsExploded || _isPathCompletedRaised)
             return;
 
-        _currentSpeed = Mathf.MoveTowards(_currentSpeed, targetSpeed, _stats.Acceleration * Time.deltaTime);
-        _overheatTracker.Tick(_currentSpeed, _stats);
+        _overheatTracker.Tick(CurrentSpeed, _stats);
 
         if (_overheatTracker.IsExploded)
             return;
@@ -90,7 +88,7 @@ public class Racer : MonoBehaviour
             return;
         }
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, _currentSpeed, _stats.Acceleration);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerating);
     }
 
     private void RaisePathCompleted()
@@ -99,7 +97,6 @@ public class Racer : MonoBehaviour
             return;
 
         _isPathCompletedRaised = true;
-        _currentSpeed = 0f;
         _mover.Stop();
         PathCompleted?.Invoke();
     }
@@ -111,7 +108,6 @@ public class Racer : MonoBehaviour
 
     private void OnExploded()
     {
-        _currentSpeed = 0f;
         _mover.Stop();
         Exploded?.Invoke();
     }

@@ -4,43 +4,48 @@ using UnityEngine;
 public class Mover : MonoBehaviour
 {
     private Rigidbody _rigidbody;
-    private Vector3 _desiredVelocity;
-    private float _maxAcceleration;
+    private Vector3 _targetPosition;
+    private RacerStats _stats;
     private bool _hasMovementTarget;
+    private bool _isAccelerating;
+
+    public float CurrentSpeed
+    {
+        get
+        {
+            Vector3 velocity = _rigidbody.linearVelocity;
+            velocity.y = 0f;
+            return velocity.magnitude;
+        }
+    }
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
     }
 
-    public void MoveTowards(Vector3 targetPosition, float allowedSpeed, float maxAcceleration)
-    {
-        Vector3 offsetToTarget = targetPosition - _rigidbody.position;
-        offsetToTarget.y = 0f;
-        _desiredVelocity = offsetToTarget.normalized * Mathf.Max(0f, allowedSpeed);
-        _maxAcceleration = Mathf.Max(0f, maxAcceleration);
-        _hasMovementTarget = true;
-    }
-
     private void FixedUpdate()
     {
-        if (_hasMovementTarget == false)
-            return;
+        ApplyMovement();
+    }
 
-        if (_desiredVelocity.sqrMagnitude > Mathf.Epsilon)
-            _rigidbody.MoveRotation(Quaternion.LookRotation(_desiredVelocity.normalized, Vector3.up));
+    public void Configure(RacerStats stats)
+    {
+        _stats = stats;
+    }
 
-        Vector3 planarVelocity = _rigidbody.linearVelocity;
-        planarVelocity.y = 0f;
-        Vector3 acceleration = (_desiredVelocity - planarVelocity) / Time.fixedDeltaTime;
-        acceleration = Vector3.ClampMagnitude(acceleration, _maxAcceleration);
-        _rigidbody.AddForce(acceleration, ForceMode.Acceleration);
+    public void MoveTowards(Vector3 targetPosition, bool isAccelerating)
+    {
+        _targetPosition = targetPosition;
+        _hasMovementTarget = true;
+        _isAccelerating = isAccelerating;
     }
 
     public void Stop()
     {
-        _desiredVelocity = Vector3.zero;
         _hasMovementTarget = false;
+        _isAccelerating = false;
+
         if (_rigidbody == null)
             return;
 
@@ -56,4 +61,33 @@ public class Mover : MonoBehaviour
         transform.SetPositionAndRotation(position, rotation);
     }
 
+    private void ApplyMovement()
+    {
+        _rigidbody.linearDamping = Mathf.Max(0f, _stats.Drag);
+
+        if (_hasMovementTarget == false)
+            return;
+
+        Vector3 forward = _rigidbody.rotation * Vector3.forward;
+        ApplyRotation();
+
+        if (_isAccelerating && CurrentSpeed < _stats.MaxSpeed)
+            _rigidbody.AddForce(forward * Mathf.Max(0f, _stats.Acceleration), ForceMode.Acceleration);
+    }
+
+    private void ApplyRotation()
+    {
+        Vector3 direction = _targetPosition - _rigidbody.position;
+        direction.y = 0f;
+
+        if (_isAccelerating == false || direction.sqrMagnitude <= Mathf.Epsilon)
+        {
+            _rigidbody.angularVelocity = Vector3.zero;
+            return;
+        }
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        Quaternion rotation = Quaternion.RotateTowards(_rigidbody.rotation, targetRotation, Mathf.Max(0f, _stats.TurnSpeed) * Time.fixedDeltaTime);
+        _rigidbody.MoveRotation(rotation);
+    }
 }
