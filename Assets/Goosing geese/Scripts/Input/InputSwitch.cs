@@ -13,14 +13,24 @@ public class InputSwitch : MonoBehaviour
     private void OnEnable()
     {
         _racer.RaceRestarted += ResetInput;
+        _racer.Finished += ResetInput;
     }
 
-    private void OnDisable()
+    private void Update()
     {
-        if (_racer != null)
-            _racer.RaceRestarted -= ResetInput;
+        if (_racer.IsFinished)
+            return;
 
-        ResetInput();
+        bool isAccelerating = _pedalIsPressed || _keyboardIsPressed;
+
+        if (isAccelerating == false)
+        {
+            _racer.Cooldown();
+        }
+        else
+        {
+            _racer.Accelerate();
+        }
     }
 
     private void OnApplicationFocus(bool hasFocus)
@@ -39,6 +49,17 @@ public class InputSwitch : MonoBehaviour
             ResetInput();
     }
 
+    private void OnDisable()
+    {
+        if (_racer != null)
+        {
+            _racer.RaceRestarted -= ResetInput;
+            _racer.Finished -= ResetInput;
+        }
+
+        ResetInput();
+    }
+
     public void ResetInput()
     {
         _pedalIsPressed = false;
@@ -50,25 +71,12 @@ public class InputSwitch : MonoBehaviour
 
     public void SetPedalPressed(bool isPressed)
     {
-        _pedalIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false;
+        _pedalIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false && _racer.IsFinished == false;
     }
 
     public void SetKeyboardPressed(bool isPressed)
     {
-        _keyboardIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false;
+        _keyboardIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false && _racer.IsFinished == false;
     }
 
-    private void Update()
-    {
-        bool isAccelerating = _pedalIsPressed || _keyboardIsPressed;
-
-        if (isAccelerating == false)
-        {
-            _racer.Cooldown();
-        }
-        else
-        {
-            _racer.Accelerate();
-        }
-    }
 }

@@ -10,6 +10,7 @@ public class RacerStats : ScriptableObject
     public float MaxSpeed = 10f;
     public float Acceleration = 5f;
     public float Drag = 0.2f;
+    [Min(0f)] public float FinishDrag = 1.5f;
     [Tooltip("Body turn speed at maximum movement speed and full steering, in degrees per second.")]
     public float TurnSpeed = 240f;
     [Tooltip("Maximum wheel direction angle relative to the racer body, in degrees.")]

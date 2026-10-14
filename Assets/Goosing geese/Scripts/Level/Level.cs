@@ -42,8 +42,12 @@ public class Level : MonoBehaviour
 
     public void BuildRoad()
     {
-        RoadPieceType[] roadLayout = _roadLayoutGenerator.Generate(_settings.RoadPieceCount);
+        int runoutPieces = Mathf.Max(1, _settings.FinishRunoutPieces);
+        RoadPieceType[] roadLayout = _roadLayoutGenerator.Generate(_settings.RoadPieceCount, runoutPieces);
+        int mainPieceCount = Mathf.Max(0, roadLayout.Length - runoutPieces);
+
         _roadPath = _roadBuilder.Build(roadLayout, _roadStartPoint);
+        _roadPath.SetFinishWaypoint(mainPieceCount);
 
         _roadPath.BuildCurve(_settings.CurveSamplesPerSegment);
         _racer.SetPath(_roadPath);

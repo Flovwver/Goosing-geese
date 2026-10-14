@@ -13,11 +13,16 @@ public class RoadLayoutGenerator
         _maxGenerationAttempts = Mathf.Max(1, maxGenerationAttempts);
     }
 
-    public RoadPieceType[] Generate(int pieceCount)
+    public RoadPieceType[] Generate(int pieceCount, int finishRunoutPieces = 0)
     {
+        if (pieceCount <= 0)
+            return new RoadPieceType[0];
+
+        finishRunoutPieces = Mathf.Max(0, finishRunoutPieces);
+
         for (int attempt = 0; attempt < _maxGenerationAttempts; attempt++)
         {
-            if (TryGenerate(pieceCount, out RoadPieceType[] layout))
+            if (TryGenerate(pieceCount, finishRunoutPieces, out RoadPieceType[] layout))
                 return layout;
         }
 
@@ -25,9 +30,9 @@ public class RoadLayoutGenerator
         return new RoadPieceType[0];
     }
 
-    private bool TryGenerate(int pieceCount, out RoadPieceType[] layout)
+    private bool TryGenerate(int pieceCount, int finishRunoutPieces, out RoadPieceType[] layout)
     {
-        layout = new RoadPieceType[pieceCount];
+        layout = new RoadPieceType[pieceCount + finishRunoutPieces];
 
         var occupiedCells = new HashSet<Vector2Int> { Vector2Int.zero };
         Vector2Int position = Vector2Int.zero;
@@ -59,6 +64,16 @@ public class RoadLayoutGenerator
 
             if (piecePlaced == false)
                 return false;
+        }
+
+        for (int pieceIndex = pieceCount; pieceIndex < layout.Length; pieceIndex++)
+        {
+            position += direction;
+
+            if (occupiedCells.Add(position) == false)
+                return false;
+
+            layout[pieceIndex] = RoadPieceType.Straight;
         }
 
         return true;

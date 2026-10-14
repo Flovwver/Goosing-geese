@@ -7,6 +7,7 @@ public class RoadSettings : ScriptableObject
 {
     [Min(1)] public int RoadPieceCount = 20;
     [Min(1)] public int MaxGenerationAttempts = 100;
+    [Min(1)] public int FinishRunoutPieces = 3;
     [Header("Path")]
     [Min(1)] public int CurveSamplesPerSegment = 24;
     public bool ShowPathLine = true;

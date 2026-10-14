@@ -19,6 +19,7 @@ public class RoadPath
         }
     }
 
+    public Transform FinishPoint { get; private set; }
     public RoadCurve Curve { get; private set; }
     public int Count => _waypoints.Count;
 
@@ -44,6 +45,11 @@ public class RoadPath
         }
 
         Curve = new RoadCurve(points, waypointIndices);
+    }
+
+    public void SetFinishWaypoint(int index)
+    {
+        FinishPoint = TryGetWaypoint(index, out Transform point) ? point : null;
     }
 
     public bool TryGetWaypoint(int index, out Transform waypoint)

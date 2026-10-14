@@ -8,6 +8,7 @@ public class Mover : MonoBehaviour
     private Movement _movement;
     private BodyRotation _bodyRotation;
     private RacerStats _stats;
+    private float? _dragOverride;
     private Vector3 _targetPosition;
     private float _slipFactor;
     private bool _hasMovementTarget;
@@ -23,7 +24,7 @@ public class Mover : MonoBehaviour
         if (_stats == null)
             return;
 
-        _movement.ApplyDrag(_stats.Drag);
+        _movement.ApplyDrag(_dragOverride ?? _stats.Drag);
 
         if (_hasMovementTarget == false)
             return;
@@ -54,8 +55,14 @@ public class Mover : MonoBehaviour
         _isAccelerating = isAccelerating;
     }
 
+    public void SetDrag(float drag)
+    {
+        _dragOverride = Mathf.Max(0f, drag);
+    }
+
     public void Stop()
     {
+        _dragOverride = null;
         _slipFactor = 0f;
         _steering?.Reset();
         _hasMovementTarget = false;
