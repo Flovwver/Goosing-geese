@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class RestartRaceButton : MonoBehaviour
 {
     [SerializeField] private Level _level;
-    [SerializeField] private InputSwitch _inputSwitch;
 
     private Button _button;
 
@@ -26,9 +25,6 @@ public class RestartRaceButton : MonoBehaviour
 
     private void RestartRace()
     {
-        if (_inputSwitch != null)
-            _inputSwitch.ReleasePedal();
-
         _level.RestartRace();
     }
 }

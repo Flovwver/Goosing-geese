@@ -18,6 +18,7 @@ public class KeyboardAccelerator : MonoBehaviour
         _accelerateAction.action.performed -= HandleAccelerationPerformed;
         _accelerateAction.action.canceled -= HandleAccelerationCanceled;
         _accelerateAction.action.Disable();
+        _inputSwitch.SetKeyboardPressed(false);
     }
 
     private void HandleAccelerationPerformed(InputAction.CallbackContext context)

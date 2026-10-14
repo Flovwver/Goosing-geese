@@ -7,6 +7,12 @@ public class PedalButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField] private InputSwitch _inputSwitch;
 
+    private void OnDisable()
+    {
+        if (_inputSwitch != null)
+            _inputSwitch.SetPedalPressed(false);
+    }
+
     public void OnPointerDown(PointerEventData eventData)
     {
         _inputSwitch.SetPedalPressed(true);
