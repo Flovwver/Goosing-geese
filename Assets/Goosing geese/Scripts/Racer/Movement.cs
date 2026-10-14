@@ -32,8 +32,12 @@ public class Movement
             Mathf.Max(0f, stats.DriftAlignmentSpeed) * deltaTime, _slipFactor);
         AlignVelocity(direction, currentSpeed, alignmentStep);
 
-        if (isAccelerating && currentSpeed < stats.MaxSpeed)
-            _rigidbody.AddForce(direction * Mathf.Max(0f, stats.Acceleration), ForceMode.Acceleration);
+        if (isAccelerating && currentSpeed < stats.MaxSpeed && deltaTime > 0f)
+        {
+            float remainingSpeed = stats.MaxSpeed - currentSpeed;
+            float acceleration = Mathf.Min(Mathf.Max(0f, stats.Acceleration), remainingSpeed / deltaTime);
+            _rigidbody.AddForce(direction * acceleration, ForceMode.Acceleration);
+        }
     }
 
     public void Stop()
