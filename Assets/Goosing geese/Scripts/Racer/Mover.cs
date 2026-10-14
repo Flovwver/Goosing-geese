@@ -3,34 +3,45 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Mover : MonoBehaviour
 {
+    private Steering _steering;
     private Rigidbody _rigidbody;
-    private Vector3 _targetPosition;
+    private Movement _movement;
+    private BodyRotation _bodyRotation;
     private RacerStats _stats;
+    private Vector3 _targetPosition;
     private bool _hasMovementTarget;
     private bool _isAccelerating;
 
-    public float CurrentSpeed
-    {
-        get
-        {
-            Vector3 velocity = _rigidbody.linearVelocity;
-            velocity.y = 0f;
-            return velocity.magnitude;
-        }
-    }
-
     private void Awake()
     {
-        _rigidbody = GetComponent<Rigidbody>();
+        InitializeComponents();
     }
 
     private void FixedUpdate()
     {
-        ApplyMovement();
+        if (_stats == null)
+            return;
+
+        _movement.ApplyDrag(_stats.Drag);
+
+        if (_hasMovementTarget == false)
+            return;
+
+        _steering.UpdateDirection(_rigidbody.position, _rigidbody.rotation, _targetPosition, _stats.MaxSteeringAngle);
+        Vector3 movementDirection = _steering.GetMovementDirection(_rigidbody.rotation);
+        float currentSpeed = _movement.GetCurrentSpeed();
+        _movement.Apply(movementDirection, currentSpeed, _isAccelerating, _stats);
+        _bodyRotation.Apply(movementDirection, _steering.LocalWheelDirection, _steering.AngleLimit, currentSpeed, _stats, Time.fixedDeltaTime);
+    }
+
+    public float GetCurrentSpeed()
+    {
+        return _movement.GetCurrentSpeed();
     }
 
     public void Configure(RacerStats stats)
     {
+        InitializeComponents();
         _stats = stats;
     }
 
@@ -43,14 +54,11 @@ public class Mover : MonoBehaviour
 
     public void Stop()
     {
+        _steering?.Reset();
         _hasMovementTarget = false;
         _isAccelerating = false;
-
-        if (_rigidbody == null)
-            return;
-
-        _rigidbody.linearVelocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
+        _movement?.Stop();
+        _bodyRotation?.Stop();
     }
 
     public void TeleportTo(Vector3 position, Quaternion rotation)
@@ -61,33 +69,14 @@ public class Mover : MonoBehaviour
         transform.SetPositionAndRotation(position, rotation);
     }
 
-    private void ApplyMovement()
+    private void InitializeComponents()
     {
-        _rigidbody.linearDamping = Mathf.Max(0f, _stats.Drag);
-
-        if (_hasMovementTarget == false)
+        if (_movement != null)
             return;
 
-        Vector3 forward = _rigidbody.rotation * Vector3.forward;
-        ApplyRotation();
-
-        if (_isAccelerating && CurrentSpeed < _stats.MaxSpeed)
-            _rigidbody.AddForce(forward * Mathf.Max(0f, _stats.Acceleration), ForceMode.Acceleration);
-    }
-
-    private void ApplyRotation()
-    {
-        Vector3 direction = _targetPosition - _rigidbody.position;
-        direction.y = 0f;
-
-        if (_isAccelerating == false || direction.sqrMagnitude <= Mathf.Epsilon)
-        {
-            _rigidbody.angularVelocity = Vector3.zero;
-            return;
-        }
-
-        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-        Quaternion rotation = Quaternion.RotateTowards(_rigidbody.rotation, targetRotation, Mathf.Max(0f, _stats.TurnSpeed) * Time.fixedDeltaTime);
-        _rigidbody.MoveRotation(rotation);
+        _rigidbody = GetComponent<Rigidbody>();
+        _steering = new Steering();
+        _movement = new Movement(_rigidbody);
+        _bodyRotation = new BodyRotation(_rigidbody);
     }
 }

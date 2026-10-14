@@ -16,8 +16,7 @@ public class Racer : MonoBehaviour
     private Vector3 _startPosition;
     private Quaternion _startRotation;
 
-    public float CurrentSpeed => _mover.CurrentSpeed;
-    public float NormalizedSpeed => _stats.MaxSpeed > 0f ? CurrentSpeed / _stats.MaxSpeed : 0f;
+    public float NormalizedSpeed => _stats.MaxSpeed > 0f ? GetCurrentSpeed() / _stats.MaxSpeed : 0f;
 
     public event Action<float> OverheatProgressChanged;
     public event Action Exploded;
@@ -44,6 +43,11 @@ public class Racer : MonoBehaviour
     {
         _overheatTracker.ProgressChanged -= OnOverheatProgressChanged;
         _overheatTracker.Exploded -= OnExploded;
+    }
+
+    public float GetCurrentSpeed()
+    {
+        return _mover.GetCurrentSpeed();
     }
 
     public void SetPath(RoadPath path)
@@ -75,7 +79,7 @@ public class Racer : MonoBehaviour
         if (_overheatTracker.IsExploded || _isPathCompletedRaised)
             return;
 
-        _overheatTracker.Tick(CurrentSpeed, _stats);
+        _overheatTracker.Tick(GetCurrentSpeed(), _stats);
 
         if (_overheatTracker.IsExploded)
             return;
