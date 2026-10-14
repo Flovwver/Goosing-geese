@@ -16,6 +16,9 @@ public class Racer : MonoBehaviour
     private Vector3 _startPosition;
     private Quaternion _startRotation;
 
+    public float YellowZoneThreshold => _stats.YellowZoneThreshold;
+    public float RedZoneThreshold => _stats.RedZoneThreshold;
+
     public float NormalizedSpeed => _stats.MaxSpeed > 0f ? GetCurrentSpeed() / _stats.MaxSpeed : 0f;
 
     public event Action<float> OverheatProgressChanged;
