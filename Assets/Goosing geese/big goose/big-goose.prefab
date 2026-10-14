@@ -132,7 +132,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef672a5d702dae74e99a6a04acd9b5e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OverheatTracker
-  _settings: {fileID: 11400000, guid: f062681396bf4b35b8230cc5e6f3e648, type: 2}
 --- !u!114 &2133777799489664667
 MonoBehaviour:
   m_ObjectHideFlags: 0

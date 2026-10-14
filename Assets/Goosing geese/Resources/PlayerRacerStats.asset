@@ -16,3 +16,6 @@ MonoBehaviour:
   Acceleration: 50
   Drag: 0.05
   TurnSpeed: 300
+  YellowZoneThreshold: 0.5
+  RedZoneThreshold: 0.75
+  TimeToOverheat: 2

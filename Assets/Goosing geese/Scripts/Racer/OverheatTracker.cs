@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class OverheatTracker : MonoBehaviour
 {
-    [SerializeField] private OverheatSettings _settings;
-
     private float _redZoneTimer;
 
     public float Progress { get; private set; }
@@ -26,12 +24,12 @@ public class OverheatTracker : MonoBehaviour
         if (IsExploded)
             return;
 
-        bool speedIsInRedZone = currentSpeed > stats.MaxSpeed * _settings.RedZoneThreshold;
+        bool speedIsInRedZone = currentSpeed > stats.MaxSpeed * stats.RedZoneThreshold;
         float timerDelta = speedIsInRedZone ? Time.deltaTime : -Time.deltaTime;
 
-        _redZoneTimer = Mathf.Clamp(_redZoneTimer + timerDelta, 0f, _settings.TimeToOverheat);
+        _redZoneTimer = Mathf.Clamp(_redZoneTimer + timerDelta, 0f, stats.TimeToOverheat);
 
-        UpdateProgress(_redZoneTimer / _settings.TimeToOverheat);
+        UpdateProgress(_redZoneTimer / stats.TimeToOverheat);
     }
 
     private void UpdateProgress(float newProgress)
