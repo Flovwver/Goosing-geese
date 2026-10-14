@@ -10,6 +10,8 @@ public class RacerStats : ScriptableObject
     public float MaxSpeed = 10f;
     public float Acceleration = 5f;
     public float Drag = 0.2f;
+    [Tooltip("Linear damping when the accelerator is released.")]
+    [Min(0f)] public float CoastingDrag = 0.5f;
     [Min(0f)] public float FinishDrag = 1.5f;
     [Tooltip("Body turn speed at maximum movement speed and full steering, in degrees per second.")]
     public float TurnSpeed = 240f;
@@ -29,6 +31,7 @@ public class RacerStats : ScriptableObject
     {
         YellowZoneThreshold = Mathf.Clamp01(YellowZoneThreshold);
         RedZoneThreshold = Mathf.Clamp(RedZoneThreshold, YellowZoneThreshold, 1f);
+        CoastingDrag = Mathf.Max(0f, CoastingDrag);
         DriftAlignmentSpeed = Mathf.Max(0f, DriftAlignmentSpeed);
         GripTransitionSpeed = Mathf.Max(0f, GripTransitionSpeed);
         TimeToOverheat = Mathf.Max(MinimumTimeToOverheat, TimeToOverheat);

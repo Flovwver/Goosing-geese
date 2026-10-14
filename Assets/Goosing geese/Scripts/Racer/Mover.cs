@@ -24,7 +24,8 @@ public class Mover : MonoBehaviour
         if (_stats == null)
             return;
 
-        _movement.ApplyDrag(_dragOverride ?? _stats.Drag);
+        float drag = _dragOverride ?? (_isAccelerating ? _stats.Drag : _stats.CoastingDrag);
+        _movement.ApplyDrag(drag);
 
         if (_hasMovementTarget == false)
             return;
