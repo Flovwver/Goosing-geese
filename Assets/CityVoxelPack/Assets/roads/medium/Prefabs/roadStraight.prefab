@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 8466983930392739929}
   - component: {fileID: 6561665455106267412}
   - component: {fileID: 8560363744439706094}
-  - component: {fileID: 3166242676300827511}
+  - component: {fileID: 360227956099786120}
   m_Layer: 0
   m_Name: road1
   m_TagString: Untagged
@@ -174,8 +174,8 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &3166242676300827511
-MeshCollider:
+--- !u!65 &360227956099786120
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -192,10 +192,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -4163724365912177184, guid: 07e6fdb41b265184dad1158beefc08f1, type: 3}
+  serializedVersion: 3
+  m_Size: {x: 90, y: 1, z: 39}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &8040623118425888566
 GameObject:
   m_ObjectHideFlags: 0
