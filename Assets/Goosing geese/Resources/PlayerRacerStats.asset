@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b621f69611bb6f34785e0495194aa1b0, type: 3}
   m_Name: PlayerRacerStats
   m_EditorClassIdentifier: Assembly-CSharp::RacerStats
-  MaxSpeed: 50
-  Acceleration: 50
+  MaxSpeed: 100
+  Acceleration: 100
   Drag: 0.05
   TurnSpeed: 300
+  MaxSteeringAngle: 30
+  DriftAlignmentSpeed: 90
+  GripTransitionSpeed: 3
   YellowZoneThreshold: 0.5
   RedZoneThreshold: 0.75
   TimeToOverheat: 2
