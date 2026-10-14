@@ -3,28 +3,47 @@ using UnityEngine;
 
 public class RoadPath
 {
-    private readonly List<Transform> _waypoints = new ();
-
-    public int Count => _waypoints.Count;
+    private readonly List<RoadPiece> _pieces = new List<RoadPiece>();
+    private readonly List<Transform> _waypoints = new List<Transform>();
 
     public RoadPath(IReadOnlyList<RoadPiece> pieces)
     {
-        if (pieces.Count == 0)
-            return;
-
-        _waypoints.Add(pieces[0].EntryPoint);
-
-        for (int pieceIndex = 0; pieceIndex < pieces.Count; pieceIndex++)
+        foreach (RoadPiece piece in pieces)
         {
-            IReadOnlyList<Transform> pieceWaypoints = pieces[pieceIndex].Waypoints;
+            _pieces.Add(piece);
 
-            for (int waypointIndex = 0; waypointIndex < pieceWaypoints.Count; waypointIndex++)
+            if (_waypoints.Count == 0)
+                _waypoints.Add(piece.EntryPoint);
+
+            _waypoints.Add(piece.ExitPoint);
+        }
+    }
+
+    public RoadCurve Curve { get; private set; }
+    public int Count => _waypoints.Count;
+
+    public void BuildCurve(int samplesPerSegment)
+    {
+        var points = new List<Vector3>();
+        var waypointIndices = new List<int>();
+
+        foreach (RoadPiece piece in _pieces)
+        {
+            var localCurve = piece.GetCurvePoints(samplesPerSegment);
+
+            if (points.Count == 0)
             {
-                _waypoints.Add(pieceWaypoints[waypointIndex]);
+                points.Add(localCurve[0]);
+                waypointIndices.Add(0);
             }
+
+            for (int i = 1; i < localCurve.Count; i++)
+                points.Add(localCurve[i]);
+
+            waypointIndices.Add(points.Count - 1);
         }
 
-        _waypoints.Add(pieces[pieces.Count - 1].ExitPoint);
+        Curve = new RoadCurve(points, waypointIndices);
     }
 
     public bool TryGetWaypoint(int index, out Transform waypoint)

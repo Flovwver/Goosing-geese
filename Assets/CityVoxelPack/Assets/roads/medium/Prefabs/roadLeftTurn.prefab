@@ -41,7 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1711123503141860976}
   m_Layer: 0
-  m_Name: Turn
+  m_Name: Curve start control
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 2096318613781520991}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 31.5, y: 0, z: -2.5}
+  m_LocalPosition: {x: 31.14, y: 0, z: 9.035206}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -174,6 +174,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 90, y: 1, z: 90}
   m_Center: {x: 5, y: 0.5, z: 5}
+--- !u!1 &4840434602289157563
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7538318999565104823}
+  m_Layer: 0
+  m_Name: Curve end control
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7538318999565104823
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4840434602289157563}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 42.9552, y: 0, z: -2.8000016}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5911618133447605053}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5068418179533923384
 GameObject:
   m_ObjectHideFlags: 0
@@ -257,8 +288,8 @@ MonoBehaviour:
   _type: 1
   _entryPoint: {fileID: 3559491031387057451}
   _exitPoint: {fileID: 3730560812036262556}
-  _waypoints:
-  - {fileID: 1711123503141860976}
+  _curveStartControl: {fileID: 1711123503141860976}
+  _curveEndControl: {fileID: 7538318999565104823}
 --- !u!1 &7299593904564049656
 GameObject:
   m_ObjectHideFlags: 0
@@ -300,7 +331,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5911618133447605053}
   m_Layer: 0
-  m_Name: Waypoints
+  m_Name: Path controls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -320,5 +351,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1711123503141860976}
+  - {fileID: 7538318999565104823}
   m_Father: {fileID: 5154137180329280835}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

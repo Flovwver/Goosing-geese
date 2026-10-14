@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ public class Level : MonoBehaviour
     private RoadLayoutGenerator _roadLayoutGenerator;
     private RoadBuilder _roadBuilder;
     private RoadPath _roadPath;
+
+    public event Action<RoadPath, RoadSettings> PathBuilt;
 
     private void Awake()
     {
@@ -30,19 +33,10 @@ public class Level : MonoBehaviour
 
         Gizmos.color = Color.yellow;
 
-        Vector3? previousPosition = null;
-
-        for (int waypointIndex = 0; waypointIndex < _roadPath.Count; waypointIndex++)
+        for (int i = 0; i < _roadPath.Count; i++)
         {
-            if (_roadPath.TryGetWaypoint(waypointIndex, out Transform waypoint) == false || waypoint == null)
-                continue;
-
-            Gizmos.DrawWireSphere(waypoint.position, _settings.WaypointGizmoRadius);
-
-            if (previousPosition.HasValue)
-                Gizmos.DrawLine(previousPosition.Value, waypoint.position);
-
-            previousPosition = waypoint.position;
+            if (_roadPath.TryGetWaypoint(i, out Transform waypoint))
+                Gizmos.DrawWireSphere(waypoint.position, _settings.WaypointGizmoRadius);
         }
     }
 
@@ -51,13 +45,22 @@ public class Level : MonoBehaviour
         RoadPieceType[] roadLayout = _roadLayoutGenerator.Generate(_settings.RoadPieceCount);
         _roadPath = _roadBuilder.Build(roadLayout, _roadStartPoint);
 
+        _roadPath.BuildCurve(_settings.CurveSamplesPerSegment);
         _racer.SetPath(_roadPath);
+        PathBuilt?.Invoke(_roadPath, _settings);
     }
 
     public void RestartRace()
     {
         BuildRoad();
         _racer.ResetRace();
+    }
+
+    public bool TryGetBuiltPath(out RoadPath path, out RoadSettings settings)
+    {
+        path = _roadPath;
+        settings = _settings;
+        return path != null && path.Curve != null;
     }
 
     private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType()

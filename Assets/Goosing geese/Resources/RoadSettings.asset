@@ -21,6 +21,11 @@ MonoBehaviour:
   - _type: 2
     _prefab: {fileID: 3628304544319266350, guid: 5d01fbd589c6eb542ba764e2ba5d07a4, type: 3}
   RoadPieceCount: 20
-  DrawPathGizmos: 1
   MaxGenerationAttempts: 100
+  CurveSamplesPerSegment: 24
+  ShowPathLine: 1
+  PathLineColor: {r: 0, g: 1, b: 1, a: 1}
+  PathLineWidth: 0.25
+  PathLineHeight: 2.1
+  DrawPathGizmos: 1
   WaypointGizmoRadius: 0.3
