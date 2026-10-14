@@ -5,12 +5,12 @@ public class OverheatTracker : MonoBehaviour
 {
     private float _redZoneTimer;
 
+    public event Action<float> ProgressChanged;
+    public event Action Exploded;
+
     public float SlipFactor { get; private set; }
     public float Progress { get; private set; }
     public bool IsExploded { get; private set; }
-
-    public event Action<float> ProgressChanged;
-    public event Action Exploded;
 
     public void ResetOverheat()
     {
@@ -30,6 +30,14 @@ public class OverheatTracker : MonoBehaviour
         SlipFactor = currentSpeed > 0f && normalizedSpeed >= stats.YellowZoneThreshold ? 1f : 0f;
 
         bool speedIsInRedZone = currentSpeed > stats.MaxSpeed * stats.RedZoneThreshold;
+
+        if (stats.TimeToOverheat <= 0f)
+        {
+            _redZoneTimer = 0f;
+            UpdateProgress(speedIsInRedZone ? 1f : 0f);
+            return;
+        }
+
         float timerDelta = speedIsInRedZone ? Time.deltaTime : -Time.deltaTime;
 
         _redZoneTimer = Mathf.Clamp(_redZoneTimer + timerDelta, 0f, stats.TimeToOverheat);
