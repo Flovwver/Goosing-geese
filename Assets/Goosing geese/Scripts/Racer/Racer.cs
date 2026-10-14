@@ -95,7 +95,7 @@ public class Racer : MonoBehaviour
             return;
         }
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerating);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerating, _overheatTracker.SlipFactor);
     }
 
     private void RaisePathCompleted()

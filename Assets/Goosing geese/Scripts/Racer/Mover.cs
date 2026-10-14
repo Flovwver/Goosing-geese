@@ -9,6 +9,7 @@ public class Mover : MonoBehaviour
     private BodyRotation _bodyRotation;
     private RacerStats _stats;
     private Vector3 _targetPosition;
+    private float _slipFactor;
     private bool _hasMovementTarget;
     private bool _isAccelerating;
 
@@ -30,7 +31,7 @@ public class Mover : MonoBehaviour
         _steering.UpdateDirection(_rigidbody.position, _rigidbody.rotation, _targetPosition, _stats.MaxSteeringAngle);
         Vector3 movementDirection = _steering.GetMovementDirection(_rigidbody.rotation);
         float currentSpeed = _movement.GetCurrentSpeed();
-        _movement.Apply(movementDirection, currentSpeed, _isAccelerating, _stats);
+        _movement.Apply(movementDirection, currentSpeed, _isAccelerating, _slipFactor, _stats, Time.fixedDeltaTime);
         _bodyRotation.Apply(movementDirection, _steering.LocalWheelDirection, _steering.AngleLimit, currentSpeed, _stats, Time.fixedDeltaTime);
     }
 
@@ -45,8 +46,9 @@ public class Mover : MonoBehaviour
         _stats = stats;
     }
 
-    public void MoveTowards(Vector3 targetPosition, bool isAccelerating)
+    public void MoveTowards(Vector3 targetPosition, bool isAccelerating, float slipFactor)
     {
+        _slipFactor = Mathf.Clamp01(slipFactor);
         _targetPosition = targetPosition;
         _hasMovementTarget = true;
         _isAccelerating = isAccelerating;
@@ -54,6 +56,7 @@ public class Mover : MonoBehaviour
 
     public void Stop()
     {
+        _slipFactor = 0f;
         _steering?.Reset();
         _hasMovementTarget = false;
         _isAccelerating = false;
