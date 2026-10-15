@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class RoadNavigator : MonoBehaviour
@@ -7,6 +8,8 @@ public class RoadNavigator : MonoBehaviour
     private RoadPath _path;
     private int _currentSegment;
     private float _distanceAlongPath;
+
+    public event Action PathCompleted;
 
     public Vector3 TargetPosition { get; private set; }
     public Vector3 ClosestPosition { get; private set; }
@@ -65,6 +68,9 @@ public class RoadNavigator : MonoBehaviour
             Vector3 offset = currentPosition - curve.GetPointAtDistance(curve.Length);
             offset.y = 0f;
             IsPathCompleted = offset.sqrMagnitude <= _settings.ArrivalDistance * _settings.ArrivalDistance;
+
+            if (IsPathCompleted)
+                PathCompleted?.Invoke();
         }
     }
 

@@ -21,9 +21,9 @@ public class InputSwitch : MonoBehaviour
         if (_racer.IsFinished)
             return;
 
-        bool isAccelerating = _pedalIsPressed || _keyboardIsPressed;
+        bool isAccelerate = _pedalIsPressed || _keyboardIsPressed;
 
-        if (isAccelerating == false)
+        if (isAccelerate == false)
         {
             _racer.Cooldown();
         }

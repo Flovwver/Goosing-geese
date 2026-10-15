@@ -7,7 +7,7 @@ public class CameraFollower : MonoBehaviour
 
     private Vector3 _velocity;
     private Racer _racer;
-    private bool _isFollowing = true;
+    private bool _isFollow = true;
 
     private void Awake()
     {
@@ -21,12 +21,12 @@ public class CameraFollower : MonoBehaviour
 
         _racer.Finished += OnRaceFinished;
         _racer.RaceRestarted += OnRaceRestarted;
-        _isFollowing = _racer.IsFinished == false;
+        _isFollow = _racer.IsFinished == false;
     }
 
     private void LateUpdate()
     {
-        if (_isFollowing == false)
+        if (_isFollow == false)
             return;
 
         Vector3 desiredPosition = _target.position + _settings.Offset;
@@ -44,13 +44,13 @@ public class CameraFollower : MonoBehaviour
 
     private void OnRaceFinished()
     {
-        _isFollowing = false;
+        _isFollow = false;
         _velocity = Vector3.zero;
     }
 
     private void OnRaceRestarted()
     {
-        _isFollowing = true;
+        _isFollow = true;
         _velocity = Vector3.zero;
         transform.position = _target.position + _settings.Offset;
     }

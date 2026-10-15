@@ -8,6 +8,7 @@ public class Level : MonoBehaviour
     [SerializeField] private Transform _roadStartPoint;
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
+    [SerializeField] private FinishLine _finishLine;
 
     private RoadBuilder _roadBuilder;
     private RoadPath _roadPath;
@@ -15,6 +16,11 @@ public class Level : MonoBehaviour
     public event Action<RoadPath, RoadSettings> PathBuilt;
 
     public LevelDefinition CurrentDefinition { get; private set; }
+
+    private void OnEnable()
+    {
+        _finishLine.Crossed += OnFinishCrossed;
+    }
 
     private void Start()
     {
@@ -35,6 +41,11 @@ public class Level : MonoBehaviour
             if (_roadPath.TryGetWaypoint(i, out Transform waypoint))
                 Gizmos.DrawWireSphere(waypoint.position, settings.WaypointGizmoRadius);
         }
+    }
+
+    private void OnDisable()
+    {
+        _finishLine.Crossed -= OnFinishCrossed;
     }
 
     private void OnDestroy()
@@ -70,6 +81,7 @@ public class Level : MonoBehaviour
         _roadPath = _roadBuilder.Build(CurrentDefinition.Layout, CurrentDefinition.StartPosition, CurrentDefinition.StartRotation);
         _roadPath.SetFinishWaypoint(layout.Length - runoutPieces);
         _roadPath.BuildCurve(settings.CurveSamplesPerSegment);
+        PlaceFinishLine();
         _racer.SetPath(_roadPath);
         _racer.ResetRace();
         PathBuilt?.Invoke(_roadPath, settings);
@@ -101,5 +113,20 @@ public class Level : MonoBehaviour
         }
 
         return piecePrefabsByType;
+    }
+
+    private void OnFinishCrossed(Racer racer)
+    {
+        if (racer == _racer)
+            racer.FinishRace();
+    }
+
+    private void PlaceFinishLine()
+    {
+        Transform finishPoint = _roadPath.FinishPoint;
+        _finishLine.gameObject.SetActive(finishPoint != null);
+
+        if (finishPoint != null)
+            _finishLine.transform.SetPositionAndRotation(finishPoint.position, finishPoint.rotation);
     }
 }
