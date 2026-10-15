@@ -11,13 +11,14 @@ public static class GripAndOverheatTests
         source.RedZoneThreshold = 0.75f;
         source.TimeToOverheat = 2f;
         var stats = new RacerConfiguration(source);
+        var grip = new GripModel();
         var root = new GameObject("Overheat regression test");
         var heat = root.AddComponent<OverheatTracker>();
 
         try
         {
-            Require(GripModel.CalculateSlipFactor(0f, stats) == 0f && GripModel.CalculateSlipFactor(49f, stats) == 0f, "Grip must hold below the yellow threshold.");
-            Require(GripModel.CalculateSlipFactor(50f, stats) == 1f && GripModel.CalculateSlipFactor(100f, stats) == 1f, "Slip must begin at the configured yellow threshold.");
+            Require(grip.CalculateSlipFactor(0f, stats) == 0f && grip.CalculateSlipFactor(49f, stats) == 0f, "Grip must hold below the yellow threshold.");
+            Require(grip.CalculateSlipFactor(50f, stats) == 1f && grip.CalculateSlipFactor(100f, stats) == 1f, "Slip must begin at the configured yellow threshold.");
             int explosions = 0;
             heat.Exploded += () => explosions++;
             heat.Tick(100f, stats, 0.5f);
@@ -30,7 +31,7 @@ public static class GripAndOverheatTests
             heat.Tick(100f, stats, 2f);
             Require(heat.IsExploded && explosions == 1, "Overheat must explode exactly once.");
             heat.ResetOverheat();
-            Require(!heat.IsExploded && heat.Progress == 0f && GripModel.CalculateSlipFactor(100f, stats) == 1f, "Resetting heat must not change the independent grip rule.");
+            Require(!heat.IsExploded && heat.Progress == 0f && grip.CalculateSlipFactor(100f, stats) == 1f, "Resetting heat must not change the independent grip rule.");
             return "PASS: grip thresholds are independent; heat/cooling/pause use explicit time; explosion is raised once and reset correctly.";
         }
         finally

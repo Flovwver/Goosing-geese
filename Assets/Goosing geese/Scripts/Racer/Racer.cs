@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(RoadNavigator))]
 public class Racer : MonoBehaviour
 {
+    private readonly GripModel _gripModel = new GripModel();
+
     [SerializeField] private RacerStats _stats;
 
     private OverheatTracker _overheatTracker;
@@ -108,7 +110,7 @@ public class Racer : MonoBehaviour
         if (_roadNavigator.IsPathCompleted)
             return;
 
-        float slipFactor = IsFinished ? 0f : GripModel.CalculateSlipFactor(GetCurrentSpeed(), _configuration);
+        float slipFactor = IsFinished ? 0f : _gripModel.CalculateSlipFactor(GetCurrentSpeed(), _configuration);
         _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerate && IsFinished == false, slipFactor);
     }
 
