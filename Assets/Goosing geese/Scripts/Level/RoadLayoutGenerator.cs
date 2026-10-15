@@ -4,13 +4,14 @@ using UnityEngine;
 public class RoadLayoutGenerator
 {
     private readonly int _maxGenerationAttempts;
-
+    private readonly System.Random _random;
     private readonly RoadPieceType[] _availablePieceTypes;
 
-    public RoadLayoutGenerator(RoadPieceType[] availablePieceTypes, int maxGenerationAttempts)
+    public RoadLayoutGenerator(RoadPieceType[] availablePieceTypes, int maxGenerationAttempts, int seed)
     {
-        _availablePieceTypes = availablePieceTypes;
+        _availablePieceTypes = (RoadPieceType[])availablePieceTypes.Clone();
         _maxGenerationAttempts = Mathf.Max(1, maxGenerationAttempts);
+        _random = new System.Random(seed);
     }
 
     public RoadPieceType[] Generate(int pieceCount, int finishRunoutPieces = 0)
@@ -85,7 +86,7 @@ public class RoadLayoutGenerator
 
         for (int index = shuffledTypes.Count - 1; index > 0; index--)
         {
-            int randomIndex = Random.Range(0, index + 1);
+            int randomIndex = _random.Next(index + 1);
             (shuffledTypes[index], shuffledTypes[randomIndex]) = (shuffledTypes[randomIndex], shuffledTypes[index]);
         }
 

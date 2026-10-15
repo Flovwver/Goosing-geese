@@ -16,6 +16,8 @@ public class FinishLine : MonoBehaviour
 
     private void OnEnable()
     {
+        _racer.RaceRestarted += OnRaceRestarted;
+
         if (_level == null)
             return;
 
@@ -38,6 +40,8 @@ public class FinishLine : MonoBehaviour
 
     private void OnDisable()
     {
+        _racer.RaceRestarted -= OnRaceRestarted;
+
         if (_level != null)
             _level.PathBuilt -= OnPathBuilt;
     }
@@ -50,5 +54,10 @@ public class FinishLine : MonoBehaviour
             return;
 
         transform.SetPositionAndRotation(path.FinishPoint.position, path.FinishPoint.rotation);
+    }
+
+    private void OnRaceRestarted()
+    {
+        _trigger.enabled = _level != null && _level.TryGetBuiltPath(out RoadPath path, out _) && path.FinishPoint != null;
     }
 }
