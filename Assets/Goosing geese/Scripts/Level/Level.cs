@@ -12,10 +12,18 @@ public class Level : MonoBehaviour
 
     private RoadBuilder _roadBuilder;
     private RoadPath _roadPath;
+    private Vector3 _racerStartPosition;
+    private Quaternion _racerStartRotation;
 
     public event Action<RoadPath, RoadSettings> PathBuilt;
 
     public LevelDefinition CurrentDefinition { get; private set; }
+
+    private void Awake()
+    {
+        _racerStartPosition = _racer.transform.position;
+        _racerStartRotation = _racer.transform.rotation;
+    }
 
     private void OnEnable()
     {
@@ -83,7 +91,7 @@ public class Level : MonoBehaviour
         _roadPath.BuildCurve(settings.CurveSamplesPerSegment);
         PlaceFinishLine();
         _racer.SetPath(_roadPath);
-        _racer.ResetRace();
+        _racer.ResetRace(_racerStartPosition, _racerStartRotation);
         PathBuilt?.Invoke(_roadPath, settings);
     }
 
@@ -93,7 +101,7 @@ public class Level : MonoBehaviour
             return;
 
         _racer.SetPath(_roadPath);
-        _racer.ResetRace();
+        _racer.ResetRace(_racerStartPosition, _racerStartRotation);
     }
 
     public bool TryGetBuiltPath(out RoadPath path, out RoadSettings settings)

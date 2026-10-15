@@ -69,10 +69,10 @@ public class Racer : MonoBehaviour
             Advance(true);
     }
 
-    public void ResetRace()
+    public void ResetRace(Vector3 position, Quaternion rotation)
     {
         IsFinished = false;
-        _mover.ResetPosition();
+        _mover.TeleportTo(position, rotation);
         _overheatTracker.ResetOverheat();
         RaceRestarted?.Invoke();
     }

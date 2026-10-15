@@ -13,8 +13,6 @@ public class Mover : MonoBehaviour
     private float _slipFactor;
     private bool _hasMovementTarget;
     private bool _isAccelerate;
-    private Vector3 _startPosition;
-    private Quaternion _startRotation;
 
     private void Awake()
     {
@@ -63,11 +61,6 @@ public class Mover : MonoBehaviour
         _dragOverride = Mathf.Max(0f, drag);
     }
 
-    public void ResetPosition()
-    {
-        TeleportTo(_startPosition, _startRotation);
-    }
-
     public void Stop()
     {
         _dragOverride = null;
@@ -96,7 +89,5 @@ public class Mover : MonoBehaviour
         _steering = new Steering();
         _movement = new Movement(_rigidbody);
         _bodyRotation = new BodyRotation(_rigidbody);
-        _startPosition = transform.position;
-        _startRotation = transform.rotation;
     }
 }
