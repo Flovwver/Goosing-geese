@@ -67,17 +67,50 @@ public class Level : MonoBehaviour
 
     public void BuildRoad()
     {
-        RoadSettings settings = Instantiate(_settings);
-        settings.hideFlags = HideFlags.HideAndDontSave;
-        int seed = Guid.NewGuid().GetHashCode();
-        int runoutPieces = Mathf.Max(1, settings.FinishRunoutPieces);
-        var generator = new RoadLayoutGenerator(settings.AvailablePieceTypes, settings.MaxGenerationAttempts, seed);
-        RoadPieceType[] layout = generator.Generate(settings.RoadPieceCount, runoutPieces);
+        if (TryBuildRoad(out string error) == false)
+            Debug.LogError($"Level creation failed: {error}", this);
+    }
 
-        if (layout.Length == 0)
+    public bool TryBuildRoad(out string error)
+    {
+        RoadSettings settings = null;
+        RoadBuilder builder = null;
+        LevelDefinition definition;
+        RoadPath path;
+
+        try
         {
-            Destroy(settings);
-            return;
+            if (_settings == null || _roadStartPoint == null)
+                throw new InvalidOperationException("Road settings and a start point must be assigned.");
+
+            settings = Instantiate(_settings);
+            settings.hideFlags = HideFlags.HideAndDontSave;
+
+            if (settings.RoadPieceCount < 1 || settings.FinishRunoutPieces < 1 || settings.CurveSamplesPerSegment < 1)
+                throw new ArgumentException("Road length, finish runout and curve sample count must be positive.");
+
+            Dictionary<RoadPieceType, RoadPiece> prefabs = BuildPiecePrefabsByType(settings);
+            int seed = Guid.NewGuid().GetHashCode();
+            var generator = new RoadLayoutGenerator(settings.AvailablePieceTypes, settings.MaxGenerationAttempts, seed);
+            RoadPieceType[] layout = generator.Generate(settings.RoadPieceCount, settings.FinishRunoutPieces);
+            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation);
+            builder = new RoadBuilder(prefabs);
+            path = builder.Build(definition.Layout, definition.StartPosition, definition.StartRotation);
+            path.SetFinishWaypoint(layout.Length - settings.FinishRunoutPieces);
+            path.BuildCurve(settings.CurveSamplesPerSegment);
+
+            if (path.FinishPoint == null || path.Curve.Length <= 0f || float.IsNaN(path.Curve.Length) || float.IsInfinity(path.Curve.Length))
+                throw new InvalidOperationException("The built road has invalid geometry or no finish.");
+        }
+        catch (Exception exception)
+        {
+            builder?.Clear();
+
+            if (settings != null)
+                Destroy(settings);
+
+            error = exception.Message;
+            return false;
         }
 
         _roadBuilder?.Clear();
@@ -85,14 +118,15 @@ public class Level : MonoBehaviour
         if (CurrentDefinition != null)
             Destroy(CurrentDefinition.Settings);
 
-        CurrentDefinition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation);
-        _roadBuilder = new RoadBuilder(BuildPiecePrefabsByType(settings));
-        _roadPath = _roadBuilder.Build(CurrentDefinition.Layout, CurrentDefinition.StartPosition, CurrentDefinition.StartRotation);
-        _roadPath.SetFinishWaypoint(layout.Length - runoutPieces);
-        _roadPath.BuildCurve(settings.CurveSamplesPerSegment);
+        CurrentDefinition = definition;
+        _roadBuilder = builder;
+        _roadPath = path;
+        builder.Activate();
         PlaceFinishLine();
         PrepareRace();
         PathBuilt?.Invoke(_roadPath, settings);
+        error = null;
+        return true;
     }
 
     public void RestartRace()
@@ -114,8 +148,14 @@ public class Level : MonoBehaviour
     {
         var piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>();
 
+        if (settings.PiecePrefabs == null)
+            throw new ArgumentException("Road prefabs must be assigned.");
+
         foreach (RoadSettings.PiecePrefabEntry entry in settings.PiecePrefabs)
         {
+            if (entry == null || entry.Prefab == null || piecePrefabsByType.ContainsKey(entry.Type))
+                throw new ArgumentException("Road prefab entries must be unique and assigned.");
+
             piecePrefabsByType.Add(entry.Type, entry.Prefab);
         }
 

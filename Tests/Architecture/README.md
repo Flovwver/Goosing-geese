@@ -7,5 +7,6 @@ Use the Unity CLI `run_script` command, or the connected `run_script` tool, with
 | Source | Entry point | Coverage |
 |---|---|---|
 | `Tests/Architecture/RaceLifecycleTests.cs` | `RaceLifecycleTests.Main` | Disable during acceleration/pause, explicit preparation while disabled, repeat after result, complete navigation reset. |
+| `Tests/Architecture/LevelReplacementTests.cs` | `LevelReplacementTests.Main` | Invalid settings/prefabs and failed candidate geometry preserve the current level and clean up partial objects. |
 
 A successful test returns a `PASS` result. Assertion failures throw with a specific failure message. Run the scene normally before invoking a test; do not use these tests against an unsaved scene with unrelated gameplay objects.
