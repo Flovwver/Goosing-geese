@@ -15,6 +15,7 @@ public static class RaceLifecycleTests
         var body = racer.GetComponent<Rigidbody>();
         var flags = BindingFlags.Instance | BindingFlags.NonPublic;
         var update = typeof(RaceController).GetMethod("Update", flags);
+        race.Resume();
         float originalTimeScale = Time.timeScale;
 
         try

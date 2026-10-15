@@ -6,4 +6,4 @@ Commit each completed and verified task separately, as authorized in the global 
 
 ## Architecture audit follow-up
 
-Before changing the race architecture or fixing the audit findings, read [the full architecture audit and pending checklist](docs/architecture/audit-2026-10-15.md). The findings are pending work scheduled in Todoist for 28 October 2026; do not treat the recorded recommendations as completed fixes. Preserve the responsibility boundaries described there, especially for `FinishLine`, `Mover`, and `Racer`.
+Before changing the race architecture, read [the architecture audit, completed checklist, current responsibility boundaries, and regression results](docs/architecture/audit-2026-10-15.md). The original audit is a historical record; its findings were fixed and verified on 15 October 2026, ahead of the planned date. Preserve the responsibility boundaries, especially for `FinishLine`, `Mover`, and `Racer`, and run the applicable permanent checks in `Tests/Architecture` after architecture changes.
