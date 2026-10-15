@@ -2,36 +2,13 @@ using UnityEngine;
 
 public class InputSwitch : MonoBehaviour
 {
-    [SerializeField] private Racer _racer;
-
     private bool _pedalIsPressed;
     private bool _keyboardIsPressed;
-
     private bool _hasFocus = true;
     private bool _isPaused;
+    private bool _canInput = true;
 
-    private void OnEnable()
-    {
-        _racer.RaceRestarted += ResetInput;
-        _racer.Finished += ResetInput;
-    }
-
-    private void Update()
-    {
-        if (_racer.IsFinished)
-            return;
-
-        bool isAccelerate = _pedalIsPressed || _keyboardIsPressed;
-
-        if (isAccelerate == false)
-        {
-            _racer.Cooldown();
-        }
-        else
-        {
-            _racer.Accelerate();
-        }
-    }
+    public bool IsAccelerate => _pedalIsPressed || _keyboardIsPressed;
 
     private void OnApplicationFocus(bool hasFocus)
     {
@@ -51,12 +28,6 @@ public class InputSwitch : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_racer != null)
-        {
-            _racer.RaceRestarted -= ResetInput;
-            _racer.Finished -= ResetInput;
-        }
-
         ResetInput();
     }
 
@@ -64,19 +35,21 @@ public class InputSwitch : MonoBehaviour
     {
         _pedalIsPressed = false;
         _keyboardIsPressed = false;
+    }
 
-        if (_racer != null)
-            _racer.Cooldown();
+    public void SetInputEnabled(bool isEnabled)
+    {
+        _canInput = isEnabled;
+        ResetInput();
     }
 
     public void SetPedalPressed(bool isPressed)
     {
-        _pedalIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false && _racer.IsFinished == false;
+        _pedalIsPressed = isPressed && _canInput && isActiveAndEnabled && _hasFocus && _isPaused == false;
     }
 
     public void SetKeyboardPressed(bool isPressed)
     {
-        _keyboardIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false && _racer.IsFinished == false;
+        _keyboardIsPressed = isPressed && _canInput && isActiveAndEnabled && _hasFocus && _isPaused == false;
     }
-
 }

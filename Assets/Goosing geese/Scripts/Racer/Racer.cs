@@ -19,6 +19,7 @@ public class Racer : MonoBehaviour
     public event Action Finished;
 
     public bool IsFinished { get; private set; }
+    public bool CanRace => _overheatTracker.IsExploded == false && _roadNavigator.IsPathCompleted == false;
 
     public float YellowZoneThreshold => _stats.YellowZoneThreshold;
     public float RedZoneThreshold => _stats.RedZoneThreshold;
@@ -40,12 +41,6 @@ public class Racer : MonoBehaviour
         _roadNavigator.PathCompleted += OnPathCompleted;
     }
 
-    private void Update()
-    {
-        if (IsFinished)
-            Advance(false);
-    }
-
     private void OnDisable()
     {
         _overheatTracker.ProgressChanged -= OnOverheatProgressChanged;
@@ -63,24 +58,12 @@ public class Racer : MonoBehaviour
         _roadNavigator.SetPath(path);
     }
 
-    public void Accelerate()
-    {
-        if (IsFinished == false)
-            Advance(true);
-    }
-
     public void ResetRace(Vector3 position, Quaternion rotation)
     {
         IsFinished = false;
         _mover.TeleportTo(position, rotation);
         _overheatTracker.ResetOverheat();
         RaceRestarted?.Invoke();
-    }
-
-    public void Cooldown()
-    {
-        if (IsFinished == false)
-            Advance(false);
     }
 
     public void FinishRace()
@@ -95,7 +78,7 @@ public class Racer : MonoBehaviour
         Finished?.Invoke();
     }
 
-    private void Advance(bool isAccelerate)
+    public void Tick(bool isAccelerate)
     {
         if (_overheatTracker.IsExploded || _roadNavigator.IsPathCompleted)
             return;
@@ -113,7 +96,7 @@ public class Racer : MonoBehaviour
         if (_roadNavigator.IsPathCompleted)
             return;
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerate, _overheatTracker.SlipFactor);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerate && IsFinished == false, _overheatTracker.SlipFactor);
     }
 
     private void OnPathCompleted()
