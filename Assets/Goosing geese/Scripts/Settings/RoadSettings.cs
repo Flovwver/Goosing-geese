@@ -17,6 +17,14 @@ public class RoadSettings : ScriptableObject
     public bool DrawPathGizmos = true;
     [Min(0f)] public float WaypointGizmoRadius = 0.3f;
 
+    [Header("Speed hints")]
+    public bool ShowSpeedHints = true;
+    [Tooltip("Turns and their approach: keep speed in the green speedometer zone, below the yellow threshold.")]
+    public Color SlowPathColor = Color.green;
+    [Tooltip("Straights: use the yellow speedometer zone; the red overheat zone is never recommended.")]
+    public Color FastPathColor = Color.yellow;
+    [Min(0f)] public float TurnApproachDistance = 50f;
+
     [Header("Generation")]
     [SerializeField] private RoadPieceType[] _availablePieceTypes =
     {
