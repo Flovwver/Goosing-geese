@@ -53,17 +53,18 @@ public class Racer : MonoBehaviour
         return _mover.GetCurrentSpeed();
     }
 
-    public void SetPath(RoadPath path)
-    {
-        _roadNavigator.SetPath(path);
-    }
-
-    public void ResetRace(Vector3 position, Quaternion rotation)
+    public void Prepare(RoadPath path, Vector3 position, Quaternion rotation)
     {
         IsFinished = false;
         _mover.TeleportTo(position, rotation);
+        _roadNavigator.SetPath(path);
         _overheatTracker.ResetOverheat();
         RaceRestarted?.Invoke();
+    }
+
+    public void StopMovement()
+    {
+        _mover.Stop();
     }
 
     public void FinishRace()

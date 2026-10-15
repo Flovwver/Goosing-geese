@@ -91,8 +91,7 @@ public class Level : MonoBehaviour
         _roadPath.SetFinishWaypoint(layout.Length - runoutPieces);
         _roadPath.BuildCurve(settings.CurveSamplesPerSegment);
         PlaceFinishLine();
-        _racer.SetPath(_roadPath);
-        _racer.ResetRace(_racerStartPosition, _racerStartRotation);
+        PrepareRace();
         PathBuilt?.Invoke(_roadPath, settings);
     }
 
@@ -101,8 +100,7 @@ public class Level : MonoBehaviour
         if (_roadPath == null)
             return;
 
-        _racer.SetPath(_roadPath);
-        _racer.ResetRace(_racerStartPosition, _racerStartRotation);
+        PrepareRace();
     }
 
     public bool TryGetBuiltPath(out RoadPath path, out RoadSettings settings)
@@ -126,7 +124,7 @@ public class Level : MonoBehaviour
 
     private void OnFinishCrossed(Racer racer)
     {
-        if (racer == _racer && _race.State == RaceState.Race)
+        if (racer == _racer && _race.isActiveAndEnabled && _race.State == RaceState.Race)
             racer.FinishRace();
     }
 
@@ -137,5 +135,11 @@ public class Level : MonoBehaviour
 
         if (finishPoint != null)
             _finishLine.transform.SetPositionAndRotation(finishPoint.position, finishPoint.rotation);
+    }
+
+    private void PrepareRace()
+    {
+        _racer.Prepare(_roadPath, _racerStartPosition, _racerStartRotation);
+        _race.Prepare();
     }
 }

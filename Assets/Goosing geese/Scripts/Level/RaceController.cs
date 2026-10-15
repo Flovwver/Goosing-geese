@@ -8,6 +8,7 @@ public class RaceController : MonoBehaviour
 
     private RaceState _stateBeforePause;
     private float _resumeTimeScale = 1f;
+    private bool _ownsPause;
 
     public event Action<RaceState> StateChanged;
     public event Action<RaceResult> Completed;
@@ -18,9 +19,12 @@ public class RaceController : MonoBehaviour
 
     private void OnEnable()
     {
-        _racer.RaceRestarted += OnRaceRestarted;
         _racer.Finished += OnFinished;
         _racer.Exploded += OnExploded;
+
+        if (State == RaceState.Paused)
+            SuspendTime();
+
         _input.SetInputEnabled(State == RaceState.Ready || State == RaceState.Race);
     }
 
@@ -49,33 +53,41 @@ public class RaceController : MonoBehaviour
 
     private void OnDisable()
     {
-        _racer.RaceRestarted -= OnRaceRestarted;
         _racer.Finished -= OnFinished;
         _racer.Exploded -= OnExploded;
-        Resume();
-        _input.ResetInput();
+        _racer.StopMovement();
+        RestoreTimeScale();
+        _input.SetInputEnabled(false);
     }
 
     public void Pause()
     {
-        if (State == RaceState.Paused)
+        if (isActiveAndEnabled == false || State == RaceState.Paused)
             return;
 
         _stateBeforePause = State;
-        _resumeTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
+        SuspendTime();
         _input.SetInputEnabled(false);
         SetState(RaceState.Paused);
     }
 
     public void Resume()
     {
-        if (State != RaceState.Paused)
+        if (isActiveAndEnabled == false || State != RaceState.Paused)
             return;
 
         RestoreTimeScale();
         _input.SetInputEnabled(_stateBeforePause == RaceState.Ready || _stateBeforePause == RaceState.Race);
         SetState(_stateBeforePause);
+    }
+
+    public void Prepare()
+    {
+        RestoreTimeScale();
+        Result = RaceResult.None;
+        _input.SetInputEnabled(isActiveAndEnabled);
+        SetState(RaceState.Ready);
+        Prepared?.Invoke();
     }
 
     private void Complete(RaceResult result)
@@ -99,19 +111,13 @@ public class RaceController : MonoBehaviour
         Complete(RaceResult.Finished);
     }
 
-    private void OnRaceRestarted()
-    {
-        RestoreTimeScale();
-        Result = RaceResult.None;
-        _input.SetInputEnabled(true);
-        SetState(RaceState.Ready);
-        Prepared?.Invoke();
-    }
-
     private void RestoreTimeScale()
     {
-        if (State == RaceState.Paused)
-            Time.timeScale = _resumeTimeScale;
+        if (_ownsPause == false)
+            return;
+
+        Time.timeScale = _resumeTimeScale;
+        _ownsPause = false;
     }
 
     private void SetState(RaceState state)
@@ -121,5 +127,12 @@ public class RaceController : MonoBehaviour
 
         State = state;
         StateChanged?.Invoke(State);
+    }
+
+    private void SuspendTime()
+    {
+        _resumeTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        _ownsPause = true;
     }
 }
