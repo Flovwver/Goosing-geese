@@ -9,16 +9,14 @@ public class RoadLayoutGenerator
 
     public RoadLayoutGenerator(RoadPieceType[] availablePieceTypes, int maxGenerationAttempts, int seed)
     {
-        _availablePieceTypes = (RoadPieceType[])availablePieceTypes.Clone();
+        _availablePieceTypes = availablePieceTypes == null ? new RoadPieceType[0] : (RoadPieceType[])availablePieceTypes.Clone();
         _maxGenerationAttempts = Mathf.Max(1, maxGenerationAttempts);
         _random = new System.Random(seed);
     }
 
     public RoadPieceType[] Generate(int pieceCount, int finishRunoutPieces = 0)
     {
-        if (pieceCount <= 0)
-            return new RoadPieceType[0];
-
+        pieceCount = Mathf.Max(1, pieceCount);
         finishRunoutPieces = Mathf.Max(0, finishRunoutPieces);
 
         for (int attempt = 0; attempt < _maxGenerationAttempts; attempt++)
@@ -27,8 +25,13 @@ public class RoadLayoutGenerator
                 return layout;
         }
 
-        Debug.LogWarning($"Не удалось сгенерировать дорогу из {pieceCount} кусков без пересечений.");
-        return new RoadPieceType[0];
+        Debug.LogWarning($"Road generation exhausted {_maxGenerationAttempts} attempts. Using a straight fallback route.");
+        var fallback = new RoadPieceType[pieceCount + finishRunoutPieces];
+
+        for (int pieceIndex = 0; pieceIndex < fallback.Length; pieceIndex++)
+            fallback[pieceIndex] = RoadPieceType.Straight;
+
+        return fallback;
     }
 
     private bool TryGenerate(int pieceCount, int finishRunoutPieces, out RoadPieceType[] layout)
