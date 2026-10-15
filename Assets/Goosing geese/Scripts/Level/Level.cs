@@ -9,6 +9,7 @@ public class Level : MonoBehaviour
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
     [SerializeField] private FinishLine _finishLine;
+    [SerializeField] private RaceController _race;
 
     private RoadBuilder _roadBuilder;
     private RoadPath _roadPath;
@@ -125,7 +126,7 @@ public class Level : MonoBehaviour
 
     private void OnFinishCrossed(Racer racer)
     {
-        if (racer == _racer)
+        if (racer == _racer && _race.State == RaceState.Race)
             racer.FinishRace();
     }
 

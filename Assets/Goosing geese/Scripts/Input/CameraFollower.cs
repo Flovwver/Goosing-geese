@@ -4,24 +4,16 @@ public class CameraFollower : MonoBehaviour
 {
     [SerializeField] private Transform _target;
     [SerializeField] private CameraSettings _settings;
+    [SerializeField] private RaceController _race;
 
     private Vector3 _velocity;
-    private Racer _racer;
     private bool _isFollow = true;
-
-    private void Awake()
-    {
-        _racer = _target.GetComponent<Racer>();
-    }
 
     private void OnEnable()
     {
-        if (_racer == null)
-            return;
-
-        _racer.Finished += OnRaceFinished;
-        _racer.RaceRestarted += OnRaceRestarted;
-        _isFollow = _racer.IsFinished == false;
+        _race.Completed += OnRaceCompleted;
+        _race.Prepared += OnRacePrepared;
+        _isFollow = _race.Result == RaceResult.None;
     }
 
     private void LateUpdate()
@@ -35,20 +27,17 @@ public class CameraFollower : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_racer == null)
-            return;
-
-        _racer.Finished -= OnRaceFinished;
-        _racer.RaceRestarted -= OnRaceRestarted;
+        _race.Completed -= OnRaceCompleted;
+        _race.Prepared -= OnRacePrepared;
     }
 
-    private void OnRaceFinished()
+    private void OnRaceCompleted(RaceResult result)
     {
         _isFollow = false;
         _velocity = Vector3.zero;
     }
 
-    private void OnRaceRestarted()
+    private void OnRacePrepared()
     {
         _isFollow = true;
         _velocity = Vector3.zero;

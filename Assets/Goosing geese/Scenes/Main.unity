@@ -792,6 +792,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollower
   _target: {fileID: 543450651709855089}
   _settings: {fileID: 11400000, guid: ddaaa218710e4b57b58001fd38020a38, type: 2}
+  _race: {fileID: 1081964708}
 --- !u!1 &734657275
 GameObject:
   m_ObjectHideFlags: 0
@@ -1511,6 +1512,7 @@ MonoBehaviour:
   _settings: {fileID: 11400000, guid: a89aed623746447b9df737176ec8f8ff, type: 2}
   _racer: {fileID: 265920761}
   _finishLine: {fileID: 310000099}
+  _race: {fileID: 1081964708}
 --- !u!4 &1081964705
 Transform:
   m_ObjectHideFlags: 0

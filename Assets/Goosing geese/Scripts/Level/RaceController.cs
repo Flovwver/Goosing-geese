@@ -10,6 +10,8 @@ public class RaceController : MonoBehaviour
     private float _resumeTimeScale = 1f;
 
     public event Action<RaceState> StateChanged;
+    public event Action<RaceResult> Completed;
+    public event Action Prepared;
 
     public RaceState State { get; private set; } = RaceState.Ready;
     public RaceResult Result { get; private set; }
@@ -17,6 +19,8 @@ public class RaceController : MonoBehaviour
     private void OnEnable()
     {
         _racer.RaceRestarted += OnRaceRestarted;
+        _racer.Finished += OnFinished;
+        _racer.Exploded += OnExploded;
         _input.SetInputEnabled(State == RaceState.Ready || State == RaceState.Race);
     }
 
@@ -46,18 +50,10 @@ public class RaceController : MonoBehaviour
     private void OnDisable()
     {
         _racer.RaceRestarted -= OnRaceRestarted;
+        _racer.Finished -= OnFinished;
+        _racer.Exploded -= OnExploded;
         Resume();
         _input.ResetInput();
-    }
-
-    public void Complete(RaceResult result)
-    {
-        if (State != RaceState.Race || result == RaceResult.None)
-            return;
-
-        Result = result;
-        _input.SetInputEnabled(false);
-        SetState(RaceState.Result);
     }
 
     public void Pause()
@@ -82,12 +78,34 @@ public class RaceController : MonoBehaviour
         SetState(_stateBeforePause);
     }
 
+    private void Complete(RaceResult result)
+    {
+        if (State != RaceState.Race)
+            return;
+
+        Result = result;
+        _input.SetInputEnabled(false);
+        SetState(RaceState.Result);
+        Completed?.Invoke(Result);
+    }
+
+    private void OnExploded()
+    {
+        Complete(RaceResult.Overheated);
+    }
+
+    private void OnFinished()
+    {
+        Complete(RaceResult.Finished);
+    }
+
     private void OnRaceRestarted()
     {
         RestoreTimeScale();
         Result = RaceResult.None;
         _input.SetInputEnabled(true);
         SetState(RaceState.Ready);
+        Prepared?.Invoke();
     }
 
     private void RestoreTimeScale()
