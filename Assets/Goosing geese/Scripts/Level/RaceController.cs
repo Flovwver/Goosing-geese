@@ -34,9 +34,9 @@ public class RaceController : MonoBehaviour
             SetState(RaceState.Race);
 
         if (State == RaceState.Race)
-            _racer.Tick(_input.IsAccelerate);
+            _racer.Tick(_input.IsAccelerate, Time.deltaTime);
         else if (State == RaceState.Result && Result == RaceResult.Finished)
-            _racer.Tick(false);
+            _racer.Tick(false, Time.deltaTime);
     }
 
     private void OnApplicationFocus(bool hasFocus)

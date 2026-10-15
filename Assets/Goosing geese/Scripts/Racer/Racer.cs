@@ -90,14 +90,14 @@ public class Racer : MonoBehaviour
         Finished?.Invoke();
     }
 
-    public void Tick(bool isAccelerate)
+    public void Tick(bool isAccelerate, float deltaTime)
     {
         if (_overheatTracker.IsExploded || _roadNavigator.IsPathCompleted)
             return;
 
         if (IsFinished == false)
         {
-            _overheatTracker.Tick(GetCurrentSpeed(), _configuration);
+            _overheatTracker.Tick(GetCurrentSpeed(), _configuration, deltaTime);
 
             if (_overheatTracker.IsExploded)
                 return;
@@ -108,7 +108,8 @@ public class Racer : MonoBehaviour
         if (_roadNavigator.IsPathCompleted)
             return;
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerate && IsFinished == false, _overheatTracker.SlipFactor);
+        float slipFactor = IsFinished ? 0f : GripModel.CalculateSlipFactor(GetCurrentSpeed(), _configuration);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerate && IsFinished == false, slipFactor);
     }
 
     private void OnPathCompleted()
