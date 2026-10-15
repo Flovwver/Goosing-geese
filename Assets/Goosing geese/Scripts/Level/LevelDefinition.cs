@@ -6,6 +6,9 @@ public sealed class LevelDefinition
 {
     public LevelDefinition(int seed, RoadPieceType[] layout, RoadConfiguration settings, Vector3 startPosition, Quaternion startRotation, RacerDefinition racer)
     {
+        if (settings == null)
+            throw new ArgumentNullException(nameof(settings));
+
         if (layout == null || layout.Length != settings.RoadPieceCount + settings.FinishRunoutPieces)
             throw new ArgumentException("Layout length must match the captured road configuration.");
 

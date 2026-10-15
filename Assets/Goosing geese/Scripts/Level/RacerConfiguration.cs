@@ -21,11 +21,20 @@ public sealed class RacerConfiguration
         RedZoneThreshold = settings.RedZoneThreshold;
         TimeToOverheat = settings.TimeToOverheat;
 
+        foreach (float value in new[] { MaxSpeed, Acceleration, Drag, CoastingDrag, FinishDrag, TurnSpeed, MaxSteeringAngle, DriftAlignmentSpeed, GripTransitionSpeed, YellowZoneThreshold, RedZoneThreshold, TimeToOverheat })
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                throw new ArgumentException("Racer configuration values must be finite.");
+        }
+
         if (MaxSpeed <= 0f || Acceleration < 0f || Drag < 0f || CoastingDrag < 0f || FinishDrag < 0f || TimeToOverheat < 0f)
             throw new ArgumentException("Racer speed must be positive and acceleration, drag and overheat time must be non-negative.");
 
         if (YellowZoneThreshold < 0f || RedZoneThreshold < YellowZoneThreshold || RedZoneThreshold > 1f)
             throw new ArgumentException("Speed zone thresholds must be ordered between zero and one.");
+
+        if (TurnSpeed < 0f || MaxSteeringAngle < 0f || MaxSteeringAngle > RacerStats.MaximumAllowedSteeringAngle || DriftAlignmentSpeed < 0f || GripTransitionSpeed < 0f)
+            throw new ArgumentException("Racer steering and grip limits must be valid and non-negative.");
     }
 
     public float MaxSpeed { get; }

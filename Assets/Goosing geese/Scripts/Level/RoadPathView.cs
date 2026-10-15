@@ -31,6 +31,12 @@ public class RoadPathView : MonoBehaviour
         ClearHints();
     }
 
+    private static Color GetSegmentColor(RoadSpeedProfile profile, int index)
+    {
+        float speed = Mathf.Min(profile.Limits[index], profile.Limits[index + 1]);
+        return SpeedZones.GetColor(speed, profile.Stats);
+    }
+
     private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
     {
         Show(path, settings);
@@ -39,14 +45,13 @@ public class RoadPathView : MonoBehaviour
     private void Show(RoadPath path, RoadConfiguration settings)
     {
         ClearHints();
-        RoadCurve curve = path.Curve;
         LineRenderer line = GetComponent<LineRenderer>();
-        ConfigureLine(line, settings);
+        ConfigureLine(line, settings, settings.PathLineColor);
         line.enabled = settings.ShowPathLine && settings.ShowSpeedHints == false;
-        var points = new Vector3[curve.Points.Count];
+        var points = new Vector3[path.Curve.Points.Count];
 
-        for (int i = 0; i < points.Length; i++)
-            points[i] = curve.Points[i] + Vector3.up * settings.PathLineHeight;
+        for (int index = 0; index < points.Length; index++)
+            points[index] = path.Curve.Points[index] + Vector3.up * settings.PathLineHeight;
 
         line.positionCount = points.Length;
         line.SetPositions(points);
@@ -54,73 +59,49 @@ public class RoadPathView : MonoBehaviour
         if (settings.ShowPathLine == false || settings.ShowSpeedHints == false)
             return;
 
-        for (int segment = 0; segment < curve.SegmentCount; segment++)
+        RoadSpeedProfile profile = _level.SpeedProfile;
+        var run = new List<Vector3> { points[0] };
+        Color color = GetSegmentColor(profile, 0);
+
+        for (int index = 0; index < points.Length - 1; index++)
         {
-            var hint = new GameObject($"Speed hint {segment}");
-            hint.transform.SetParent(transform, false);
-            LineRenderer hintLine = hint.AddComponent<LineRenderer>();
-            ConfigureLine(hintLine, settings);
-            int startIndex = curve.GetSegmentStartIndex(segment);
-            int endIndex = curve.GetSegmentEndIndex(segment);
-            var segmentPoints = new Vector3[endIndex - startIndex + 1];
-            System.Array.Copy(points, startIndex, segmentPoints, 0, segmentPoints.Length);
-            hintLine.positionCount = segmentPoints.Length;
-            hintLine.SetPositions(segmentPoints);
-            hintLine.colorGradient = BuildSpeedGradient(path, settings, segment);
-            _hintLines.Add(hintLine);
+            Color nextColor = GetSegmentColor(profile, index);
+
+            if (nextColor != color)
+            {
+                AddHint(run, color, settings);
+                run.Clear();
+                run.Add(points[index]);
+                color = nextColor;
+            }
+
+            run.Add(points[index + 1]);
         }
+
+        AddHint(run, color, settings);
     }
 
-    private void ConfigureLine(LineRenderer line, RoadConfiguration settings)
+    private void AddHint(List<Vector3> points, Color color, RoadConfiguration settings)
+    {
+        var hint = new GameObject($"Speed hint {_hintLines.Count}");
+        hint.transform.SetParent(transform, false);
+        LineRenderer line = hint.AddComponent<LineRenderer>();
+        ConfigureLine(line, settings, color);
+        line.positionCount = points.Count;
+        line.SetPositions(points.ToArray());
+        _hintLines.Add(line);
+    }
+
+    private void ConfigureLine(LineRenderer line, RoadConfiguration settings, Color color)
     {
         line.useWorldSpace = true;
         line.sharedMaterial = _material;
-        line.startColor = settings.PathLineColor;
-        line.endColor = settings.PathLineColor;
+        line.startColor = color;
+        line.endColor = color;
         line.widthMultiplier = settings.PathLineWidth;
         line.enabled = true;
         line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         line.receiveShadows = false;
-    }
-
-    private Gradient BuildSpeedGradient(RoadPath path, RoadConfiguration settings, int segment)
-    {
-        Color color = path.GetPieceType(segment) == RoadPieceType.Straight ? settings.FastPathColor : settings.SlowPathColor;
-        var keys = new List<GradientColorKey> { new GradientColorKey(color, 0f) };
-        float nextTurnDistance = float.PositiveInfinity;
-
-        for (int next = segment + 1; next < path.Curve.SegmentCount; next++)
-        {
-            if (path.GetPieceType(next) == RoadPieceType.Straight)
-                continue;
-
-            nextTurnDistance = path.Curve.GetSegmentEndDistance(next - 1);
-            break;
-        }
-
-        if (path.GetPieceType(segment) == RoadPieceType.Straight && float.IsPositiveInfinity(nextTurnDistance) == false && settings.TurnApproachDistance > 0f)
-        {
-            float startDistance = segment == 0 ? 0f : path.Curve.GetSegmentEndDistance(segment - 1);
-            float length = path.Curve.GetSegmentEndDistance(segment) - startDistance;
-            float approach = length > 0f ? (nextTurnDistance - settings.TurnApproachDistance - startDistance) / length : 0f;
-
-            if (approach <= 0f)
-            {
-                keys[0] = new GradientColorKey(settings.SlowPathColor, 0f);
-            }
-            else if (approach < 1f)
-            {
-                if (approach > 0.02f)
-                    keys.Add(new GradientColorKey(color, approach - 0.02f));
-
-                keys.Add(new GradientColorKey(settings.SlowPathColor, approach));
-            }
-        }
-
-        keys.Add(new GradientColorKey(keys[keys.Count - 1].color, 1f));
-        var gradient = new Gradient { mode = GradientMode.Blend };
-        gradient.SetKeys(keys.ToArray(), new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
-        return gradient;
     }
 
     private void ClearHints()

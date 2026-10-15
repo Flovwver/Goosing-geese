@@ -13,6 +13,12 @@ public sealed class NavigationConfiguration
         WaypointPassTolerance = settings.WaypointPassTolerance;
         DebugPointRadius = settings.DebugPointRadius;
 
+        foreach (float value in new[] { ArrivalDistance, LookAheadDistance, WaypointPassTolerance, DebugPointRadius })
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                throw new ArgumentException("Navigation configuration values must be finite.");
+        }
+
         if (ArrivalDistance < 0f || LookAheadDistance < 0f || WaypointPassTolerance < 0f || DebugPointRadius < 0f)
             throw new ArgumentException("Navigation distances must be non-negative.");
     }

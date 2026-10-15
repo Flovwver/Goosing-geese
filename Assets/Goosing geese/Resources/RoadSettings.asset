@@ -23,9 +23,6 @@ MonoBehaviour:
   DrawPathGizmos: 1
   WaypointGizmoRadius: 0.3
   ShowSpeedHints: 1
-  SlowPathColor: {r: 0, g: 1, b: 0, a: 1}
-  FastPathColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  TurnApproachDistance: 50
   _availablePieceTypes: 000000000100000002000000
   _piecePrefabs:
   - _type: 0

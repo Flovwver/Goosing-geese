@@ -21,9 +21,6 @@ public sealed class RoadConfiguration
         DrawPathGizmos = settings.DrawPathGizmos;
         WaypointGizmoRadius = settings.WaypointGizmoRadius;
         ShowSpeedHints = settings.ShowSpeedHints;
-        SlowPathColor = settings.SlowPathColor;
-        FastPathColor = settings.FastPathColor;
-        TurnApproachDistance = settings.TurnApproachDistance;
         AvailablePieceTypes = Array.AsReadOnly(settings.AvailablePieceTypes == null ? new RoadPieceType[0] : (RoadPieceType[])settings.AvailablePieceTypes.Clone());
         var prefabs = new Dictionary<RoadPieceType, RoadPiece>();
 
@@ -55,9 +52,6 @@ public sealed class RoadConfiguration
     public bool DrawPathGizmos { get; }
     public float WaypointGizmoRadius { get; }
     public bool ShowSpeedHints { get; }
-    public Color SlowPathColor { get; }
-    public Color FastPathColor { get; }
-    public float TurnApproachDistance { get; }
     public IReadOnlyList<RoadPieceType> AvailablePieceTypes { get; }
     public IReadOnlyDictionary<RoadPieceType, RoadPiece> PiecePrefabs { get; }
 }

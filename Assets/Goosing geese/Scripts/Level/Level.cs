@@ -17,6 +17,7 @@ public class Level : MonoBehaviour
     public event Action<RoadPath, RoadConfiguration> PathBuilt;
 
     public LevelDefinition CurrentDefinition { get; private set; }
+    public RoadSpeedProfile SpeedProfile { get; private set; }
 
     private void Awake()
     {
@@ -95,6 +96,7 @@ public class Level : MonoBehaviour
     {
         RoadBuilder builder = null;
         RoadPath path;
+        RoadSpeedProfile profile;
 
         try
         {
@@ -109,6 +111,8 @@ public class Level : MonoBehaviour
 
             if (path.FinishPoint == null || path.Curve.Length <= 0f || float.IsNaN(path.Curve.Length) || float.IsInfinity(path.Curve.Length))
                 throw new InvalidOperationException("The built road has invalid geometry or no finish.");
+
+            profile = new RoadSpeedProfile(path.Curve, definition.Racer.Stats);
         }
         catch (Exception exception)
         {
@@ -121,6 +125,7 @@ public class Level : MonoBehaviour
         CurrentDefinition = definition;
         _roadBuilder = builder;
         _roadPath = path;
+        SpeedProfile = profile;
         builder.Activate();
         PlaceFinishLine();
         PrepareRace();
