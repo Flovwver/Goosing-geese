@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-
     [SerializeField] private Transform _roadStartPoint;
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
@@ -16,7 +14,7 @@ public class Level : MonoBehaviour
     private Vector3 _racerStartPosition;
     private Quaternion _racerStartRotation;
 
-    public event Action<RoadPath, RoadSettings> PathBuilt;
+    public event Action<RoadPath, RoadConfiguration> PathBuilt;
 
     public LevelDefinition CurrentDefinition { get; private set; }
 
@@ -38,7 +36,7 @@ public class Level : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        RoadSettings settings = CurrentDefinition?.Settings;
+        RoadConfiguration settings = CurrentDefinition?.Settings;
 
         if (settings == null || settings.DrawPathGizmos == false || _roadPath == null)
             return;
@@ -60,9 +58,6 @@ public class Level : MonoBehaviour
     private void OnDestroy()
     {
         _roadBuilder?.Clear();
-
-        if (CurrentDefinition != null)
-            Destroy(CurrentDefinition.Settings);
     }
 
     public void BuildRoad()
@@ -73,30 +68,43 @@ public class Level : MonoBehaviour
 
     public bool TryBuildRoad(out string error)
     {
-        RoadSettings settings = null;
-        RoadBuilder builder = null;
         LevelDefinition definition;
+
+        try
+        {
+            if (_roadStartPoint == null)
+                throw new InvalidOperationException("A road start point must be assigned.");
+
+            var settings = new RoadConfiguration(_settings);
+            int seed = Guid.NewGuid().GetHashCode();
+            var generator = new RoadLayoutGenerator(settings.AvailablePieceTypes, settings.MaxGenerationAttempts, seed);
+            RoadPieceType[] layout = generator.Generate(settings.RoadPieceCount, settings.FinishRunoutPieces);
+            RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
+            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation, racer);
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+            return false;
+        }
+
+        return TryRestoreLevel(definition, out error);
+    }
+
+    public bool TryRestoreLevel(LevelDefinition definition, out string error)
+    {
+        RoadBuilder builder = null;
         RoadPath path;
 
         try
         {
-            if (_settings == null || _roadStartPoint == null)
-                throw new InvalidOperationException("Road settings and a start point must be assigned.");
+            if (definition == null)
+                throw new ArgumentNullException(nameof(definition));
 
-            settings = Instantiate(_settings);
-            settings.hideFlags = HideFlags.HideAndDontSave;
-
-            if (settings.RoadPieceCount < 1 || settings.FinishRunoutPieces < 1 || settings.CurveSamplesPerSegment < 1)
-                throw new ArgumentException("Road length, finish runout and curve sample count must be positive.");
-
-            Dictionary<RoadPieceType, RoadPiece> prefabs = BuildPiecePrefabsByType(settings);
-            int seed = Guid.NewGuid().GetHashCode();
-            var generator = new RoadLayoutGenerator(settings.AvailablePieceTypes, settings.MaxGenerationAttempts, seed);
-            RoadPieceType[] layout = generator.Generate(settings.RoadPieceCount, settings.FinishRunoutPieces);
-            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation);
-            builder = new RoadBuilder(prefabs);
+            RoadConfiguration settings = definition.Settings;
+            builder = new RoadBuilder(settings.PiecePrefabs);
             path = builder.Build(definition.Layout, definition.StartPosition, definition.StartRotation);
-            path.SetFinishWaypoint(layout.Length - settings.FinishRunoutPieces);
+            path.SetFinishWaypoint(definition.Layout.Count - settings.FinishRunoutPieces);
             path.BuildCurve(settings.CurveSamplesPerSegment);
 
             if (path.FinishPoint == null || path.Curve.Length <= 0f || float.IsNaN(path.Curve.Length) || float.IsInfinity(path.Curve.Length))
@@ -105,26 +113,18 @@ public class Level : MonoBehaviour
         catch (Exception exception)
         {
             builder?.Clear();
-
-            if (settings != null)
-                Destroy(settings);
-
             error = exception.Message;
             return false;
         }
 
         _roadBuilder?.Clear();
-
-        if (CurrentDefinition != null)
-            Destroy(CurrentDefinition.Settings);
-
         CurrentDefinition = definition;
         _roadBuilder = builder;
         _roadPath = path;
         builder.Activate();
         PlaceFinishLine();
         PrepareRace();
-        PathBuilt?.Invoke(_roadPath, settings);
+        PathBuilt?.Invoke(_roadPath, definition.Settings);
         error = null;
         return true;
     }
@@ -137,29 +137,11 @@ public class Level : MonoBehaviour
         PrepareRace();
     }
 
-    public bool TryGetBuiltPath(out RoadPath path, out RoadSettings settings)
+    public bool TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings)
     {
         path = _roadPath;
         settings = CurrentDefinition?.Settings;
         return path != null && path.Curve != null;
-    }
-
-    private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType(RoadSettings settings)
-    {
-        var piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>();
-
-        if (settings.PiecePrefabs == null)
-            throw new ArgumentException("Road prefabs must be assigned.");
-
-        foreach (RoadSettings.PiecePrefabEntry entry in settings.PiecePrefabs)
-        {
-            if (entry == null || entry.Prefab == null || piecePrefabsByType.ContainsKey(entry.Type))
-                throw new ArgumentException("Road prefab entries must be unique and assigned.");
-
-            piecePrefabsByType.Add(entry.Type, entry.Prefab);
-        }
-
-        return piecePrefabsByType;
     }
 
     private void OnFinishCrossed(Racer racer)
@@ -179,7 +161,7 @@ public class Level : MonoBehaviour
 
     private void PrepareRace()
     {
-        _racer.Prepare(_roadPath, _racerStartPosition, _racerStartRotation);
+        _racer.Prepare(_roadPath, CurrentDefinition.Racer);
         _race.Prepare();
     }
 }

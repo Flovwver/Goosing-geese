@@ -8,9 +8,12 @@ public class RoadBuilder
 
     private GameObject _root;
 
-    public RoadBuilder(Dictionary<RoadPieceType, RoadPiece> piecePrefabsByType)
+    public RoadBuilder(IReadOnlyDictionary<RoadPieceType, RoadPiece> piecePrefabsByType)
     {
-        _piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>(piecePrefabsByType);
+        _piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>();
+
+        foreach (KeyValuePair<RoadPieceType, RoadPiece> pair in piecePrefabsByType)
+            _piecePrefabsByType.Add(pair.Key, pair.Value);
     }
 
     public RoadPath Build(IReadOnlyList<RoadPieceType> layout, Vector3 startPosition, Quaternion startRotation)

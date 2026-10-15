@@ -7,9 +7,13 @@ public class RoadLayoutGenerator
     private readonly System.Random _random;
     private readonly RoadPieceType[] _availablePieceTypes;
 
-    public RoadLayoutGenerator(RoadPieceType[] availablePieceTypes, int maxGenerationAttempts, int seed)
+    public RoadLayoutGenerator(IReadOnlyList<RoadPieceType> availablePieceTypes, int maxGenerationAttempts, int seed)
     {
-        _availablePieceTypes = availablePieceTypes == null ? new RoadPieceType[0] : (RoadPieceType[])availablePieceTypes.Clone();
+        _availablePieceTypes = new RoadPieceType[availablePieceTypes?.Count ?? 0];
+
+        for (int index = 0; index < _availablePieceTypes.Length; index++)
+            _availablePieceTypes[index] = availablePieceTypes[index];
+
         _maxGenerationAttempts = Mathf.Max(1, maxGenerationAttempts);
         _random = new System.Random(seed);
     }

@@ -21,7 +21,7 @@ public class OverheatTracker : MonoBehaviour
         ProgressChanged?.Invoke(Progress);
     }
 
-    public void Tick(float currentSpeed, RacerStats stats)
+    public void Tick(float currentSpeed, RacerConfiguration stats)
     {
         if (IsExploded)
             return;

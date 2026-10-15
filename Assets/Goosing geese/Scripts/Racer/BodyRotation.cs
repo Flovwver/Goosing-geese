@@ -10,7 +10,7 @@ public class BodyRotation
         _rigidbody = rigidbody;
     }
 
-    public void Apply(Vector3 direction, Vector3 localWheelDirection, float steeringLimit, float currentSpeed, RacerStats stats, float deltaTime)
+    public void Apply(Vector3 direction, Vector3 localWheelDirection, float steeringLimit, float currentSpeed, RacerConfiguration stats, float deltaTime)
     {
         float steeringAngle = Vector3.Angle(Vector3.forward, localWheelDirection);
         float speedFactor = stats.MaxSpeed > 0f

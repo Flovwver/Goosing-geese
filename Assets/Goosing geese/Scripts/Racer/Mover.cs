@@ -7,7 +7,7 @@ public class Mover : MonoBehaviour
     private Rigidbody _rigidbody;
     private Movement _movement;
     private BodyRotation _bodyRotation;
-    private RacerStats _stats;
+    private RacerConfiguration _stats;
     private float? _dragOverride;
     private Vector3 _targetPosition;
     private float _slipFactor;
@@ -42,7 +42,7 @@ public class Mover : MonoBehaviour
         return _movement.GetCurrentSpeed();
     }
 
-    public void Configure(RacerStats stats)
+    public void Configure(RacerConfiguration stats)
     {
         InitializeComponents();
         _stats = stats;

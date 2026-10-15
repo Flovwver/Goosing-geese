@@ -18,7 +18,7 @@ public class RoadPathView : MonoBehaviour
 
         _level.PathBuilt += OnPathBuilt;
 
-        if (_level.TryGetBuiltPath(out RoadPath path, out RoadSettings settings))
+        if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
             Show(path, settings);
     }
 
@@ -31,12 +31,12 @@ public class RoadPathView : MonoBehaviour
         ClearHints();
     }
 
-    private void OnPathBuilt(RoadPath path, RoadSettings settings)
+    private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
     {
         Show(path, settings);
     }
 
-    private void Show(RoadPath path, RoadSettings settings)
+    private void Show(RoadPath path, RoadConfiguration settings)
     {
         ClearHints();
         RoadCurve curve = path.Curve;
@@ -71,7 +71,7 @@ public class RoadPathView : MonoBehaviour
         }
     }
 
-    private void ConfigureLine(LineRenderer line, RoadSettings settings)
+    private void ConfigureLine(LineRenderer line, RoadConfiguration settings)
     {
         line.useWorldSpace = true;
         line.sharedMaterial = _material;
@@ -83,7 +83,7 @@ public class RoadPathView : MonoBehaviour
         line.receiveShadows = false;
     }
 
-    private Gradient BuildSpeedGradient(RoadPath path, RoadSettings settings, int segment)
+    private Gradient BuildSpeedGradient(RoadPath path, RoadConfiguration settings, int segment)
     {
         Color color = path.GetPieceType(segment) == RoadPieceType.Straight ? settings.FastPathColor : settings.SlowPathColor;
         var keys = new List<GradientColorKey> { new GradientColorKey(color, 0f) };

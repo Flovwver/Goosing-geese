@@ -6,6 +6,7 @@ public class RoadNavigator : MonoBehaviour
     [SerializeField] private NavigationSettings _settings;
 
     private RoadPath _path;
+    private NavigationConfiguration _configuration;
     private int _currentSegment;
     private float _distanceAlongPath;
 
@@ -14,6 +15,12 @@ public class RoadNavigator : MonoBehaviour
     public Vector3 TargetPosition { get; private set; }
     public Vector3 ClosestPosition { get; private set; }
     public bool IsPathCompleted { get; private set; } = true;
+    public NavigationConfiguration Configuration => _configuration;
+
+    private void Awake()
+    {
+        _configuration = CaptureConfiguration();
+    }
 
     private void OnDrawGizmosSelected()
     {
@@ -37,7 +44,7 @@ public class RoadNavigator : MonoBehaviour
         if (IsPathCompleted == false)
         {
             ClosestPosition = path.Curve.GetPointAtDistance(0f);
-            TargetPosition = path.Curve.GetPointAtDistance(_settings.LookAheadDistance);
+            TargetPosition = path.Curve.GetPointAtDistance(_configuration.LookAheadDistance);
         }
     }
 
@@ -53,7 +60,7 @@ public class RoadNavigator : MonoBehaviour
             _distanceAlongPath = curve.FindClosestDistance(currentPosition, _currentSegment, _distanceAlongPath);
             float endDistance = curve.GetSegmentEndDistance(_currentSegment);
 
-            if (endDistance - _distanceAlongPath > _settings.WaypointPassTolerance)
+            if (endDistance - _distanceAlongPath > _configuration.WaypointPassTolerance)
                 break;
 
             _distanceAlongPath = endDistance;
@@ -61,17 +68,27 @@ public class RoadNavigator : MonoBehaviour
         }
 
         ClosestPosition = curve.GetPointAtDistance(_distanceAlongPath);
-        TargetPosition = curve.GetPointAtDistance(_distanceAlongPath + Mathf.Max(0f, _settings.LookAheadDistance));
+        TargetPosition = curve.GetPointAtDistance(_distanceAlongPath + Mathf.Max(0f, _configuration.LookAheadDistance));
 
         if (_currentSegment >= curve.SegmentCount)
         {
             Vector3 offset = currentPosition - curve.GetPointAtDistance(curve.Length);
             offset.y = 0f;
-            IsPathCompleted = offset.sqrMagnitude <= _settings.ArrivalDistance * _settings.ArrivalDistance;
+            IsPathCompleted = offset.sqrMagnitude <= _configuration.ArrivalDistance * _configuration.ArrivalDistance;
 
             if (IsPathCompleted)
                 PathCompleted?.Invoke();
         }
+    }
+
+    public NavigationConfiguration CaptureConfiguration()
+    {
+        return new NavigationConfiguration(_settings);
+    }
+
+    public void Configure(NavigationConfiguration configuration)
+    {
+        _configuration = configuration;
     }
 
 }

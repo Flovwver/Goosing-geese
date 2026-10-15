@@ -62,7 +62,8 @@ public static class RaceLifecycleTests
                 navigator.UpdateTarget(point);
 
             Require(navigator.IsPathCompleted, "Navigation completion setup must succeed.");
-            racer.Prepare(path, new Vector3(1f, 2f, 3f), Quaternion.Euler(0f, 35f, 0f));
+            var definition = level.CurrentDefinition.Racer;
+            racer.Prepare(path, new RacerDefinition(definition.Stats, definition.Navigation, new Vector3(1f, 2f, 3f), Quaternion.Euler(0f, 35f, 0f)));
             Require(!navigator.IsPathCompleted && racer.CanRace && racer.GetCurrentSpeed() == 0f && !racer.IsFinished, "One racer preparation operation must reset navigation, movement and local state.");
             return "PASS: controller disable during acceleration and pause; preparation while disabled; repeat after result; owned pause restoration; complete racer preparation.";
         }

@@ -11,6 +11,7 @@ public class Racer : MonoBehaviour
     private OverheatTracker _overheatTracker;
     private Mover _mover;
     private RoadNavigator _roadNavigator;
+    private RacerConfiguration _configuration;
 
     public event Action<float> OverheatProgressChanged;
     public event Action Exploded;
@@ -20,17 +21,19 @@ public class Racer : MonoBehaviour
 
     public bool IsFinished { get; private set; }
     public bool CanRace => _overheatTracker.IsExploded == false && _roadNavigator.IsPathCompleted == false;
+    public RacerConfiguration Configuration => _configuration;
 
-    public float YellowZoneThreshold => _stats.YellowZoneThreshold;
-    public float RedZoneThreshold => _stats.RedZoneThreshold;
+    public float YellowZoneThreshold => _configuration?.YellowZoneThreshold ?? _stats.YellowZoneThreshold;
+    public float RedZoneThreshold => _configuration?.RedZoneThreshold ?? _stats.RedZoneThreshold;
 
-    public float NormalizedSpeed => _stats.MaxSpeed > 0f ? GetCurrentSpeed() / _stats.MaxSpeed : 0f;
+    public float NormalizedSpeed => _configuration != null && _configuration.MaxSpeed > 0f ? GetCurrentSpeed() / _configuration.MaxSpeed : 0f;
 
     private void Awake()
     {
         _overheatTracker = GetComponent<OverheatTracker>();
         _mover = GetComponent<Mover>();
-        _mover.Configure(_stats);
+        _configuration = new RacerConfiguration(_stats);
+        _mover.Configure(_configuration);
         _roadNavigator = GetComponent<RoadNavigator>();
     }
 
@@ -53,13 +56,21 @@ public class Racer : MonoBehaviour
         return _mover.GetCurrentSpeed();
     }
 
-    public void Prepare(RoadPath path, Vector3 position, Quaternion rotation)
+    public void Prepare(RoadPath path, RacerDefinition definition)
     {
         IsFinished = false;
-        _mover.TeleportTo(position, rotation);
+        _configuration = definition.Stats;
+        _mover.Configure(_configuration);
+        _roadNavigator.Configure(definition.Navigation);
+        _mover.TeleportTo(definition.Position, definition.Rotation);
         _roadNavigator.SetPath(path);
         _overheatTracker.ResetOverheat();
         RaceRestarted?.Invoke();
+    }
+
+    public RacerDefinition CaptureDefinition(Vector3 position, Quaternion rotation)
+    {
+        return new RacerDefinition(new RacerConfiguration(_stats), _roadNavigator.CaptureConfiguration(), position, rotation);
     }
 
     public void StopMovement()
@@ -74,7 +85,7 @@ public class Racer : MonoBehaviour
 
         IsFinished = true;
         _overheatTracker.ResetOverheat();
-        _mover.SetDrag(_stats.FinishDrag);
+        _mover.SetDrag(_configuration.FinishDrag);
         _mover.MoveTowards(_roadNavigator.TargetPosition, false, 0f);
         Finished?.Invoke();
     }
@@ -86,7 +97,7 @@ public class Racer : MonoBehaviour
 
         if (IsFinished == false)
         {
-            _overheatTracker.Tick(GetCurrentSpeed(), _stats);
+            _overheatTracker.Tick(GetCurrentSpeed(), _configuration);
 
             if (_overheatTracker.IsExploded)
                 return;

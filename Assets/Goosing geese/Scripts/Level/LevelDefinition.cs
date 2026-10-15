@@ -2,20 +2,25 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelDefinition
+public sealed class LevelDefinition
 {
-    public LevelDefinition(int seed, RoadPieceType[] layout, RoadSettings settings, Vector3 startPosition, Quaternion startRotation)
+    public LevelDefinition(int seed, RoadPieceType[] layout, RoadConfiguration settings, Vector3 startPosition, Quaternion startRotation, RacerDefinition racer)
     {
+        if (layout == null || layout.Length != settings.RoadPieceCount + settings.FinishRunoutPieces)
+            throw new ArgumentException("Layout length must match the captured road configuration.");
+
         Seed = seed;
         Layout = Array.AsReadOnly((RoadPieceType[])layout.Clone());
-        Settings = settings;
+        Settings = settings ?? throw new ArgumentNullException(nameof(settings));
         StartPosition = startPosition;
         StartRotation = startRotation;
+        Racer = racer ?? throw new ArgumentNullException(nameof(racer));
     }
 
     public int Seed { get; }
     public IReadOnlyList<RoadPieceType> Layout { get; }
-    public RoadSettings Settings { get; }
+    public RoadConfiguration Settings { get; }
     public Vector3 StartPosition { get; }
     public Quaternion StartRotation { get; }
+    public RacerDefinition Racer { get; }
 }

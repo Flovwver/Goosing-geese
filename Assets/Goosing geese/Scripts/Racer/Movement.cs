@@ -24,7 +24,7 @@ public class Movement
         _rigidbody.linearDamping = Mathf.Max(0f, drag);
     }
 
-    public void Apply(Vector3 direction, float currentSpeed, bool isAccelerate, float slipFactor, RacerStats stats, float deltaTime)
+    public void Apply(Vector3 direction, float currentSpeed, bool isAccelerate, float slipFactor, RacerConfiguration stats, float deltaTime)
     {
         _slipFactor = Mathf.MoveTowards(_slipFactor, Mathf.Clamp01(slipFactor),
             Mathf.Max(0f, stats.GripTransitionSpeed) * deltaTime);
