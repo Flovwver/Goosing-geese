@@ -14,6 +14,9 @@ public class GameScreens : MonoBehaviour
     [SerializeField] private Racer _player;
     [SerializeField] private OpponentSpawner _opponents;
 
+    private RacerOverheatView _overheatView;
+    private bool _waitingForExplosion;
+    private GameObject _pedal;
     private RectTransform _safeArea;
     private GameObject _panel;
     private Text _status;
@@ -24,12 +27,16 @@ public class GameScreens : MonoBehaviour
     private void Awake()
     {
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _overheatView = _player.GetComponentInChildren<RacerOverheatView>();
         BuildCanvas();
     }
 
     private void OnEnable()
     {
         _race.StateChanged += OnStateChanged;
+
+        if (_overheatView != null)
+            _overheatView.ExplosionCompleted += OnExplosionCompleted;
     }
 
     private void Start()
@@ -43,6 +50,7 @@ public class GameScreens : MonoBehaviour
         _safeArea.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
         _safeArea.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
         bool showNavigation = _panel == null && _race.State != RaceState.Result;
+        _pedal.SetActive(_race.State != RaceState.Result);
         _gear.SetActive(showNavigation);
         _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
         string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
@@ -63,6 +71,10 @@ public class GameScreens : MonoBehaviour
     private void OnDisable()
     {
         _race.StateChanged -= OnStateChanged;
+        _waitingForExplosion = false;
+
+        if (_overheatView != null)
+            _overheatView.ExplosionCompleted -= OnExplosionCompleted;
     }
 
     private static RectTransform Rect(string name, Transform parent, Vector2 min, Vector2 max)
@@ -132,6 +144,7 @@ public class GameScreens : MonoBehaviour
         bar.localScale = Vector3.one;
         Place(bar, new Vector2(0.22f, 0.914f), new Vector2(0.91f, 0.954f));
         PedalButton pedal = FindFirstObjectByType<PedalButton>();
+        _pedal = pedal.gameObject;
         RectTransform pedalRect = pedal.GetComponent<RectTransform>();
         pedalRect.SetParent(_safeArea, false);
         pedalRect.localScale = Vector3.one;
@@ -182,7 +195,12 @@ public class GameScreens : MonoBehaviour
 
         var rect = Rect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
         _panel = rect.gameObject;
-        _panel.AddComponent<Image>().color = PanelColor;
+
+        if (page == "result")
+            Place(rect, new Vector2(0.06f, 0.025f), new Vector2(0.94f, 0.48f));
+        else
+            _panel.AddComponent<Image>().color = PanelColor;
+
         var layout = _panel.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(24, 24, 24, 24);
         layout.spacing = 12f;
@@ -206,14 +224,30 @@ public class GameScreens : MonoBehaviour
 
     private void OnStateChanged(RaceState state)
     {
+        _waitingForExplosion = false;
+
         if (state == RaceState.Waiting)
             ShowMenu();
         else if (state == RaceState.Racing)
             ClosePanel();
         else if (state == RaceState.Paused)
             ShowPause();
+        else if (_race.Outcome == RaceOutcome.Overheated && _overheatView != null && _overheatView.isActiveAndEnabled)
+        {
+            ClosePanel();
+            _waitingForExplosion = true;
+        }
         else
             ShowResult();
+    }
+
+    private void OnExplosionCompleted()
+    {
+        if (_waitingForExplosion && _race.State == RaceState.Result)
+        {
+            _waitingForExplosion = false;
+            ShowResult();
+        }
     }
 
     private void ShowMenu()
@@ -242,10 +276,33 @@ public class GameScreens : MonoBehaviour
         Label(_panel.transform, "+" + _race.LastReward + L(" очков", " points"), 30);
 
         if (_race.PlayerWon)
-            MakeButton(_panel.transform, L("Следующий уровень", "Next level"), _race.NextLevel);
+            MakeResultButton(L("Следующий уровень", "Next level"), _race.NextLevel);
 
-        MakeButton(_panel.transform, L("Повторить трассу", "Retry track"), _race.Retry);
-        MakeButton(_panel.transform, L("В главное меню", "Main menu"), _race.ReturnToMenu);
+        MakeResultButton(L("Повторить трассу", "Retry track"), _race.Retry);
+        MakeResultButton(L("В главное меню", "Main menu"), _race.ReturnToMenu);
+
+        foreach (Text label in _panel.GetComponentsInChildren<Text>())
+        {
+            if (label.GetComponentInParent<Button>() == null)
+            {
+                var outline = label.gameObject.AddComponent<Outline>();
+                outline.effectColor = Color.black;
+                outline.effectDistance = new Vector2(2f, -2f);
+            }
+        }
+    }
+
+    private void MakeResultButton(string text, Action action)
+    {
+        Button button = MakeButton(_panel.transform, text, action);
+        button.GetComponent<Image>().color = new Color(1f, 0.79f, 0.28f);
+        button.GetComponent<LayoutElement>().preferredHeight = 80f;
+        Text label = button.GetComponentInChildren<Text>();
+        label.color = new Color(0.05f, 0.09f, 0.12f);
+        label.fontStyle = FontStyle.Bold;
+        var outline = button.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0.05f, 0.09f, 0.12f);
+        outline.effectDistance = new Vector2(3f, -3f);
     }
 
     private void OpenSettings()
