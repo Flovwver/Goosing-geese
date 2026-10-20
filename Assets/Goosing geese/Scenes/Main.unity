@@ -1234,6 +1234,8 @@ MonoBehaviour:
   _racer: {fileID: 265920761}
   _piecesPerLevel: 2
   _maximumPieces: 60
+  _minimumRoadSpacing: 24
+  _layoutValidationAttempts: 20
 --- !u!4 &1081964705
 Transform:
   m_ObjectHideFlags: 0
@@ -1401,6 +1403,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OpponentSpawner
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
+  _opponentPrefab: {fileID: 5334310155782183356, guid: e7400662bbc0e40429d30d03231ca0b9, type: 3}
   _vehiclePrefabs:
   - {fileID: 118780, guid: 2204ec8a2d6a8fe45900f91c3ffb2300, type: 3}
   - {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
@@ -2250,6 +2253,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeatFeedback
   _particleMaterial: {fileID: 2100000, guid: adeafb5b76314aa479789bb417f3a452, type: 2}
+--- !u!114 &543450651709855099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1273300575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e051dd3e62aa91344ad52be6b1399865, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RacerAppearance
+  _modelLength: 5
 --- !u!1001 &1464469445466606345
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2408,6 +2424,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4736223883380996564, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 543450651709855098}
+    - targetCorrespondingSourceObject: {fileID: 4736223883380996564, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 543450651709855099}
   m_SourcePrefab: {fileID: 100100000, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
 --- !u!1001 &4131863152634964888
 PrefabInstance:

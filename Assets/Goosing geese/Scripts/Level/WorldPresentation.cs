@@ -3,7 +3,6 @@ using UnityEngine;
 public class WorldPresentation : MonoBehaviour
 {
     private const int AppearanceCount = 3;
-    private const float VehicleLength = 5f;
     [SerializeField] private Level _level;
     [SerializeField] private Racer _player;
     [SerializeField] private RaceController _race;
@@ -13,8 +12,7 @@ public class WorldPresentation : MonoBehaviour
     [SerializeField, Min(1f)] private float _roadClearance = 20f;
     [SerializeField, Min(1f)] private float _groundSize = 10000f;
 
-    private MeshRenderer[] _playerRenderers;
-    private GameObject _model;
+    private RacerAppearance _appearance;
     private GameObject _root;
     private RoadPath _path;
     private Material _groundMaterial;
@@ -23,7 +21,7 @@ public class WorldPresentation : MonoBehaviour
 
     private void Awake()
     {
-        _playerRenderers = _player.GetComponentsInChildren<MeshRenderer>(true);
+        _appearance = _player.GetComponent<RacerAppearance>();
     }
 
     private void OnEnable()
@@ -35,18 +33,6 @@ public class WorldPresentation : MonoBehaviour
     private void Start()
     {
         ApplyAppearance();
-    }
-
-    private void LateUpdate()
-    {
-        if (_race.Progress.Appearance < AppearanceCount)
-            return;
-
-        foreach (MeshRenderer renderer in _playerRenderers)
-            renderer.enabled = false;
-
-        if (_model != null)
-            _model.SetActive(_player.GetComponent<OverheatTracker>().IsExploded == false);
     }
 
     private void OnDisable()
@@ -64,46 +50,12 @@ public class WorldPresentation : MonoBehaviour
     public void ApplyAppearance()
     {
         int appearance = Mathf.Clamp(_race.Progress.Appearance, 0, AppearanceOptions - 1);
-
-        if (_model != null)
-        {
-            _model.SetActive(false);
-            Destroy(_model);
-        }
-
-        foreach (MeshRenderer renderer in _playerRenderers)
-            renderer.enabled = appearance < AppearanceCount;
-
         Color[] colors = { Color.white, new Color(0.65f, 0.85f, 1f), new Color(1f, 0.65f, 0.75f) };
 
         if (appearance < AppearanceCount)
-        {
-            foreach (MeshRenderer renderer in _playerRenderers)
-                renderer.material.color = colors[appearance];
-
-            return;
-        }
-
-        GameObject prefab = _vehicles[appearance - AppearanceCount];
-
-        if (prefab == null)
-            return;
-
-        _model = Instantiate(prefab, _player.transform);
-        _model.transform.localPosition = Vector3.zero;
-        _model.transform.localRotation = Quaternion.identity;
-        Bounds bounds = new Bounds(_model.transform.position, Vector3.zero);
-
-        foreach (Renderer renderer in _model.GetComponentsInChildren<Renderer>())
-            bounds.Encapsulate(renderer.bounds);
-
-        float length = Mathf.Max(bounds.size.x, bounds.size.z);
-
-        if (length > Mathf.Epsilon)
-            _model.transform.localScale *= VehicleLength / length;
-
-        foreach (Collider collider in _model.GetComponentsInChildren<Collider>())
-            collider.enabled = false;
+            _appearance.ShowOriginal(colors[appearance]);
+        else
+            _appearance.ShowModel(_vehicles[appearance - AppearanceCount]);
     }
 
     public void Rebuild()
