@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RoadSafety : MonoBehaviour
 {
+    private const float GuidanceSectionLength = 5f;
+
     [SerializeField] private Level _level;
     [SerializeField] private Racer _player;
     [SerializeField] private RaceController _race;
@@ -60,36 +63,62 @@ public class RoadSafety : MonoBehaviour
             Destroy(_lines);
         }
 
-        _lines = new GameObject("Speed guidance");
+        _lines = null;
         LineRenderer source = _level.GetComponent<LineRenderer>();
+        source.enabled = false;
+
+        if (settings.ShowPathLine == false)
+            return;
+
+        _lines = new GameObject("Speed guidance");
+        var points = new List<Vector3>();
+        Color color = Color.clear;
+        Vector3 heightOffset = Vector3.up * settings.PathLineHeight;
         float start = 0f;
-        const float sectionLength = 5f;
 
         for (int segment = 0; segment < path.Curve.SegmentCount; segment++)
         {
             float end = path.Curve.GetSegmentEndDistance(segment);
 
-            for (float distance = start; distance < end; distance += sectionLength)
+            for (float distance = start; distance < end; distance += GuidanceSectionLength)
             {
-                var go = new GameObject("Speed section");
-                go.transform.SetParent(_lines.transform);
-                var line = go.AddComponent<LineRenderer>();
-                line.sharedMaterial = source.sharedMaterial;
-                line.startWidth = settings.PathLineWidth;
-                line.endWidth = settings.PathLineWidth;
-                line.startColor = GetRecommendedColor(segment, distance);
-                line.endColor = line.startColor;
-                line.positionCount = 2;
-                line.SetPosition(0, path.Curve.GetPointAtDistance(distance) + Vector3.up * settings.PathLineHeight);
-                line.SetPosition(1, path.Curve.GetPointAtDistance(Mathf.Min(end, distance + sectionLength)) + Vector3.up * settings.PathLineHeight);
-                line.enabled = settings.ShowPathLine;
-                line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                Color sectionColor = GetRecommendedColor(segment, distance);
+
+                if (points.Count > 0 && sectionColor != color)
+                {
+                    AddGuidanceLine(points, color, settings, source.sharedMaterial);
+                    points.Clear();
+                }
+
+                color = sectionColor;
+
+                if (points.Count == 0)
+                    points.Add(path.Curve.GetPointAtDistance(distance) + heightOffset);
+
+                points.Add(path.Curve.GetPointAtDistance(Mathf.Min(end, distance + GuidanceSectionLength)) + heightOffset);
             }
 
             start = end;
         }
 
-        source.enabled = false;
+        if (points.Count > 1)
+            AddGuidanceLine(points, color, settings, source.sharedMaterial);
+    }
+
+    private void AddGuidanceLine(List<Vector3> points, Color color, RoadSettings settings, Material material)
+    {
+        var go = new GameObject("Speed section");
+        go.transform.SetParent(_lines.transform, false);
+        var line = go.AddComponent<LineRenderer>();
+        line.sharedMaterial = material;
+        line.startWidth = settings.PathLineWidth;
+        line.endWidth = settings.PathLineWidth;
+        line.startColor = color;
+        line.endColor = color;
+        line.positionCount = points.Count;
+        line.SetPositions(points.ToArray());
+        line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        line.receiveShadows = false;
     }
 
     private void OnRestarted()
