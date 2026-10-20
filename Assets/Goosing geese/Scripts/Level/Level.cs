@@ -19,6 +19,8 @@ public class Level : MonoBehaviour
     private RoadLayoutGeometry _layoutGeometry;
     private RoadPath _roadPath;
 
+    private List<RoadPiece> _builtPieces;
+    private bool _restoreAfterReload;
     private RoadPieceType[] _currentLayout;
     private int _mainPieceCount;
     private int _curveSamples;
@@ -30,15 +32,29 @@ public class Level : MonoBehaviour
 
     private void Awake()
     {
-        _roadLayoutGenerator = new RoadLayoutGenerator(_settings.AvailablePieceTypes, _settings.MaxGenerationAttempts);
-        var prefabs = BuildPiecePrefabsByType();
-        _roadBuilder = new RoadBuilder(prefabs);
-        _layoutGeometry = new RoadLayoutGeometry(prefabs);
+        InitializeComponents();
+    }
+
+    private void OnEnable()
+    {
+        InitializeComponents();
+        _restoreAfterReload = _roadPath == null && _builtPieces.Count > 0;
     }
 
     private void Start()
     {
         BuildRoad();
+    }
+
+    private void Update()
+    {
+        if (_restoreAfterReload == false)
+            return;
+
+        _restoreAfterReload = false;
+        _roadPath = new RoadPath(_builtPieces);
+        ConfigurePath();
+        _racer.ResetRace();
     }
 
     private void OnDrawGizmos()
@@ -62,6 +78,7 @@ public class Level : MonoBehaviour
 
     public void CreateLevel(int seed)
     {
+        InitializeComponents();
         Seed = seed;
         RaceController race = GetComponent<RaceController>();
         int level = race != null ? race.Progress.Level : 1;
@@ -118,12 +135,33 @@ public class Level : MonoBehaviour
 
     private void BuildCurrentLayout()
     {
+        InitializeComponents();
+        _restoreAfterReload = false;
         _roadPath = _roadBuilder.Build(_currentLayout, _roadStartPoint);
+        ConfigurePath();
+    }
+
+    private void ConfigurePath()
+    {
         _roadPath.SetFinishWaypoint(_mainPieceCount);
 
         _roadPath.BuildCurve(_curveSamples);
         _racer.SetPath(_roadPath);
         PathBuilt?.Invoke(_roadPath, _settings);
+    }
+
+    private void InitializeComponents()
+    {
+        if (_roadBuilder != null)
+            return;
+
+        if (_builtPieces == null)
+            _builtPieces = new List<RoadPiece>();
+
+        _roadLayoutGenerator = new RoadLayoutGenerator(_settings.AvailablePieceTypes, _settings.MaxGenerationAttempts);
+        var prefabs = BuildPiecePrefabsByType();
+        _roadBuilder = new RoadBuilder(prefabs, _builtPieces);
+        _layoutGeometry = new RoadLayoutGeometry(prefabs);
     }
 
     private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType()

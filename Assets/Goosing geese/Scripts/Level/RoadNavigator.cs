@@ -49,7 +49,7 @@ public class RoadNavigator : MonoBehaviour
 
     public void UpdateTarget(Vector3 currentPosition)
     {
-        if (IsPathCompleted)
+        if (IsPathCompleted || _path == null || _path.Curve == null)
             return;
 
         RoadCurve curve = _path.Curve;

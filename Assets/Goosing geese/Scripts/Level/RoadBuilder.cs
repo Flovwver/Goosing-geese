@@ -4,11 +4,12 @@ using UnityEngine;
 public class RoadBuilder
 {
     private readonly Dictionary<RoadPieceType, RoadPiece> _piecePrefabsByType;
-    private readonly List<RoadPiece> _placedPieces = new List<RoadPiece>();
+    private readonly List<RoadPiece> _placedPieces;
 
-    public RoadBuilder(Dictionary<RoadPieceType, RoadPiece> piecePrefabsByType)
+    public RoadBuilder(Dictionary<RoadPieceType, RoadPiece> piecePrefabsByType, List<RoadPiece> placedPieces)
     {
         _piecePrefabsByType = piecePrefabsByType;
+        _placedPieces = placedPieces;
     }
 
     public RoadPath Build(RoadPieceType[] layout, Transform startPoint)

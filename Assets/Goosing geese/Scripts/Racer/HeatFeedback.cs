@@ -11,7 +11,7 @@ public class HeatFeedback : MonoBehaviour
     private const float DropSize = 0.18f;
     private static readonly int ColorProperty = Shader.PropertyToID("_Color");
 
-    private readonly List<Material> _replacementMaterials = new List<Material>();
+    private List<Material> _replacementMaterials = new List<Material>();
     [SerializeField] private Material _particleMaterial;
     private Racer _racer;
     private MeshRenderer[] _renderers;
@@ -59,6 +59,9 @@ public class HeatFeedback : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_properties == null)
+            _properties = new MaterialPropertyBlock();
+
         _racer.OverheatProgressChanged += OnProgress;
         _racer.RaceRestarted += OnRestarted;
     }

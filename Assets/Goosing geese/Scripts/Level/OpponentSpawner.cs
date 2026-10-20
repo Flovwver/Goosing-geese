@@ -24,6 +24,9 @@ public class OpponentSpawner : MonoBehaviour
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += OnRestarted;
         _race.RaceEnded += OnRaceEnded;
+
+        if (_opponent != null)
+            _opponent.Finished += OnOpponentFinished;
     }
 
     private void Start()
