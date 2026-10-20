@@ -137,11 +137,6 @@ public class GameScreens : MonoBehaviour
         pedalRect.SetParent(_safeArea, false);
         pedalRect.localScale = Vector3.one;
         GameUiFactory.Place(pedalRect, new Vector2(0.36f, 0.055f), new Vector2(0.64f, 0.215f));
-        pedal.GetComponent<Image>().color = new Color(1f, 0.79f, 0.28f);
-        TMPro.TMP_Text pedalLabel = pedal.GetComponentInChildren<TMPro.TMP_Text>();
-        pedalLabel.text = L("ГАЗ", "GAS");
-        pedalLabel.fontSize = 42f;
-        pedalLabel.color = new Color(0.1f, 0.14f, 0.14f);
     }
 
     private void ShowPanel(string title, string page)

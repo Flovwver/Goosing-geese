@@ -3,14 +3,13 @@ using UnityEngine;
 
 public class WorldPresentation : MonoBehaviour
 {
-    private const int AppearanceCount = 3;
     private readonly Dictionary<Material, Material> _compatibleMaterials = new Dictionary<Material, Material>();
 
     [SerializeField] private Level _level;
     [SerializeField] private Racer _player;
     [SerializeField] private RaceController _race;
     [SerializeField] private GameObject[] _scenery;
-    [SerializeField] private GameObject[] _vehicles;
+    [SerializeField] private RacerAppearanceCatalog _appearances;
     [SerializeField, Min(1f)] private float _decorationSpacing = 45f;
     [SerializeField, Min(1f)] private float _roadClearance = 20f;
     [SerializeField, Min(1f)] private float _groundSize = 10000f;
@@ -22,7 +21,7 @@ public class WorldPresentation : MonoBehaviour
     private RoadPath _path;
     private Material _groundMaterial;
 
-    public int AppearanceOptions => AppearanceCount + (_vehicles != null ? _vehicles.Length : 0);
+    public int AppearanceOptions => _appearances.Count;
 
     private void Awake()
     {
@@ -66,13 +65,15 @@ public class WorldPresentation : MonoBehaviour
 
     public void ApplyAppearance()
     {
-        int appearance = Mathf.Clamp(_race.Progress.Appearance, 0, AppearanceOptions - 1);
-        Color[] colors = { Color.white, new Color(0.65f, 0.85f, 1f), new Color(1f, 0.65f, 0.75f) };
+        RacerAppearanceCatalog.Entry appearance = _appearances.GetEntry(_race.Progress.Appearance);
 
-        if (appearance < AppearanceCount)
-            _appearance.ShowOriginal(colors[appearance]);
+        if (appearance == null)
+            return;
+
+        if (appearance.Model != null)
+            _appearance.ShowModel(appearance.Model);
         else
-            _appearance.ShowModel(_vehicles[appearance - AppearanceCount]);
+            _appearance.ShowOriginal(appearance.Tint);
     }
 
     public void Rebuild()

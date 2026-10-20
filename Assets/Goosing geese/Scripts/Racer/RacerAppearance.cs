@@ -31,11 +31,11 @@ public class RacerAppearance : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_replacement == null)
-            return;
+        bool visible = _overheat == null || _overheat.IsExploded == false;
+        SetOriginalVisibility(_replacement == null && visible);
 
-        SetOriginalVisibility(false);
-        _replacement.SetActive(_overheat == null || _overheat.IsExploded == false);
+        if (_replacement != null)
+            _replacement.SetActive(visible);
     }
 
     public void ShowOriginal(Color tint)

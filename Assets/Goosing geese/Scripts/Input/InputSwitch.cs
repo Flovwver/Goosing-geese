@@ -11,6 +11,8 @@ public class InputSwitch : MonoBehaviour
     private bool _isPaused;
     private RaceController _race;
 
+    public bool IsThrottlePressed => _pedalIsPressed || _keyboardIsPressed;
+
     private void Awake()
     {
         _race = FindFirstObjectByType<RaceController>();
@@ -29,14 +31,14 @@ public class InputSwitch : MonoBehaviour
 
         if (_race != null)
         {
-            if (_race.State == RaceState.Waiting && (_pedalIsPressed || _keyboardIsPressed))
+            if (_race.State == RaceState.Waiting && IsThrottlePressed)
                 _race.StartRace();
 
             if (_race.State != RaceState.Racing)
                 return;
         }
 
-        bool isAccelerating = _pedalIsPressed || _keyboardIsPressed;
+        bool isAccelerating = IsThrottlePressed;
 
         if (isAccelerating == false)
         {

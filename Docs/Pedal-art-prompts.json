@@ -1,0 +1,25 @@
+{
+  "tool": "Built-in image_gen",
+  "transparent_background": true,
+  "common_prompt": "Use case: stylized-concept. Asset type: a single production-ready transparent PNG sprite for a mobile low-poly goose racing game's accelerator control. Style: polished chunky stylized 3D game icon, clean low-poly forms, slightly rounded bevels, crisp readable silhouette, warm soft upper-left lighting, restrained shading, dark edge definition. Composition: ONE isolated object centered, mostly vertical, viewed from above with a slight frontal perspective, toe/top pointing straight to image top, heel/hinge at bottom center, visually symmetric and front-facing with no diagonal yaw. Fill 80 percent of canvas height, leave transparent margin around every edge. Genuine alpha transparency, no background, no floor, no rectangle behind the object, no lettering, no logos, no arrows, no border, no detached cast shadow. Depict the relaxed raised state; it will be animated around its bottom hinge by the game. ",
+  "assets": [
+    {
+      "file": "goose-foot.png",
+      "subject": "Subject: a cute golden-orange goose webbed foot, three broad rounded forward toes joined by unmistakable triangular webbing, small raised ankle at the bottom, subtle orange-red creases and warm yellow highlights. No human shoe, no mechanical pedal, no bird body, no leg extending outside the image. Distinct webbed goose foot silhouette, friendly and tactile."
+    },
+    {
+      "file": "car-pedal.png",
+      "subject": "Subject: a modern passenger car accelerator pedal, tall slim rounded rectangular charcoal-black rubber pad on a small dark metal hinge at bottom, several deep horizontal rubber grooves, slim silver beveled rim. A sleek everyday car pedal, no foot or shoe, no cockpit, no surrounding car parts."
+    },
+    {
+      "file": "tractor-pedal.png",
+      "subject": "Subject: a sturdy vintage tractor accelerator pedal, broad heavy olive-green cast-metal pedal with aged warm steel edges and thick dark brown ribbed rubber tread, a visible stout hinge at bottom. Chunky agricultural mechanical design distinctly different from a sleek car pedal. A touch of restrained wear, no dirt particles, no foot or shoe, no vehicle or background."
+    },
+    {
+      "file": "goat-hoof.png",
+      "subject": "Subject: a cute stylized goat cloven hoof control, two broad dark charcoal-brown rounded hoof tips split by a clear central notch, short cream-colored furry ankle cuff at the bottom, warm grey edge highlights. Symmetric two-toed hoof seen from above, friendly low-poly toy-game look, unmistakably different from a bird webbed foot, no whole goat, no leg extending outside image, no mechanical pedal."
+    }
+  ],
+  "asset_directory": "Assets/Goosing geese/Art/Pedals",
+  "animation": "PedalView transforms the original sprite around its bottom pivot; no separate pressed bitmap."
+}
