@@ -12,8 +12,13 @@ public class Level : MonoBehaviour
     private RoadLayoutGenerator _roadLayoutGenerator;
     private RoadBuilder _roadBuilder;
     private RoadPath _roadPath;
+    private RoadPieceType[] _currentLayout;
+    private int _mainPieceCount;
+    private int _curveSamples;
 
     public event Action<RoadPath, RoadSettings> PathBuilt;
+
+    public int Seed { get; private set; }
 
     private void Awake()
     {
@@ -42,21 +47,41 @@ public class Level : MonoBehaviour
 
     public void BuildRoad()
     {
+        CreateLevel(Environment.TickCount);
+    }
+
+    public void CreateLevel(int seed)
+    {
+        Seed = seed;
+        _mainPieceCount = Mathf.Max(1, _settings.RoadPieceCount);
+        _curveSamples = Mathf.Max(1, _settings.CurveSamplesPerSegment);
         int runoutPieces = Mathf.Max(1, _settings.FinishRunoutPieces);
-        RoadPieceType[] roadLayout = _roadLayoutGenerator.Generate(_settings.RoadPieceCount, runoutPieces);
-        int mainPieceCount = Mathf.Max(0, roadLayout.Length - runoutPieces);
+        UnityEngine.Random.State randomState = UnityEngine.Random.state;
 
-        _roadPath = _roadBuilder.Build(roadLayout, _roadStartPoint);
-        _roadPath.SetFinishWaypoint(mainPieceCount);
+        try
+        {
+            UnityEngine.Random.InitState(seed);
+            _currentLayout = _roadLayoutGenerator.Generate(_mainPieceCount, runoutPieces);
+        }
+        finally
+        {
+            UnityEngine.Random.state = randomState;
+        }
 
-        _roadPath.BuildCurve(_settings.CurveSamplesPerSegment);
-        _racer.SetPath(_roadPath);
-        PathBuilt?.Invoke(_roadPath, _settings);
+        if (_currentLayout.Length == 0)
+        {
+            _currentLayout = new RoadPieceType[_mainPieceCount + runoutPieces];
+
+            for (int i = 0; i < _currentLayout.Length; i++)
+                _currentLayout[i] = RoadPieceType.Straight;
+        }
+
+        BuildCurrentLayout();
     }
 
     public void RestartRace()
     {
-        BuildRoad();
+        BuildCurrentLayout();
         _racer.ResetRace();
     }
 
@@ -65,6 +90,16 @@ public class Level : MonoBehaviour
         path = _roadPath;
         settings = _settings;
         return path != null && path.Curve != null;
+    }
+
+    private void BuildCurrentLayout()
+    {
+        _roadPath = _roadBuilder.Build(_currentLayout, _roadStartPoint);
+        _roadPath.SetFinishWaypoint(_mainPieceCount);
+
+        _roadPath.BuildCurve(_curveSamples);
+        _racer.SetPath(_roadPath);
+        PathBuilt?.Invoke(_roadPath, _settings);
     }
 
     private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType()
