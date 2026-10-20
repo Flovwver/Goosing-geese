@@ -8,12 +8,16 @@ public class Speedometer : MonoBehaviour
     [SerializeField] private Racer _racer;
     [SerializeField] private Slider _greenZoneSlider;
     [SerializeField] private Slider _yellowZoneSlider;
+    [SerializeField] private Text _maximumSpeedLabel;
 
     private Slider _slider;
+    private float _displayedMaximumSpeed;
+    private bool _hasDisplayedMaximumSpeed;
 
     private void OnEnable()
     {
         _slider = GetComponent<Slider>();
+        _hasDisplayedMaximumSpeed = false;
     }
 
     private void Update()
@@ -29,5 +33,21 @@ public class Speedometer : MonoBehaviour
 
         float speed = Application.isPlaying ? Mathf.Clamp01(_racer.NormalizedSpeed) : 0f;
         _slider.SetValueWithoutNotify(speed);
+        UpdateMaximumSpeed();
+    }
+
+    private void UpdateMaximumSpeed()
+    {
+        if (_maximumSpeedLabel == null)
+            return;
+
+        float maximumSpeed = _racer.MaxSpeed;
+
+        if (_hasDisplayedMaximumSpeed && Mathf.Approximately(_displayedMaximumSpeed, maximumSpeed))
+            return;
+
+        _displayedMaximumSpeed = maximumSpeed;
+        _hasDisplayedMaximumSpeed = true;
+        _maximumSpeedLabel.text = "MAX " + maximumSpeed.ToString("0.#");
     }
 }

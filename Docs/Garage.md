@@ -39,3 +39,7 @@ Wallet stores available purchase points; Points remains cumulative for the leade
 Checked save migration, purchase/reload without refunds, all four upgrade kinds, separate model records, shared goose colors, maximum levels, insufficient funds, invalid requests, blocked purchases during racing/pause, reward accounting, unchanged source settings, no compounded gains after model switching, garage input blocking, and script reload without duplicate garage canvases.
 
 Measured cooling at rates 1 and 2: the latter removes twice as much heat in the same frame, while heating in the red zone remains unchanged. Inspected the garage and starting-menu layouts in portrait Game view. Test profile and leaderboard values were restored after verification. No player build was created.
+
+## Speedometer maximum
+
+The right end of the speedometer displays MAX followed by the selected racer's current maximum speed, including purchased upgrades. It uses the same speed units as RacerStats and does not assume a km/h conversion. Verified 100 -> 105 after a purchase, 100 for another unmodified model, restoration on switching back, enlarged green slider with a fixed red threshold, and one correctly bound label after script reload.
