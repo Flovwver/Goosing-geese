@@ -87,7 +87,7 @@ public class InputSwitch : MonoBehaviour
         _keyboardIsPressed = false;
 
         if (_racer != null)
-            _racer.Cooldown();
+            _racer.ReleaseThrottle();
     }
 
     public void SetPedalPressed(bool isPressed)

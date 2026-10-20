@@ -94,6 +94,11 @@ public class Racer : MonoBehaviour
             Advance(false);
     }
 
+    public void ReleaseThrottle()
+    {
+        _mover.ReleaseThrottle();
+    }
+
     public void FinishRace()
     {
         if (IsFinished || _overheatTracker.IsExploded || _isPathCompletedRaised)

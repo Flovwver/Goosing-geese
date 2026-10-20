@@ -62,6 +62,11 @@ public class Mover : MonoBehaviour
         _isAccelerating = isAccelerating;
     }
 
+    public void ReleaseThrottle()
+    {
+        _isAccelerating = false;
+    }
+
     public void SetDrag(float drag)
     {
         _dragOverride = Mathf.Max(0f, drag);
