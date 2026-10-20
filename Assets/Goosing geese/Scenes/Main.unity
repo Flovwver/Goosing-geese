@@ -1401,6 +1401,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OpponentSpawner
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
+  _vehiclePrefabs:
+  - {fileID: 118780, guid: 2204ec8a2d6a8fe45900f91c3ffb2300, type: 3}
+  - {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
+  - {fileID: 172936, guid: bdad8bf555bf147508f695d9b026e205, type: 3}
 --- !u!114 &1081964710
 MonoBehaviour:
   m_ObjectHideFlags: 0

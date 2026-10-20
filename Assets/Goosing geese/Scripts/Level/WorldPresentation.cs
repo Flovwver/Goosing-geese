@@ -29,6 +29,7 @@ public class WorldPresentation : MonoBehaviour
     private void OnEnable()
     {
         _level.PathBuilt += OnPathBuilt;
+        _player.RaceRestarted += ApplyAppearance;
     }
 
     private void Start()
@@ -39,6 +40,7 @@ public class WorldPresentation : MonoBehaviour
     private void OnDisable()
     {
         _level.PathBuilt -= OnPathBuilt;
+        _player.RaceRestarted -= ApplyAppearance;
     }
 
     private void OnDestroy()
