@@ -1208,6 +1208,7 @@ GameObject:
   - component: {fileID: 1081964709}
   - component: {fileID: 1081964711}
   - component: {fileID: 1081964710}
+  - component: {fileID: 1081964712}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -1435,6 +1436,24 @@ MonoBehaviour:
   _decorationSpacing: 45
   _roadClearance: 20
   _groundSize: 10000
+--- !u!114 &1081964712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef6693e62586224290158dd2186e30a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadSafety
+  _level: {fileID: 1081964704}
+  _player: {fileID: 265920761}
+  _race: {fileID: 1081964708}
+  _previewDistance: 45
+  _roadHalfWidth: 12
+  _offRoadGraceTime: 0.75
 --- !u!1 &1242738827
 GameObject:
   m_ObjectHideFlags: 0
