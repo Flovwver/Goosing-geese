@@ -215,6 +215,7 @@ public class GameScreens : MonoBehaviour
             return;
 
         ShowPanel(L("Настройки", "Settings"), "settings");
+        AddNameField();
         AddVolume(L("Музыка", "Music"), _race.Progress.MusicVolume, value => _race.Progress.MusicVolume = value);
         AddVolume(L("Эффекты", "Effects"), _race.Progress.EffectsVolume, value => _race.Progress.EffectsVolume = value);
         MakeButton(_panel.transform, _race.Progress.English ? "Русский" : "English", () =>
@@ -224,6 +225,22 @@ public class GameScreens : MonoBehaviour
             OpenSettings();
         });
         MakeButton(_panel.transform, L("Назад", "Back"), Back);
+    }
+
+    private void AddNameField()
+    {
+        var rect = Rect("Player name", _panel.transform, Vector2.zero, Vector2.one);
+        rect.gameObject.AddComponent<Image>().color = ButtonColor;
+        rect.gameObject.AddComponent<LayoutElement>().preferredHeight = 55f;
+        var input = rect.gameObject.AddComponent<InputField>();
+        input.textComponent = Label(rect, "", 24);
+        input.characterLimit = 20;
+        input.text = _race.Progress.PlayerName;
+        input.onEndEdit.AddListener(value =>
+        {
+            _race.Progress.PlayerName = string.IsNullOrWhiteSpace(value) ? "Player" : value.Trim();
+            _race.Progress.Save();
+        });
     }
 
     private void AddVolume(string title, float value, Action<float> apply)
@@ -247,7 +264,19 @@ public class GameScreens : MonoBehaviour
     private void ShowLeaderboard()
     {
         ShowPanel(L("Локальный рекорд", "Local leaderboard"), "leaderboard");
-        Label(_panel.transform, L("1. Ты — ", "1. You — ") + _race.Progress.Points, 30);
+        LocalLeaderboard.Record(_race.Progress.PlayerName, _race.Progress.Points);
+        var entries = LocalLeaderboard.Read();
+        string rows = "";
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            bool currentPlayer = entries[i].Name == _race.Progress.PlayerName;
+
+            if (i < 5 || currentPlayer)
+                rows += LocalLeaderboard.GetRank(entries, i) + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "") + "\n";
+        }
+
+        Label(_panel.transform, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
         Label(_panel.transform, L("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
         MakeButton(_panel.transform, L("Назад", "Back"), Back);
     }

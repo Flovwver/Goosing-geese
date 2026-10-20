@@ -13,6 +13,7 @@ public class PlayerProgress
     private const int DailyWinReward = 75;
     private const int GlobalWinReward = 300;
 
+    public string PlayerName = "Player";
     public int Points;
     public int Level = 1;
     public int Wins;
@@ -110,6 +111,7 @@ public class PlayerProgress
 
     public void Save()
     {
+        LocalLeaderboard.Record(PlayerName, Points);
         PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(this));
         PlayerPrefs.Save();
     }
