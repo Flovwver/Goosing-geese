@@ -15,6 +15,8 @@ public class WorldPresentation : MonoBehaviour
     [SerializeField, Min(1f)] private float _roadClearance = 20f;
     [SerializeField, Min(1f)] private float _groundSize = 10000f;
 
+    private List<Material> _compatibleMaterialSources = new List<Material>();
+    private List<Material> _compatibleMaterialCopies = new List<Material>();
     private RacerAppearance _appearance;
     private GameObject _root;
     private RoadPath _path;
@@ -29,6 +31,15 @@ public class WorldPresentation : MonoBehaviour
 
     private void OnEnable()
     {
+        for (int index = 0; index < _compatibleMaterialSources.Count; index++)
+        {
+            Material source = _compatibleMaterialSources[index];
+            Material copy = _compatibleMaterialCopies[index];
+
+            if (source != null && copy != null)
+                _compatibleMaterials[source] = copy;
+        }
+
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += ApplyAppearance;
     }
@@ -46,7 +57,7 @@ public class WorldPresentation : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (Material material in _compatibleMaterials.Values)
+        foreach (Material material in _compatibleMaterialCopies)
             Destroy(material);
 
         if (_groundMaterial != null)
@@ -161,6 +172,8 @@ public class WorldPresentation : MonoBehaviour
                     compatible.mainTextureScale = source.mainTextureScale;
                     compatible.mainTextureOffset = source.mainTextureOffset;
                     _compatibleMaterials.Add(source, compatible);
+                    _compatibleMaterialSources.Add(source);
+                    _compatibleMaterialCopies.Add(compatible);
                 }
 
                 materials[i] = compatible;
