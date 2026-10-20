@@ -20,6 +20,7 @@ public class CameraFollower : MonoBehaviour
             return;
 
         _racer.Finished += OnRaceFinished;
+        _racer.Exploded += OnRaceFinished;
         _racer.RaceRestarted += OnRaceRestarted;
         _isFollowing = _racer.IsFinished == false;
     }
@@ -39,6 +40,7 @@ public class CameraFollower : MonoBehaviour
             return;
 
         _racer.Finished -= OnRaceFinished;
+        _racer.Exploded -= OnRaceFinished;
         _racer.RaceRestarted -= OnRaceRestarted;
     }
 

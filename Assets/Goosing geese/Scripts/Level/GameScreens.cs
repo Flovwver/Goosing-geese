@@ -119,7 +119,11 @@ public class GameScreens : MonoBehaviour
         var rect = Rect(text, parent, Vector2.zero, Vector2.one);
         rect.gameObject.AddComponent<Image>().color = ButtonColor;
         var button = rect.gameObject.AddComponent<Button>();
-        button.onClick.AddListener(() => action());
+        button.onClick.AddListener(() =>
+        {
+            GetComponent<GameAudio>().PlayClick();
+            action();
+        });
         rect.gameObject.AddComponent<LayoutElement>().preferredHeight = 68f;
         Label(rect, text, 25);
         return button;
