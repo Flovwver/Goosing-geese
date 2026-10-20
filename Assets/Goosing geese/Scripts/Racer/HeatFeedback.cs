@@ -12,6 +12,7 @@ public class HeatFeedback : MonoBehaviour
     private static readonly int ColorProperty = Shader.PropertyToID("_Color");
 
     private readonly List<Material> _replacementMaterials = new List<Material>();
+    [SerializeField] private Material _particleMaterial;
     private Racer _racer;
     private MeshRenderer[] _renderers;
     private Transform[] _drops;
@@ -44,10 +45,12 @@ public class HeatFeedback : MonoBehaviour
         {
             Material original = renderer.sharedMaterial;
 
-            if (original == null || (original.shader != null && original.shader.isSupported))
+            if (original == null)
                 continue;
 
-            var replacement = new Material(Shader.Find("Particles/Standard Unlit"));
+            var replacement = _particleMaterial != null
+                ? new Material(_particleMaterial)
+                : new Material(Shader.Find("Particles/Standard Unlit"));
             replacement.mainTexture = original.mainTexture;
             renderer.sharedMaterial = replacement;
             _replacementMaterials.Add(replacement);

@@ -2243,6 +2243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a1dcfe6392902e4cb209839b1c9ee7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeatFeedback
+  _particleMaterial: {fileID: 2100000, guid: adeafb5b76314aa479789bb417f3a452, type: 2}
 --- !u!1001 &1464469445466606345
 PrefabInstance:
   m_ObjectHideFlags: 0
