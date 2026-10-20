@@ -782,6 +782,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollower
   _target: {fileID: 543450651709855089}
   _settings: {fileID: 11400000, guid: ddaaa218710e4b57b58001fd38020a38, type: 2}
+  _menuFocusHeight: 3
 --- !u!1 &734657275
 GameObject:
   m_ObjectHideFlags: 0

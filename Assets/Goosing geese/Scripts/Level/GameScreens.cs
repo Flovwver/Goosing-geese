@@ -18,7 +18,8 @@ public class GameScreens : MonoBehaviour
     private GameObject _panel;
     private Text _status;
     private Font _font;
-    private Text _pauseLabel;
+    private GameObject _gear;
+    private GameObject _trophy;
 
     private void Awake()
     {
@@ -41,7 +42,9 @@ public class GameScreens : MonoBehaviour
         Rect safe = Screen.safeArea;
         _safeArea.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
         _safeArea.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
-        _pauseLabel.text = L("Пауза", "Pause");
+        bool showNavigation = _panel == null && _race.State != RaceState.Result;
+        _gear.SetActive(showNavigation);
+        _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
         string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
         string lead = "";
 
@@ -52,7 +55,9 @@ public class GameScreens : MonoBehaviour
             lead = playerDistance >= opponentDistance ? L("Ты впереди", "You are ahead") : L("Соперник впереди", "Rival is ahead");
         }
 
-        _status.text = L("УРОВЕНЬ ", "LEVEL ") + _race.GetComponent<Level>().Number + "   •   " + _race.Progress.Points + L(" очков", " points") + "\n" + state + "\n" + lead;
+        _status.text = _race.State == RaceState.Waiting
+            ? L("УРОВЕНЬ ", "LEVEL ") + _race.GetComponent<Level>().Number
+            : state + "\n" + lead;
     }
 
     private void OnDisable()
@@ -72,6 +77,14 @@ public class GameScreens : MonoBehaviour
         return rect;
     }
 
+    private static void Place(RectTransform rect, Vector2 min, Vector2 max)
+    {
+        rect.anchorMin = min;
+        rect.anchorMax = max;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+    }
+
     private string L(string russian, string english)
     {
         return _race.Progress.English ? english : russian;
@@ -89,17 +102,45 @@ public class GameScreens : MonoBehaviour
         scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
         scaler.matchWidthOrHeight = 0.5f;
         _safeArea = Rect("Safe area", root.transform, Vector2.zero, Vector2.one);
-        _status = Label(_safeArea, "", 26);
-        var statusRect = _status.rectTransform;
-        statusRect.anchorMin = new Vector2(0.04f, 0.84f);
-        statusRect.anchorMax = new Vector2(0.78f, 0.98f);
-        var settings = MakeButton(_safeArea, L("Пауза", "Pause"), OpenSettings);
-        _pauseLabel = settings.GetComponentInChildren<Text>();
-        var buttonRect = (RectTransform)settings.transform;
-        buttonRect.anchorMin = new Vector2(0.79f, 0.91f);
-        buttonRect.anchorMax = new Vector2(0.97f, 0.98f);
-        buttonRect.offsetMin = Vector2.zero;
-        buttonRect.offsetMax = Vector2.zero;
+        _status = Label(_safeArea, "", 23);
+        Place(_status.rectTransform, new Vector2(0.22f, 0.81f), new Vector2(0.9f, 0.88f));
+        _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
+        _trophy = MakeIconButton("Leaderboard", MenuSymbol.Trophy, ShowLeaderboard, new Vector2(0.81f, 0.045f), new Vector2(0.97f, 0.145f), new Color(1f, 0.77f, 0.28f));
+        ConfigureRaceHud();
+    }
+
+    private GameObject MakeIconButton(string name, MenuSymbol symbol, Action action, Vector2 min, Vector2 max, Color tint)
+    {
+        Button button = MakeButton(_safeArea, name, action);
+        Text label = button.GetComponentInChildren<Text>();
+        label.gameObject.SetActive(false);
+        Destroy(label.gameObject);
+        button.GetComponent<Image>().color = new Color(0.04f, 0.09f, 0.11f, 0.82f);
+        Place((RectTransform)button.transform, min, max);
+        var iconRect = Rect("Symbol", button.transform, Vector2.zero, Vector2.one);
+        var icon = iconRect.gameObject.AddComponent<MenuSymbolGraphic>();
+        icon.color = tint;
+        icon.SetSymbol(symbol);
+        return button.gameObject;
+    }
+
+    private void ConfigureRaceHud()
+    {
+        Speedometer speedometer = FindFirstObjectByType<Speedometer>();
+        RectTransform bar = speedometer.GetComponent<RectTransform>();
+        bar.SetParent(_safeArea, false);
+        bar.localScale = Vector3.one;
+        Place(bar, new Vector2(0.22f, 0.914f), new Vector2(0.91f, 0.954f));
+        PedalButton pedal = FindFirstObjectByType<PedalButton>();
+        RectTransform pedalRect = pedal.GetComponent<RectTransform>();
+        pedalRect.SetParent(_safeArea, false);
+        pedalRect.localScale = Vector3.one;
+        Place(pedalRect, new Vector2(0.36f, 0.055f), new Vector2(0.64f, 0.215f));
+        pedal.GetComponent<Image>().color = new Color(1f, 0.79f, 0.28f);
+        TMPro.TMP_Text pedalLabel = pedal.GetComponentInChildren<TMPro.TMP_Text>();
+        pedalLabel.text = L("ГАЗ", "GAS");
+        pedalLabel.fontSize = 42f;
+        pedalLabel.color = new Color(0.1f, 0.14f, 0.14f);
     }
 
     private Text Label(Transform parent, string text, int size)
@@ -139,7 +180,7 @@ public class GameScreens : MonoBehaviour
             Destroy(_panel);
         }
 
-        var rect = Rect("Panel " + page, _safeArea, new Vector2(0.06f, 0.22f), new Vector2(0.94f, 0.82f));
+        var rect = Rect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
         _panel = rect.gameObject;
         _panel.AddComponent<Image>().color = PanelColor;
         var layout = _panel.AddComponent<VerticalLayoutGroup>();
@@ -177,13 +218,7 @@ public class GameScreens : MonoBehaviour
 
     private void ShowMenu()
     {
-        ShowPanel("GOOSING GEESE", "menu");
-        Label(_panel.transform, L("Гони. Остывай. Побеждай.", "Race. Cool down. Win."), 24);
-        MakeButton(_panel.transform, L("Таблица рекордов", "Leaderboard"), ShowLeaderboard);
-        MakeButton(_panel.transform, L("Задания", "Quests"), ShowQuests);
-        MakeButton(_panel.transform, L("Внешний вид и окружение", "Appearance and scenery"), ShowAppearance);
-        MakeButton(_panel.transform, L("Настройки", "Settings"), OpenSettings);
-        Label(_panel.transform, L("Зажми педаль внизу экрана", "Hold the pedal below"), 24);
+        ClosePanel();
     }
 
     private void ShowPause()
@@ -231,6 +266,8 @@ public class GameScreens : MonoBehaviour
             _race.Progress.Save();
             OpenSettings();
         });
+        MakeButton(_panel.transform, L("Задания", "Quests"), ShowQuests);
+        MakeButton(_panel.transform, L("Персонаж и окружение", "Character and scenery"), ShowAppearance);
         MakeButton(_panel.transform, L("Назад", "Back"), Back);
     }
 
