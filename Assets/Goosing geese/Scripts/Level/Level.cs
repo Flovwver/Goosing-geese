@@ -12,6 +12,9 @@ public class Level : MonoBehaviour
     private RoadLayoutGenerator _roadLayoutGenerator;
     private RoadBuilder _roadBuilder;
     private RoadPath _roadPath;
+    [SerializeField, Min(0)] private int _piecesPerLevel = 2;
+    [SerializeField, Min(1)] private int _maximumPieces = 60;
+
     private RoadPieceType[] _currentLayout;
     private int _mainPieceCount;
     private int _curveSamples;
@@ -53,7 +56,9 @@ public class Level : MonoBehaviour
     public void CreateLevel(int seed)
     {
         Seed = seed;
-        _mainPieceCount = Mathf.Max(1, _settings.RoadPieceCount);
+        RaceController race = GetComponent<RaceController>();
+        int level = race != null ? race.Progress.Level : 1;
+        _mainPieceCount = Mathf.Clamp(_settings.RoadPieceCount + (level - 1) * _piecesPerLevel, 1, _maximumPieces);
         _curveSamples = Mathf.Max(1, _settings.CurveSamplesPerSegment);
         int runoutPieces = Mathf.Max(1, _settings.FinishRunoutPieces);
         UnityEngine.Random.State randomState = UnityEngine.Random.state;
