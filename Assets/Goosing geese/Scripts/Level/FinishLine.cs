@@ -27,13 +27,10 @@ public class FinishLine : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponentInParent<Racer>() != _racer)
-            return;
+        Racer racer = other.GetComponentInParent<Racer>();
 
-        _racer.FinishRace();
-
-        if (_racer.IsFinished)
-            _trigger.enabled = false;
+        if (racer != null)
+            racer.FinishRace();
     }
 
     private void OnDisable()

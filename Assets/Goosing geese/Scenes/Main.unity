@@ -1205,6 +1205,7 @@ GameObject:
   - component: {fileID: 1081964707}
   - component: {fileID: 1081964706}
   - component: {fileID: 1081964708}
+  - component: {fileID: 1081964709}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -1380,6 +1381,20 @@ MonoBehaviour:
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _input: {fileID: 280129367}
+--- !u!114 &1081964709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58c2230148366c94ebcc9de9a6c1c89d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpponentSpawner
+  _level: {fileID: 1081964704}
+  _player: {fileID: 265920761}
 --- !u!1 &1242738827
 GameObject:
   m_ObjectHideFlags: 0

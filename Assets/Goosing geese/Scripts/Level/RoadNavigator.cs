@@ -7,6 +7,10 @@ public class RoadNavigator : MonoBehaviour
     private RoadPath _path;
     private int _currentSegment;
     private float _distanceAlongPath;
+    private float _laneOffset;
+
+    public int CurrentSegment => _currentSegment;
+    public float DistanceAlongPath => _distanceAlongPath;
 
     public Vector3 TargetPosition { get; private set; }
     public Vector3 ClosestPosition { get; private set; }
@@ -22,6 +26,11 @@ public class RoadNavigator : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(TargetPosition, _settings.DebugPointRadius);
         Gizmos.DrawLine(transform.position, TargetPosition);
+    }
+
+    public void SetLaneOffset(float offset)
+    {
+        _laneOffset = offset;
     }
 
     public void SetPath(RoadPath path)
@@ -59,6 +68,9 @@ public class RoadNavigator : MonoBehaviour
 
         ClosestPosition = curve.GetPointAtDistance(_distanceAlongPath);
         TargetPosition = curve.GetPointAtDistance(_distanceAlongPath + Mathf.Max(0f, _settings.LookAheadDistance));
+
+        Vector3 tangent = curve.GetPointAtDistance(_distanceAlongPath + _settings.LookAheadDistance + 1f) - TargetPosition;
+        TargetPosition += Vector3.Cross(Vector3.up, tangent.normalized) * _laneOffset;
 
         if (_currentSegment >= curve.SegmentCount)
         {

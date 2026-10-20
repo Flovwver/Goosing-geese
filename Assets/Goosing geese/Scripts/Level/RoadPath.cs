@@ -19,6 +19,8 @@ public class RoadPath
         }
     }
 
+    public IReadOnlyList<RoadPiece> Pieces => _pieces;
+
     public Transform FinishPoint { get; private set; }
     public RoadCurve Curve { get; private set; }
     public int Count => _waypoints.Count;
