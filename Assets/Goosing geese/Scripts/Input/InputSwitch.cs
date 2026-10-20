@@ -9,6 +9,12 @@ public class InputSwitch : MonoBehaviour
 
     private bool _hasFocus = true;
     private bool _isPaused;
+    private RaceController _race;
+
+    private void Awake()
+    {
+        _race = FindFirstObjectByType<RaceController>();
+    }
 
     private void OnEnable()
     {
@@ -20,6 +26,15 @@ public class InputSwitch : MonoBehaviour
     {
         if (_racer.IsFinished)
             return;
+
+        if (_race != null)
+        {
+            if (_race.State == RaceState.Waiting && (_pedalIsPressed || _keyboardIsPressed))
+                _race.StartRace();
+
+            if (_race.State != RaceState.Racing)
+                return;
+        }
 
         bool isAccelerating = _pedalIsPressed || _keyboardIsPressed;
 
@@ -37,6 +52,9 @@ public class InputSwitch : MonoBehaviour
     {
         _hasFocus = hasFocus;
 
+        if (hasFocus == false && _race != null)
+            _race.Pause();
+
         if (hasFocus == false)
             ResetInput();
     }
@@ -44,6 +62,9 @@ public class InputSwitch : MonoBehaviour
     private void OnApplicationPause(bool isPaused)
     {
         _isPaused = isPaused;
+
+        if (isPaused && _race != null)
+            _race.Pause();
 
         if (isPaused)
             ResetInput();

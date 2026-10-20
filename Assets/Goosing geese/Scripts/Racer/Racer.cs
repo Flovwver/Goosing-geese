@@ -57,6 +57,11 @@ public class Racer : MonoBehaviour
         _overheatTracker.Exploded -= OnExploded;
     }
 
+    public void StopMovement()
+    {
+        _mover.Stop();
+    }
+
     public float GetCurrentSpeed()
     {
         return _mover.GetCurrentSpeed();
