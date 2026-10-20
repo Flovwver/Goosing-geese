@@ -276,9 +276,9 @@ public class GameScreens : MonoBehaviour
     private void ShowAppearance()
     {
         ShowPanel(L("Внешний вид", "Appearance"), "appearance");
-        MakeButton(_panel.transform, L("Сменить цвет гуся", "Change goose color"), () =>
+        MakeButton(_panel.transform, L("Сменить персонажа / транспорт", "Change character / vehicle"), () =>
         {
-            _race.Progress.Appearance = (_race.Progress.Appearance + 1) % 3;
+            _race.Progress.Appearance = (_race.Progress.Appearance + 1) % GetComponent<WorldPresentation>().AppearanceOptions;
             _race.Progress.Save();
             GetComponent<WorldPresentation>().ApplyAppearance();
         });
