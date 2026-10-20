@@ -13,9 +13,12 @@ public class RaceController : MonoBehaviour
 
     public RaceState State { get; private set; } = RaceState.Waiting;
     public bool PlayerWon { get; private set; }
+    public PlayerProgress Progress { get; private set; }
+    public int LastReward { get; private set; }
 
     private void Awake()
     {
+        Progress = PlayerProgress.Load();
         if (_level == null)
             _level = GetComponent<Level>();
 
@@ -77,6 +80,16 @@ public class RaceController : MonoBehaviour
         _level.RestartRace();
     }
 
+    public void NextLevel()
+    {
+        if (State != RaceState.Result || PlayerWon == false)
+            return;
+
+        Time.timeScale = 1f;
+        _level.BuildRoad();
+        _player.ResetRace();
+    }
+
     public void ReturnToMenu()
     {
         Retry();
@@ -88,6 +101,7 @@ public class RaceController : MonoBehaviour
             return;
 
         PlayerWon = playerWon;
+        LastReward = Progress.RecordRace(playerWon);
         SetState(RaceState.Result);
         _input.ResetInput();
 
