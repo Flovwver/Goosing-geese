@@ -22,6 +22,7 @@ public class Level : MonoBehaviour
     public event Action<RoadPath, RoadSettings> PathBuilt;
 
     public int Seed { get; private set; }
+    public int Number { get; private set; }
 
     private void Awake()
     {
@@ -58,6 +59,7 @@ public class Level : MonoBehaviour
         Seed = seed;
         RaceController race = GetComponent<RaceController>();
         int level = race != null ? race.Progress.Level : 1;
+        Number = level;
         _mainPieceCount = Mathf.Clamp(_settings.RoadPieceCount + (level - 1) * _piecesPerLevel, 1, _maximumPieces);
         _curveSamples = Mathf.Max(1, _settings.CurveSamplesPerSegment);
         int runoutPieces = Mathf.Max(1, _settings.FinishRunoutPieces);

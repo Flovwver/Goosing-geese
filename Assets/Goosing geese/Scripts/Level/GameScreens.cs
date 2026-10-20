@@ -52,7 +52,7 @@ public class GameScreens : MonoBehaviour
             lead = playerDistance >= opponentDistance ? L("Ты впереди", "You are ahead") : L("Соперник впереди", "Rival is ahead");
         }
 
-        _status.text = L("УРОВЕНЬ ", "LEVEL ") + _race.Progress.Level + "   •   " + _race.Progress.Points + L(" очков", " points") + "\n" + state + "\n" + lead;
+        _status.text = L("УРОВЕНЬ ", "LEVEL ") + _race.GetComponent<Level>().Number + "   •   " + _race.Progress.Points + L(" очков", " points") + "\n" + state + "\n" + lead;
     }
 
     private void OnDisable()

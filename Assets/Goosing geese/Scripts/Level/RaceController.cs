@@ -94,7 +94,10 @@ public class RaceController : MonoBehaviour
 
     public void ReturnToMenu()
     {
-        Retry();
+        if (State == RaceState.Result && PlayerWon)
+            NextLevel();
+        else
+            Retry();
     }
 
     public void EndRace(bool playerWon, RaceOutcome outcome = RaceOutcome.OpponentFinished)
