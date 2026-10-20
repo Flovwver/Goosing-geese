@@ -19,6 +19,11 @@ public class Mover : MonoBehaviour
         InitializeComponents();
     }
 
+    private void OnEnable()
+    {
+        InitializeComponents();
+    }
+
     private void FixedUpdate()
     {
         if (_stats == null)
@@ -39,6 +44,7 @@ public class Mover : MonoBehaviour
 
     public float GetCurrentSpeed()
     {
+        InitializeComponents();
         return _movement.GetCurrentSpeed();
     }
 
