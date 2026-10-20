@@ -11,6 +11,7 @@ public class RacerOverheatView : MonoBehaviour
     [SerializeField] private Racer _racer;
 
     private Animator _animator;
+    private ParticleSystem[] _explosionParticles;
     private bool _isExploding;
 
     public event Action ExplosionCompleted;
@@ -18,6 +19,13 @@ public class RacerOverheatView : MonoBehaviour
     private void Awake()
     {
         _animator = GetComponent<Animator>();
+        _explosionParticles = GetComponentsInChildren<ParticleSystem>(true);
+
+        foreach (ParticleSystem particles in _explosionParticles)
+        {
+            ParticleSystem.MainModule main = particles.main;
+            main.stopAction = ParticleSystemStopAction.None;
+        }
     }
 
     private void OnEnable()
@@ -55,6 +63,7 @@ public class RacerOverheatView : MonoBehaviour
 
     private void OnExploded()
     {
+        ResetExplosionParticles();
         _isExploding = true;
         _animator.SetTrigger(ExplodedParameter);
     }
@@ -62,9 +71,18 @@ public class RacerOverheatView : MonoBehaviour
     private void OnRaceRestarted()
     {
         _isExploding = false;
+        ResetExplosionParticles();
         _animator.Rebind();
         _animator.ResetTrigger(ExplodedParameter);
         _animator.SetFloat(OverheatProgressParameter, 0f);
         _animator.Update(0f);
+    }
+
+    private void ResetExplosionParticles()
+    {
+        foreach (ParticleSystem particles in _explosionParticles)
+        {
+            particles.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
     }
 }
