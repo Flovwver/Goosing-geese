@@ -26,54 +26,62 @@ public class RoadLayoutGenerator
                 return layout;
         }
 
-        Debug.LogWarning($"Не удалось сгенерировать дорогу из {pieceCount} кусков без пересечений.");
+        Debug.LogWarning($"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ {pieceCount} пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         return new RoadPieceType[0];
     }
 
     private bool TryGenerate(int pieceCount, int finishRunoutPieces, out RoadPieceType[] layout)
     {
         layout = new RoadPieceType[pieceCount + finishRunoutPieces];
-
         var occupiedCells = new HashSet<Vector2Int> { Vector2Int.zero };
-        Vector2Int position = Vector2Int.zero;
-        Vector2Int direction = Vector2Int.up;
+        long remainingChoices = (long)pieceCount * Mathf.Max(1, _availablePieceTypes.Length);
+        return TryPlacePiece(0, pieceCount, layout, Vector2Int.zero, Vector2Int.up, occupiedCells, ref remainingChoices);
+    }
 
-        for (int pieceIndex = 0; pieceIndex < pieceCount; pieceIndex++)
+    private bool TryPlacePiece(int index, int pieceCount, RoadPieceType[] layout, Vector2Int position,
+        Vector2Int direction, HashSet<Vector2Int> occupiedCells, ref long remainingChoices)
+    {
+        if (index == pieceCount)
+            return TryAppendRunout(pieceCount, layout, position, direction, occupiedCells);
+
+        Vector2Int targetCell = position + direction;
+
+        if (remainingChoices <= 0 || occupiedCells.Add(targetCell) == false)
+            return false;
+
+        foreach (RoadPieceType candidate in GetShuffledTypes())
         {
-            bool piecePlaced = false;
-
-            foreach (RoadPieceType candidateType in GetShuffledTypes())
-            {
-                Vector2Int targetCell = position + direction;
-
-                if (occupiedCells.Contains(targetCell))
-                    continue;
-
-                occupiedCells.Add(targetCell);
-                layout[pieceIndex] = candidateType;
-                position = targetCell;
-
-                if (candidateType == RoadPieceType.LeftTurn)
-                    direction = RotateLeft(direction);
-                else if (candidateType == RoadPieceType.RightTurn)
-                    direction = RotateRight(direction);
-
-                piecePlaced = true;
+            if (remainingChoices-- <= 0)
                 break;
-            }
 
-            if (piecePlaced == false)
-                return false;
+            Vector2Int nextDirection = direction;
+
+            if (candidate == RoadPieceType.LeftTurn)
+                nextDirection = RotateLeft(direction);
+            else if (candidate == RoadPieceType.RightTurn)
+                nextDirection = RotateRight(direction);
+
+            layout[index] = candidate;
+
+            if (TryPlacePiece(index + 1, pieceCount, layout, targetCell, nextDirection, occupiedCells, ref remainingChoices))
+                return true;
         }
 
-        for (int pieceIndex = pieceCount; pieceIndex < layout.Length; pieceIndex++)
+        occupiedCells.Remove(targetCell);
+        return false;
+    }
+
+    private bool TryAppendRunout(int pieceCount, RoadPieceType[] layout, Vector2Int position,
+        Vector2Int direction, HashSet<Vector2Int> occupiedCells)
+    {
+        for (int index = pieceCount; index < layout.Length; index++)
         {
             position += direction;
 
-            if (occupiedCells.Add(position) == false)
+            if (occupiedCells.Contains(position))
                 return false;
 
-            layout[pieceIndex] = RoadPieceType.Straight;
+            layout[index] = RoadPieceType.Straight;
         }
 
         return true;
