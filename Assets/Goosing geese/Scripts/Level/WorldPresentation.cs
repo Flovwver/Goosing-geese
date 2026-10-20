@@ -93,6 +93,8 @@ public class WorldPresentation : MonoBehaviour
         if (_scenery == null || theme >= _scenery.Length || _scenery[theme] == null)
             return;
 
+        float clearance = _roadClearance + GetDecorationRadius(_scenery[theme]);
+
         for (float distance = _decorationSpacing; distance < _path.Curve.Length; distance += _decorationSpacing)
         {
             Vector3 point = _path.Curve.GetPointAtDistance(distance);
@@ -101,12 +103,12 @@ public class WorldPresentation : MonoBehaviour
 
             for (int side = -1; side <= 1; side += 2)
             {
-                Vector3 candidate = point + right * (_roadClearance * side);
+                Vector3 candidate = point + right * (clearance * side);
                 bool clear = true;
 
                 foreach (Vector3 roadPoint in _path.Curve.Points)
                 {
-                    if ((candidate - roadPoint).sqrMagnitude < _roadClearance * _roadClearance)
+                    if ((candidate - roadPoint).sqrMagnitude < clearance * clearance)
                     {
                         clear = false;
                         break;
@@ -123,6 +125,18 @@ public class WorldPresentation : MonoBehaviour
                     collider.enabled = false;
             }
         }
+    }
+
+    private float GetDecorationRadius(GameObject prefab)
+    {
+        var bounds = new Bounds(prefab.transform.position, Vector3.zero);
+
+        foreach (Renderer renderer in prefab.GetComponentsInChildren<Renderer>(true))
+            bounds.Encapsulate(renderer.bounds);
+
+        Vector3 centerOffset = bounds.center - prefab.transform.position;
+        var radius = new Vector2(bounds.extents.x + Mathf.Abs(centerOffset.x), bounds.extents.z + Mathf.Abs(centerOffset.z));
+        return radius.magnitude;
     }
 
     private void RepairMaterials(GameObject decoration)

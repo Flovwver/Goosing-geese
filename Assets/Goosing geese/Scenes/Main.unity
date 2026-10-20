@@ -1444,7 +1444,7 @@ MonoBehaviour:
   _scenery:
   - {fileID: 4811954470448506791, guid: c1e243c93572b0146bb09bf02d78ff6d, type: 3}
   - {fileID: 2370815033398676697, guid: 17b1ab29f037ed440aa481a1fc8cd4d9, type: 3}
-  - {fileID: 0}
+  - {fileID: 1164899596817984, guid: ba33f5f0a254c9443956b40146028648, type: 3}
   _vehicles:
   - {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
   - {fileID: 118780, guid: 2204ec8a2d6a8fe45900f91c3ffb2300, type: 3}
