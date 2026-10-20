@@ -41,7 +41,7 @@ public class GameScreens : MonoBehaviour
         Rect safe = Screen.safeArea;
         _safeArea.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
         _safeArea.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
-        string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : L("Гонка", "Race");
+        string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
         string lead = "";
 
         if (_race.State == RaceState.Racing && _opponents.Opponent != null)
