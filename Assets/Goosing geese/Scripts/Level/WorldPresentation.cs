@@ -1,8 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class WorldPresentation : MonoBehaviour
 {
     private const int AppearanceCount = 3;
+    private readonly Dictionary<Material, Material> _compatibleMaterials = new Dictionary<Material, Material>();
+
     [SerializeField] private Level _level;
     [SerializeField] private Racer _player;
     [SerializeField] private RaceController _race;
@@ -43,6 +46,9 @@ public class WorldPresentation : MonoBehaviour
 
     private void OnDestroy()
     {
+        foreach (Material material in _compatibleMaterials.Values)
+            Destroy(material);
+
         if (_groundMaterial != null)
             Destroy(_groundMaterial);
     }
@@ -111,10 +117,42 @@ public class WorldPresentation : MonoBehaviour
                     continue;
 
                 GameObject decoration = Instantiate(_scenery[theme], candidate, Quaternion.identity, _root.transform);
+                RepairMaterials(decoration);
 
                 foreach (Collider collider in decoration.GetComponentsInChildren<Collider>())
                     collider.enabled = false;
             }
+        }
+    }
+
+    private void RepairMaterials(GameObject decoration)
+    {
+        foreach (Renderer renderer in decoration.GetComponentsInChildren<Renderer>(true))
+        {
+            Material[] materials = renderer.sharedMaterials;
+
+            for (int i = 0; i < materials.Length; i++)
+            {
+                Material source = materials[i];
+
+                if (source == null || (source.shader != null && source.shader.isSupported && source.shader.name != "Hidden/InternalErrorShader"))
+                    continue;
+
+                if (_compatibleMaterials.TryGetValue(source, out Material compatible) == false)
+                {
+                    compatible = new Material(_groundMaterial);
+                    compatible.name = source.name + " (compatible)";
+                    compatible.color = Color.white;
+                    compatible.mainTexture = source.mainTexture;
+                    compatible.mainTextureScale = source.mainTextureScale;
+                    compatible.mainTextureOffset = source.mainTextureOffset;
+                    _compatibleMaterials.Add(source, compatible);
+                }
+
+                materials[i] = compatible;
+            }
+
+            renderer.sharedMaterials = materials;
         }
     }
 
