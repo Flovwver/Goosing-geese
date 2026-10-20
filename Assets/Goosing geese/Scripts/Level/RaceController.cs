@@ -13,12 +13,14 @@ public class RaceController : MonoBehaviour
 
     public RaceState State { get; private set; } = RaceState.Waiting;
     public bool PlayerWon { get; private set; }
+    public RaceOutcome Outcome { get; private set; }
     public PlayerProgress Progress { get; private set; }
     public int LastReward { get; private set; }
 
     private void Awake()
     {
         Progress = PlayerProgress.Load();
+
         if (_level == null)
             _level = GetComponent<Level>();
 
@@ -95,12 +97,13 @@ public class RaceController : MonoBehaviour
         Retry();
     }
 
-    public void EndRace(bool playerWon)
+    public void EndRace(bool playerWon, RaceOutcome outcome = RaceOutcome.OpponentFinished)
     {
         if (State != RaceState.Racing)
             return;
 
         PlayerWon = playerWon;
+        Outcome = playerWon ? RaceOutcome.FinishedFirst : outcome;
         LastReward = Progress.RecordRace(playerWon);
         SetState(RaceState.Result);
         _input.ResetInput();
@@ -124,13 +127,13 @@ public class RaceController : MonoBehaviour
 
     private void OnPlayerExploded()
     {
-        EndRace(false);
+        EndRace(false, RaceOutcome.Overheated);
     }
 
     private void OnPathCompleted()
     {
         if (State == RaceState.Racing)
-            EndRace(false);
+            EndRace(false, RaceOutcome.RouteEnded);
     }
 
     private void OnRestarted()

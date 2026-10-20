@@ -18,7 +18,7 @@ public class GameScreens : MonoBehaviour
     private GameObject _panel;
     private Text _status;
     private Font _font;
-    private string _page;
+    private Text _pauseLabel;
 
     private void Awake()
     {
@@ -41,6 +41,7 @@ public class GameScreens : MonoBehaviour
         Rect safe = Screen.safeArea;
         _safeArea.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
         _safeArea.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
+        _pauseLabel.text = L("Пауза", "Pause");
         string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
         string lead = "";
 
@@ -93,6 +94,7 @@ public class GameScreens : MonoBehaviour
         statusRect.anchorMin = new Vector2(0.04f, 0.84f);
         statusRect.anchorMax = new Vector2(0.78f, 0.98f);
         var settings = MakeButton(_safeArea, L("Пауза", "Pause"), OpenSettings);
+        _pauseLabel = settings.GetComponentInChildren<Text>();
         var buttonRect = (RectTransform)settings.transform;
         buttonRect.anchorMin = new Vector2(0.79f, 0.91f);
         buttonRect.anchorMax = new Vector2(0.97f, 0.98f);
@@ -137,7 +139,6 @@ public class GameScreens : MonoBehaviour
             Destroy(_panel);
         }
 
-        _page = page;
         var rect = Rect("Panel " + page, _safeArea, new Vector2(0.06f, 0.22f), new Vector2(0.94f, 0.82f));
         _panel = rect.gameObject;
         _panel.AddComponent<Image>().color = PanelColor;
@@ -159,7 +160,6 @@ public class GameScreens : MonoBehaviour
             Destroy(_panel);
         }
 
-        _page = "";
         _input.enabled = true;
     }
 
@@ -197,6 +197,13 @@ public class GameScreens : MonoBehaviour
     private void ShowResult()
     {
         ShowPanel(_race.PlayerWon ? L("Победа!", "You won!") : L("Попробуем ещё?", "Try again?"), "result");
+        string reason = _race.Outcome == RaceOutcome.Overheated ? L("Перегрев", "Overheated")
+            : _race.Outcome == RaceOutcome.OffRoad ? L("Вылет с трассы", "Off the road")
+            : _race.Outcome == RaceOutcome.OpponentFinished ? L("Соперник финишировал первым", "Your rival finished first") : "";
+
+        if (_race.PlayerWon == false)
+            Label(_panel.transform, reason, 24);
+
         Label(_panel.transform, "+" + _race.LastReward + L(" очков", " points"), 30);
 
         if (_race.PlayerWon)
@@ -275,6 +282,9 @@ public class GameScreens : MonoBehaviour
             if (i < 5 || currentPlayer)
                 rows += LocalLeaderboard.GetRank(entries, i) + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "") + "\n";
         }
+
+        if (entries.Find(entry => entry.Name == _race.Progress.PlayerName) == null)
+            rows += (entries.Count + 1) + ". " + _race.Progress.PlayerName + " — " + _race.Progress.Points + " •";
 
         Label(_panel.transform, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
         Label(_panel.transform, L("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);

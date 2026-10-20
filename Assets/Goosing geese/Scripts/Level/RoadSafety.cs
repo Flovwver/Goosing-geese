@@ -10,7 +10,6 @@ public class RoadSafety : MonoBehaviour
     [SerializeField, Min(0f)] private float _offRoadGraceTime = 0.75f;
 
     private RoadPath _path;
-    private RoadSettings _settings;
     private float _offRoadTimer;
     private GameObject _lines;
 
@@ -31,7 +30,7 @@ public class RoadSafety : MonoBehaviour
         _offRoadTimer = displacement.sqrMagnitude > _roadHalfWidth * _roadHalfWidth ? _offRoadTimer + Time.deltaTime : 0f;
 
         if (_offRoadTimer >= _offRoadGraceTime)
-            _race.EndRace(false);
+            _race.EndRace(false, RaceOutcome.OffRoad);
     }
 
     private void OnDisable()
@@ -53,7 +52,6 @@ public class RoadSafety : MonoBehaviour
     private void OnPathBuilt(RoadPath path, RoadSettings settings)
     {
         _path = path;
-        _settings = settings;
         _offRoadTimer = 0f;
 
         if (_lines != null)
