@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class GameUiFactory
 {
+    private const float ReferenceWidth = 720f;
+    private const float ReferenceHeight = 1280f;
     private const float LabelHeightMultiplier = 2.4f;
     private const float ButtonHeight = 68f;
     private const int ButtonFontSize = 25;
@@ -33,6 +35,27 @@ public class GameUiFactory
         rect.anchorMax = max;
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
+    }
+
+    public static GameObject CreateCanvas(string name, Transform parent, int sortingOrder)
+    {
+        var root = new GameObject(name, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        root.transform.SetParent(parent, false);
+        var canvas = root.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = sortingOrder;
+        var scaler = root.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
+        scaler.matchWidthOrHeight = 0.5f;
+        return root;
+    }
+
+    public static void UpdateSafeArea(RectTransform rect)
+    {
+        Rect safe = Screen.safeArea;
+        rect.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
+        rect.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
     }
 
     public Text CreateLabel(Transform parent, string text, int size)

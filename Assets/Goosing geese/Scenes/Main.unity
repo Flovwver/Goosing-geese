@@ -1210,6 +1210,7 @@ GameObject:
   - component: {fileID: 1081964710}
   - component: {fileID: 1081964712}
   - component: {fileID: 1081964713}
+  - component: {fileID: 1081964714}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -1375,6 +1376,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio
   _race: {fileID: 1081964708}
   _player: {fileID: 265920761}
+--- !u!114 &1081964714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cce9b33399fe20e458b7caebfa66f22c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RaceResultView
+  _race: {fileID: 1081964708}
+  _overheatView: {fileID: 1861684951}
+  _audio: {fileID: 1081964713}
 --- !u!1 &1242738827
 GameObject:
   m_ObjectHideFlags: 0
@@ -1865,6 +1881,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1861684951 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7798042765454621036, guid: 528ac5758e2f6644c89bea6aa75538e1, type: 3}
+  m_PrefabInstance: {fileID: 1464469445466606345}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e7f1faaa031fef449b14224739991fb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RacerOverheatView
 --- !u!1 &1978502867
 GameObject:
   m_ObjectHideFlags: 0

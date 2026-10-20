@@ -4,8 +4,7 @@ using UnityEngine.UI;
 
 public class GameScreens : MonoBehaviour
 {
-    private const float ReferenceWidth = 720f;
-    private const float ReferenceHeight = 1280f;
+    private const int CanvasSortingOrder = 20;
     private static readonly Color PanelColor = new Color(0.05f, 0.09f, 0.12f, 0.96f);
     private static readonly Color ButtonColor = new Color(0.12f, 0.32f, 0.36f);
 
@@ -14,9 +13,6 @@ public class GameScreens : MonoBehaviour
     [SerializeField] private Racer _player;
     [SerializeField] private OpponentSpawner _opponents;
 
-    private RacerOverheatView _overheatView;
-    private bool _waitingForExplosion;
-    private GameObject _explosionSkipButton;
     private GameObject _pedal;
     private RectTransform _safeArea;
     private GameObject _panel;
@@ -29,7 +25,6 @@ public class GameScreens : MonoBehaviour
 
     private void Awake()
     {
-        _overheatView = _player.GetComponentInChildren<RacerOverheatView>();
         InitializeUi();
     }
 
@@ -42,9 +37,6 @@ public class GameScreens : MonoBehaviour
 
         _race.StateChanged += OnStateChanged;
 
-        if (_overheatView != null)
-            _overheatView.ExplosionCompleted += OnExplosionCompleted;
-
         if (rebuilt)
             OnStateChanged(_race.State);
     }
@@ -56,9 +48,7 @@ public class GameScreens : MonoBehaviour
 
     private void Update()
     {
-        Rect safe = Screen.safeArea;
-        _safeArea.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
-        _safeArea.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
+        GameUiFactory.UpdateSafeArea(_safeArea);
         bool showNavigation = _panel == null && _race.State != RaceState.Result;
         _pedal.SetActive(_race.State != RaceState.Result);
         _gear.SetActive(showNavigation);
@@ -81,11 +71,6 @@ public class GameScreens : MonoBehaviour
     private void OnDisable()
     {
         _race.StateChanged -= OnStateChanged;
-        _waitingForExplosion = false;
-        _explosionSkipButton.SetActive(false);
-
-        if (_overheatView != null)
-            _overheatView.ExplosionCompleted -= OnExplosionCompleted;
     }
 
     private string L(string russian, string english)
@@ -112,29 +97,14 @@ public class GameScreens : MonoBehaviour
 
     private void BuildCanvas()
     {
-        var root = new GameObject("Game screens", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        var root = GameUiFactory.CreateCanvas("Game screens", transform, CanvasSortingOrder);
         _canvasRoot = root;
-        root.transform.SetParent(transform, false);
-        var canvas = root.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 20;
-        var scaler = root.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
-        scaler.matchWidthOrHeight = 0.5f;
         _safeArea = GameUiFactory.CreateRect("Safe area", root.transform, Vector2.zero, Vector2.one);
         _status = _ui.CreateLabel(_safeArea, "", 23);
         GameUiFactory.Place(_status.rectTransform, new Vector2(0.22f, 0.81f), new Vector2(0.9f, 0.88f));
         _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
         _trophy = MakeIconButton("Leaderboard", MenuSymbol.Trophy, ShowLeaderboard, new Vector2(0.81f, 0.045f), new Vector2(0.97f, 0.145f), new Color(1f, 0.77f, 0.28f));
         ConfigureRaceHud();
-        var skipRect = GameUiFactory.CreateRect("Show result on tap", root.transform, Vector2.zero, Vector2.one);
-        _explosionSkipButton = skipRect.gameObject;
-        _explosionSkipButton.AddComponent<Image>().color = Color.clear;
-        var skipButton = _explosionSkipButton.AddComponent<Button>();
-        skipButton.transition = Selectable.Transition.None;
-        skipButton.onClick.AddListener(OnExplosionCompleted);
-        _explosionSkipButton.SetActive(false);
     }
 
     private GameObject MakeIconButton(string name, MenuSymbol symbol, Action action, Vector2 min, Vector2 max, Color tint)
@@ -185,11 +155,7 @@ public class GameScreens : MonoBehaviour
         var rect = GameUiFactory.CreateRect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
         _panel = rect.gameObject;
 
-        if (page == "result")
-            GameUiFactory.Place(rect, new Vector2(0.06f, 0.025f), new Vector2(0.94f, 0.48f));
-        else
-            _panel.AddComponent<Image>().color = PanelColor;
-
+        _panel.AddComponent<Image>().color = PanelColor;
         var layout = _panel.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(24, 24, 24, 24);
         layout.spacing = 12f;
@@ -197,7 +163,7 @@ public class GameScreens : MonoBehaviour
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
         _ui.CreateLabel(rect, title, 32);
-        _input.enabled = page == "menu" || page == "result";
+        _input.enabled = false;
     }
 
     private void ClosePanel()
@@ -213,33 +179,12 @@ public class GameScreens : MonoBehaviour
 
     private void OnStateChanged(RaceState state)
     {
-        _waitingForExplosion = false;
-        _explosionSkipButton.SetActive(false);
-
         if (state == RaceState.Waiting)
             ShowMenu();
-        else if (state == RaceState.Racing)
-            ClosePanel();
         else if (state == RaceState.Paused)
             ShowPause();
-        else if (_race.Outcome == RaceOutcome.Overheated && _overheatView != null && _overheatView.isActiveAndEnabled)
-        {
-            ClosePanel();
-            _waitingForExplosion = true;
-            _explosionSkipButton.SetActive(true);
-        }
         else
-            ShowResult();
-    }
-
-    private void OnExplosionCompleted()
-    {
-        if (_waitingForExplosion && _race.State == RaceState.Result)
-        {
-            _waitingForExplosion = false;
-            _explosionSkipButton.SetActive(false);
-            ShowResult();
-        }
+            ClosePanel();
     }
 
     private void ShowMenu()
@@ -253,48 +198,6 @@ public class GameScreens : MonoBehaviour
         _ui.CreateButton(_panel.transform, L("Продолжить", "Resume"), _race.Resume);
         _ui.CreateButton(_panel.transform, L("Настройки", "Settings"), OpenSettings);
         _ui.CreateButton(_panel.transform, L("В главное меню", "Main menu"), _race.ReturnToMenu);
-    }
-
-    private void ShowResult()
-    {
-        ShowPanel(_race.PlayerWon ? L("Победа!", "You won!") : L("Попробуем ещё?", "Try again?"), "result");
-        string reason = _race.Outcome == RaceOutcome.Overheated ? L("Перегрев", "Overheated")
-            : _race.Outcome == RaceOutcome.OffRoad ? L("Вылет с трассы", "Off the road")
-            : _race.Outcome == RaceOutcome.OpponentFinished ? L("Соперник финишировал первым", "Your rival finished first") : "";
-
-        if (_race.PlayerWon == false)
-            _ui.CreateLabel(_panel.transform, reason, 24);
-
-        _ui.CreateLabel(_panel.transform, "+" + _race.LastReward + L(" очков", " points"), 30);
-
-        if (_race.PlayerWon)
-            MakeResultButton(L("Следующий уровень", "Next level"), _race.NextLevel);
-
-        MakeResultButton(L("Повторить трассу", "Retry track"), _race.Retry);
-        MakeResultButton(L("В главное меню", "Main menu"), _race.ReturnToMenu);
-
-        foreach (Text label in _panel.GetComponentsInChildren<Text>())
-        {
-            if (label.GetComponentInParent<Button>() == null)
-            {
-                var outline = label.gameObject.AddComponent<Outline>();
-                outline.effectColor = Color.black;
-                outline.effectDistance = new Vector2(2f, -2f);
-            }
-        }
-    }
-
-    private void MakeResultButton(string text, Action action)
-    {
-        Button button = _ui.CreateButton(_panel.transform, text, action);
-        button.GetComponent<Image>().color = new Color(1f, 0.79f, 0.28f);
-        button.GetComponent<LayoutElement>().preferredHeight = 80f;
-        Text label = button.GetComponentInChildren<Text>();
-        label.color = new Color(0.05f, 0.09f, 0.12f);
-        label.fontStyle = FontStyle.Bold;
-        var outline = button.gameObject.AddComponent<Outline>();
-        outline.effectColor = new Color(0.05f, 0.09f, 0.12f);
-        outline.effectDistance = new Vector2(3f, -3f);
     }
 
     private void OpenSettings()
