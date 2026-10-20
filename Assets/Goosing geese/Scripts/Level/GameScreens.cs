@@ -16,6 +16,7 @@ public class GameScreens : MonoBehaviour
 
     private RacerOverheatView _overheatView;
     private bool _waitingForExplosion;
+    private GameObject _explosionSkipButton;
     private GameObject _pedal;
     private RectTransform _safeArea;
     private GameObject _panel;
@@ -72,6 +73,7 @@ public class GameScreens : MonoBehaviour
     {
         _race.StateChanged -= OnStateChanged;
         _waitingForExplosion = false;
+        _explosionSkipButton.SetActive(false);
 
         if (_overheatView != null)
             _overheatView.ExplosionCompleted -= OnExplosionCompleted;
@@ -119,6 +121,13 @@ public class GameScreens : MonoBehaviour
         _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
         _trophy = MakeIconButton("Leaderboard", MenuSymbol.Trophy, ShowLeaderboard, new Vector2(0.81f, 0.045f), new Vector2(0.97f, 0.145f), new Color(1f, 0.77f, 0.28f));
         ConfigureRaceHud();
+        var skipRect = Rect("Show result on tap", root.transform, Vector2.zero, Vector2.one);
+        _explosionSkipButton = skipRect.gameObject;
+        _explosionSkipButton.AddComponent<Image>().color = Color.clear;
+        var skipButton = _explosionSkipButton.AddComponent<Button>();
+        skipButton.transition = Selectable.Transition.None;
+        skipButton.onClick.AddListener(OnExplosionCompleted);
+        _explosionSkipButton.SetActive(false);
     }
 
     private GameObject MakeIconButton(string name, MenuSymbol symbol, Action action, Vector2 min, Vector2 max, Color tint)
@@ -225,6 +234,7 @@ public class GameScreens : MonoBehaviour
     private void OnStateChanged(RaceState state)
     {
         _waitingForExplosion = false;
+        _explosionSkipButton.SetActive(false);
 
         if (state == RaceState.Waiting)
             ShowMenu();
@@ -236,6 +246,7 @@ public class GameScreens : MonoBehaviour
         {
             ClosePanel();
             _waitingForExplosion = true;
+            _explosionSkipButton.SetActive(true);
         }
         else
             ShowResult();
@@ -246,6 +257,7 @@ public class GameScreens : MonoBehaviour
         if (_waitingForExplosion && _race.State == RaceState.Result)
         {
             _waitingForExplosion = false;
+            _explosionSkipButton.SetActive(false);
             ShowResult();
         }
     }
