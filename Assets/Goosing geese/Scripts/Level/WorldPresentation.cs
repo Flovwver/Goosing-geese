@@ -37,6 +37,18 @@ public class WorldPresentation : MonoBehaviour
         ApplyAppearance();
     }
 
+    private void LateUpdate()
+    {
+        if (_race.Progress.Appearance < AppearanceCount)
+            return;
+
+        foreach (MeshRenderer renderer in _playerRenderers)
+            renderer.enabled = false;
+
+        if (_model != null)
+            _model.SetActive(_player.GetComponent<OverheatTracker>().IsExploded == false);
+    }
+
     private void OnDisable()
     {
         _level.PathBuilt -= OnPathBuilt;
