@@ -9,11 +9,15 @@ public class Level : MonoBehaviour
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
 
-    private RoadLayoutGenerator _roadLayoutGenerator;
-    private RoadBuilder _roadBuilder;
-    private RoadPath _roadPath;
     [SerializeField, Min(0)] private int _piecesPerLevel = 2;
     [SerializeField, Min(1)] private int _maximumPieces = 60;
+    [SerializeField, Min(0f)] private float _minimumRoadSpacing = 24f;
+    [SerializeField, Min(1)] private int _layoutValidationAttempts = 20;
+
+    private RoadLayoutGenerator _roadLayoutGenerator;
+    private RoadBuilder _roadBuilder;
+    private RoadLayoutGeometry _layoutGeometry;
+    private RoadPath _roadPath;
 
     private RoadPieceType[] _currentLayout;
     private int _mainPieceCount;
@@ -27,7 +31,9 @@ public class Level : MonoBehaviour
     private void Awake()
     {
         _roadLayoutGenerator = new RoadLayoutGenerator(_settings.AvailablePieceTypes, _settings.MaxGenerationAttempts);
-        _roadBuilder = new RoadBuilder(BuildPiecePrefabsByType());
+        var prefabs = BuildPiecePrefabsByType();
+        _roadBuilder = new RoadBuilder(prefabs);
+        _layoutGeometry = new RoadLayoutGeometry(prefabs);
     }
 
     private void Start()
@@ -68,7 +74,18 @@ public class Level : MonoBehaviour
         try
         {
             UnityEngine.Random.InitState(seed);
-            _currentLayout = _roadLayoutGenerator.Generate(_mainPieceCount, runoutPieces);
+            _currentLayout = new RoadPieceType[0];
+
+            for (int attempt = 0; attempt < Mathf.Max(1, _layoutValidationAttempts); attempt++)
+            {
+                RoadPieceType[] candidate = _roadLayoutGenerator.Generate(_mainPieceCount, runoutPieces);
+
+                if (_layoutGeometry.IsValid(candidate, _roadStartPoint, _minimumRoadSpacing, _curveSamples))
+                {
+                    _currentLayout = candidate;
+                    break;
+                }
+            }
         }
         finally
         {
