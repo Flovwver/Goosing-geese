@@ -12,6 +12,7 @@ public class GameScreens : MonoBehaviour
     [SerializeField] private InputSwitch _input;
     [SerializeField] private Racer _player;
     [SerializeField] private OpponentSpawner _opponents;
+    [SerializeField] private GarageView _garage;
 
     private GameObject _pedal;
     private RectTransform _safeArea;
@@ -22,6 +23,7 @@ public class GameScreens : MonoBehaviour
     private Speedometer _speedometer;
     private GameObject _gear;
     private GameObject _trophy;
+    private GameObject _garageButton;
 
     private void Awake()
     {
@@ -36,6 +38,7 @@ public class GameScreens : MonoBehaviour
             InitializeUi();
 
         _race.StateChanged += OnStateChanged;
+        _garage.VisibilityChanged += OnGarageVisibilityChanged;
 
         if (rebuilt)
             OnStateChanged(_race.State);
@@ -49,10 +52,14 @@ public class GameScreens : MonoBehaviour
     private void Update()
     {
         GameUiFactory.UpdateSafeArea(_safeArea);
-        bool showNavigation = _panel == null && _race.State != RaceState.Result;
-        _pedal.SetActive(_race.State != RaceState.Result);
+        bool showNavigation = _panel == null && _garage.IsVisible == false && _race.State != RaceState.Result;
+        _pedal.SetActive(_race.State != RaceState.Result && _garage.IsVisible == false);
         _gear.SetActive(showNavigation);
         _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
+        _garageButton.SetActive(showNavigation && _race.State == RaceState.Waiting);
+        UpdateInputAvailability();
+        _status.gameObject.SetActive(_garage.IsVisible == false);
+        _speedometer.gameObject.SetActive(_garage.IsVisible == false);
         string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
         string lead = "";
 
@@ -71,6 +78,7 @@ public class GameScreens : MonoBehaviour
     private void OnDisable()
     {
         _race.StateChanged -= OnStateChanged;
+        _garage.VisibilityChanged -= OnGarageVisibilityChanged;
     }
 
     private string L(string russian, string english)
@@ -104,6 +112,9 @@ public class GameScreens : MonoBehaviour
         GameUiFactory.Place(_status.rectTransform, new Vector2(0.22f, 0.81f), new Vector2(0.9f, 0.88f));
         _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
         _trophy = MakeIconButton("Leaderboard", MenuSymbol.Trophy, ShowLeaderboard, new Vector2(0.81f, 0.045f), new Vector2(0.97f, 0.145f), new Color(1f, 0.77f, 0.28f));
+        _garageButton = MakeIconButton("Garage", MenuSymbol.Garage, OpenGarage, new Vector2(0.025f, 0.045f), new Vector2(0.185f, 0.145f), new Color(0.7f, 0.86f, 1f));
+        Text garageLabel = _ui.CreateLabel(_garageButton.transform, L("ГАРАЖ", "GARAGE"), 18);
+        GameUiFactory.Place(garageLabel.rectTransform, new Vector2(0f, -0.25f), new Vector2(1f, 0.02f));
         ConfigureRaceHud();
     }
 
@@ -147,6 +158,7 @@ public class GameScreens : MonoBehaviour
             Destroy(_panel);
         }
 
+        _garage.Hide();
         var rect = GameUiFactory.CreateRect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
         _panel = rect.gameObject;
 
@@ -158,7 +170,7 @@ public class GameScreens : MonoBehaviour
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
         _ui.CreateLabel(rect, title, 32);
-        _input.enabled = false;
+        UpdateInputAvailability();
     }
 
     private void ClosePanel()
@@ -167,9 +179,10 @@ public class GameScreens : MonoBehaviour
         {
             _panel.SetActive(false);
             Destroy(_panel);
+            _panel = null;
         }
 
-        _input.enabled = true;
+        UpdateInputAvailability();
     }
 
     private void OnStateChanged(RaceState state)
@@ -180,6 +193,26 @@ public class GameScreens : MonoBehaviour
             ShowPause();
         else
             ClosePanel();
+    }
+
+    private void UpdateInputAvailability()
+    {
+        bool acceptsInput = _race.State == RaceState.Waiting || _race.State == RaceState.Racing;
+        _input.enabled = acceptsInput && _panel == null && _garage.IsVisible == false;
+    }
+
+    private void OnGarageVisibilityChanged(bool visible)
+    {
+        if (visible)
+            ClosePanel();
+
+        UpdateInputAvailability();
+    }
+
+    private void OpenGarage()
+    {
+        ClosePanel();
+        _garage.Show();
     }
 
     private void ShowMenu()
@@ -214,7 +247,7 @@ public class GameScreens : MonoBehaviour
             OpenSettings();
         });
         _ui.CreateButton(_panel.transform, L("Задания", "Quests"), ShowQuests);
-        _ui.CreateButton(_panel.transform, L("Персонаж и окружение", "Character and scenery"), ShowAppearance);
+        _ui.CreateButton(_panel.transform, L("Окружение", "Scenery"), ShowScenery);
         _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
     }
 
@@ -296,15 +329,9 @@ public class GameScreens : MonoBehaviour
         _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
     }
 
-    private void ShowAppearance()
+    private void ShowScenery()
     {
-        ShowPanel(L("Внешний вид", "Appearance"), "appearance");
-        _ui.CreateButton(_panel.transform, L("Сменить персонажа / транспорт", "Change character / vehicle"), () =>
-        {
-            _race.Progress.Appearance = (_race.Progress.Appearance + 1) % GetComponent<WorldPresentation>().AppearanceOptions;
-            _race.Progress.Save();
-            GetComponent<WorldPresentation>().ApplyAppearance();
-        });
+        ShowPanel(L("Окружение", "Scenery"), "appearance");
         _ui.CreateButton(_panel.transform, L("Сменить окружение", "Change scenery"), () =>
         {
             _race.Progress.Environment = (_race.Progress.Environment + 1) % 3;

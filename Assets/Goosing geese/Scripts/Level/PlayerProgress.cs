@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -15,6 +16,9 @@ public class PlayerProgress
 
     public string PlayerName = "Player";
     public int Points;
+    public int Wallet;
+    public bool WalletInitialized;
+    public List<RacerUpgradeProgress> Upgrades = new List<RacerUpgradeProgress>();
     public int Level = 1;
     public int Wins;
     public int Races;
@@ -47,6 +51,18 @@ public class PlayerProgress
             progress = new PlayerProgress();
 
         progress.Points = Mathf.Max(0, progress.Points);
+
+        if (progress.WalletInitialized == false)
+        {
+            progress.Wallet = progress.Points;
+            progress.WalletInitialized = true;
+        }
+
+        progress.Wallet = Mathf.Clamp(progress.Wallet, 0, progress.Points);
+
+        if (progress.Upgrades == null)
+            progress.Upgrades = new List<RacerUpgradeProgress>();
+
         progress.Level = Mathf.Max(1, progress.Level);
         progress.MusicVolume = Mathf.Clamp01(progress.MusicVolume);
         progress.EffectsVolume = Mathf.Clamp01(progress.EffectsVolume);
@@ -69,6 +85,7 @@ public class PlayerProgress
         Wins++;
         DailyWins++;
         Points += WinReward;
+        Wallet += WinReward;
         Level++;
         Save();
         return WinReward;
@@ -97,6 +114,7 @@ public class PlayerProgress
 
         int reward = quest == 0 ? DailyRaceReward : quest == 1 ? DailyWinReward : GlobalWinReward;
         Points += reward;
+        Wallet += reward;
 
         if (quest == 0)
             DailyRacesClaimed = true;

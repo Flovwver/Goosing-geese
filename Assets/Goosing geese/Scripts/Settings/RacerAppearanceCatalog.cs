@@ -19,12 +19,23 @@ public class RacerAppearanceCatalog : ScriptableObject
     [Serializable]
     public class Entry
     {
+        [SerializeField] private string _upgradeId;
+        [SerializeField] private string _russianName;
+        [SerializeField] private string _englishName;
+        [SerializeField] private RacerStats _stats;
         [SerializeField] private GameObject _model;
         [SerializeField] private Color _tint = Color.white;
         [SerializeField] private Sprite _pedalSprite;
 
+        public string UpgradeId => _upgradeId;
+        public RacerStats Stats => _stats;
         public GameObject Model => _model;
         public Color Tint => _tint;
         public Sprite PedalSprite => _pedalSprite;
+
+        public string GetName(bool english)
+        {
+            return english ? _englishName : _russianName;
+        }
     }
 }

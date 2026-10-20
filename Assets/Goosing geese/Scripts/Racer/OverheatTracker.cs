@@ -38,7 +38,7 @@ public class OverheatTracker : MonoBehaviour
             return;
         }
 
-        float timerDelta = speedIsInRedZone ? Time.deltaTime : -Time.deltaTime;
+        float timerDelta = speedIsInRedZone ? Time.deltaTime : -Time.deltaTime * Mathf.Max(0f, stats.CoolingRate);
 
         _redZoneTimer = Mathf.Clamp(_redZoneTimer + timerDelta, 0f, stats.TimeToOverheat);
 

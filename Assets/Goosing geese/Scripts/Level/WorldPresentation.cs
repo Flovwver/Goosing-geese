@@ -10,6 +10,7 @@ public class WorldPresentation : MonoBehaviour
     [SerializeField] private RaceController _race;
     [SerializeField] private GameObject[] _scenery;
     [SerializeField] private RacerAppearanceCatalog _appearances;
+    [SerializeField] private RacerGarage _garage;
     [SerializeField, Min(1f)] private float _decorationSpacing = 45f;
     [SerializeField, Min(1f)] private float _roadClearance = 20f;
     [SerializeField, Min(1f)] private float _groundSize = 10000f;
@@ -20,8 +21,6 @@ public class WorldPresentation : MonoBehaviour
     private GameObject _root;
     private RoadPath _path;
     private Material _groundMaterial;
-
-    public int AppearanceOptions => _appearances.Count;
 
     private void Awake()
     {
@@ -41,6 +40,7 @@ public class WorldPresentation : MonoBehaviour
 
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += ApplyAppearance;
+        _garage.SelectionChanged += ApplyAppearance;
     }
 
     private void Start()
@@ -52,6 +52,7 @@ public class WorldPresentation : MonoBehaviour
     {
         _level.PathBuilt -= OnPathBuilt;
         _player.RaceRestarted -= ApplyAppearance;
+        _garage.SelectionChanged -= ApplyAppearance;
     }
 
     private void OnDestroy()

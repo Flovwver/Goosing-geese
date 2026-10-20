@@ -994,7 +994,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.28}
   m_EffectDistance: {x: 1.5, y: -1.5}
@@ -1009,7 +1009,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1302,6 +1302,9 @@ GameObject:
   - component: {fileID: 1081964712}
   - component: {fileID: 1081964713}
   - component: {fileID: 1081964714}
+  - component: {fileID: 1081964717}
+  - component: {fileID: 1081964716}
+  - component: {fileID: 1081964715}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -1410,6 +1413,7 @@ MonoBehaviour:
   _input: {fileID: 280129367}
   _player: {fileID: 265920761}
   _opponents: {fileID: 1081964709}
+  _garage: {fileID: 1081964716}
 --- !u!114 &1081964711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1430,6 +1434,7 @@ MonoBehaviour:
   - {fileID: 2370815033398676697, guid: 17b1ab29f037ed440aa481a1fc8cd4d9, type: 3}
   - {fileID: 1164899596817984, guid: ba33f5f0a254c9443956b40146028648, type: 3}
   _appearances: {fileID: 11400000, guid: 3e3286f7c977296498d1d131a5672028, type: 2}
+  _garage: {fileID: 1081964717}
   _decorationSpacing: 45
   _roadClearance: 20
   _groundSize: 10000
@@ -1474,11 +1479,55 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cce9b33399fe20e458b7caebfa66f22c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RaceResultView
   _race: {fileID: 1081964708}
   _overheatView: {fileID: 1861684951}
   _audio: {fileID: 1081964713}
+--- !u!114 &1081964715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4599c0983a1f8d4789f310d08b2019e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RacerLoadout
+  _racer: {fileID: 265920761}
+  _garage: {fileID: 1081964717}
+--- !u!114 &1081964716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cebe99961976e34280c55ab67c86010, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GarageView
+  _race: {fileID: 1081964708}
+  _garage: {fileID: 1081964717}
+  _audio: {fileID: 1081964713}
+--- !u!114 &1081964717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5302a52395909964c8d4fedd1a3a4af5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RacerGarage
+  _race: {fileID: 1081964708}
+  _appearances: {fileID: 11400000, guid: 3e3286f7c977296498d1d131a5672028, type: 2}
+  _rules: {fileID: 11400000, guid: e5e965a100704eb4fbdb852423030c72, type: 2}
 --- !u!1 &1242738827
 GameObject:
   m_ObjectHideFlags: 0
@@ -1991,7 +2040,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e7f1faaa031fef449b14224739991fb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RacerOverheatView
 --- !u!1 &1978502867
 GameObject:
@@ -2216,7 +2265,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0.28}

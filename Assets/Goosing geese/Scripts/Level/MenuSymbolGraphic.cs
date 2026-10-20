@@ -4,7 +4,8 @@ using UnityEngine.UI;
 public enum MenuSymbol
 {
     Gear,
-    Trophy
+    Trophy,
+    Garage
 }
 
 [RequireComponent(typeof(CanvasRenderer))]
@@ -30,7 +31,7 @@ public class MenuSymbolGraphic : MaskableGraphic
                 Stroke(vertices, direction * 0.23f, direction * 0.36f, 0.09f);
             }
         }
-        else
+        else if (_symbol == MenuSymbol.Trophy)
         {
             Quad(vertices, new Vector2(-0.27f, 0.3f), new Vector2(-0.15f, -0.02f), new Vector2(0.15f, -0.02f), new Vector2(0.27f, 0.3f));
             Stroke(vertices, new Vector2(0f, -0.02f), new Vector2(0f, -0.26f), 0.07f);
@@ -41,6 +42,20 @@ public class MenuSymbolGraphic : MaskableGraphic
             Stroke(vertices, new Vector2(0.27f, 0.24f), new Vector2(0.39f, 0.24f), 0.05f);
             Stroke(vertices, new Vector2(0.39f, 0.24f), new Vector2(0.34f, 0.05f), 0.05f);
             Stroke(vertices, new Vector2(0.34f, 0.05f), new Vector2(0.17f, 0f), 0.05f);
+        }
+        else
+        {
+            Stroke(vertices, new Vector2(-0.38f, 0.1f), new Vector2(0f, 0.38f), 0.06f);
+            Stroke(vertices, new Vector2(0f, 0.38f), new Vector2(0.38f, 0.1f), 0.06f);
+            Stroke(vertices, new Vector2(-0.3f, 0.13f), new Vector2(-0.3f, -0.32f), 0.05f);
+            Stroke(vertices, new Vector2(0.3f, 0.13f), new Vector2(0.3f, -0.32f), 0.05f);
+            Stroke(vertices, new Vector2(-0.32f, -0.32f), new Vector2(0.32f, -0.32f), 0.05f);
+
+            for (int row = 0; row < 4; row++)
+            {
+                float height = 0.04f - row * 0.09f;
+                Stroke(vertices, new Vector2(-0.2f, height), new Vector2(0.2f, height), 0.035f);
+            }
         }
     }
 

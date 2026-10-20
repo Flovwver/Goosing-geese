@@ -11,6 +11,7 @@ public class Racer : MonoBehaviour
     private OverheatTracker _overheatTracker;
     private Mover _mover;
     private RoadNavigator _roadNavigator;
+    private RacerStats _runtimeStats;
 
     private bool _isPathCompletedRaised;
     private Vector3 _startPosition;
@@ -24,16 +25,20 @@ public class Racer : MonoBehaviour
 
     public bool IsFinished { get; private set; }
 
-    public float YellowZoneThreshold => _stats.YellowZoneThreshold;
-    public float RedZoneThreshold => _stats.RedZoneThreshold;
+    public RacerStats BaseStats => _stats;
+    public float MaxSpeed => ActiveStats.MaxSpeed;
+    public float YellowZoneThreshold => ActiveStats.YellowZoneThreshold;
+    public float RedZoneThreshold => ActiveStats.RedZoneThreshold;
 
-    public float NormalizedSpeed => _stats.MaxSpeed > 0f ? GetCurrentSpeed() / _stats.MaxSpeed : 0f;
+    public float NormalizedSpeed => MaxSpeed > 0f ? GetCurrentSpeed() / MaxSpeed : 0f;
+
+    private RacerStats ActiveStats => _runtimeStats != null ? _runtimeStats : _stats;
 
     private void Awake()
     {
         _overheatTracker = GetComponent<OverheatTracker>();
         _mover = GetComponent<Mover>();
-        _mover.Configure(_stats);
+        _mover.Configure(ActiveStats);
         _roadNavigator = GetComponent<RoadNavigator>();
         _startPosition = transform.position;
         _startRotation = transform.rotation;
@@ -65,6 +70,12 @@ public class Racer : MonoBehaviour
     public float GetCurrentSpeed()
     {
         return _mover.GetCurrentSpeed();
+    }
+
+    public void ConfigureStats(RacerStats stats)
+    {
+        _runtimeStats = stats;
+        _mover.Configure(ActiveStats);
     }
 
     public void SetPath(RoadPath path)
@@ -106,7 +117,7 @@ public class Racer : MonoBehaviour
 
         IsFinished = true;
         _overheatTracker.ResetOverheat();
-        _mover.SetDrag(_stats.FinishDrag);
+        _mover.SetDrag(ActiveStats.FinishDrag);
         _mover.MoveTowards(_roadNavigator.TargetPosition, false, 0f);
         Finished?.Invoke();
     }
@@ -118,7 +129,7 @@ public class Racer : MonoBehaviour
 
         if (IsFinished == false)
         {
-            _overheatTracker.Tick(GetCurrentSpeed(), _stats);
+            _overheatTracker.Tick(GetCurrentSpeed(), ActiveStats);
 
             if (_overheatTracker.IsExploded)
                 return;

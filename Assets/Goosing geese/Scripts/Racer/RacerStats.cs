@@ -26,6 +26,8 @@ public class RacerStats : ScriptableObject
     [Range(0f, 1f)] public float YellowZoneThreshold = 0.5f;
     [Range(0f, 1f)] public float RedZoneThreshold = 0.8f;
     [Min(MinimumTimeToOverheat)] public float TimeToOverheat = 3f;
+    [Tooltip("Heat recovery rate below the red speed zone.")]
+    [Min(0f)] public float CoolingRate = 1f;
 
     private void OnValidate()
     {
@@ -35,5 +37,6 @@ public class RacerStats : ScriptableObject
         DriftAlignmentSpeed = Mathf.Max(0f, DriftAlignmentSpeed);
         GripTransitionSpeed = Mathf.Max(0f, GripTransitionSpeed);
         TimeToOverheat = Mathf.Max(MinimumTimeToOverheat, TimeToOverheat);
+        CoolingRate = Mathf.Max(0f, CoolingRate);
     }
 }
