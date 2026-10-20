@@ -14,7 +14,9 @@ public class HeatFeedback : MonoBehaviour
     private List<Material> _replacementMaterials = new List<Material>();
     [SerializeField] private Material _particleMaterial;
     private Racer _racer;
+    private RacerAppearance _appearance;
     private MeshRenderer[] _renderers;
+    private Color[] _baseColors;
     private Transform[] _drops;
     private Material _sweatMaterial;
     private MaterialPropertyBlock _properties;
@@ -23,7 +25,8 @@ public class HeatFeedback : MonoBehaviour
     private void Awake()
     {
         _racer = GetComponent<Racer>();
-        _renderers = GetComponentsInChildren<MeshRenderer>(true);
+        _appearance = GetComponent<RacerAppearance>();
+        RefreshRenderers();
         _properties = new MaterialPropertyBlock();
         _drops = new Transform[DropCount];
         _sweatMaterial = new Material(Shader.Find("Standard"));
@@ -64,16 +67,24 @@ public class HeatFeedback : MonoBehaviour
 
         _racer.OverheatProgressChanged += OnProgress;
         _racer.RaceRestarted += OnRestarted;
+
+        if (_appearance != null)
+            _appearance.AppearanceChanged += RefreshRenderers;
+
+        RefreshRenderers();
     }
 
     private void Update()
     {
-        foreach (MeshRenderer renderer in _renderers)
+        for (int index = 0; index < _renderers.Length; index++)
         {
+            MeshRenderer renderer = _renderers[index];
+
             if (renderer == null)
                 continue;
 
-            _properties.SetColor(ColorProperty, Color.Lerp(renderer.sharedMaterial.color, Color.red, _progress));
+            renderer.GetPropertyBlock(_properties);
+            _properties.SetColor(ColorProperty, Color.Lerp(_baseColors[index], Color.red, _progress));
             renderer.SetPropertyBlock(_properties);
         }
 
@@ -90,6 +101,9 @@ public class HeatFeedback : MonoBehaviour
     {
         _racer.OverheatProgressChanged -= OnProgress;
         _racer.RaceRestarted -= OnRestarted;
+
+        if (_appearance != null)
+            _appearance.AppearanceChanged -= RefreshRenderers;
     }
 
     private void OnDestroy()
@@ -98,6 +112,24 @@ public class HeatFeedback : MonoBehaviour
 
         foreach (Material material in _replacementMaterials)
             Destroy(material);
+    }
+
+    private void RefreshRenderers()
+    {
+        var renderers = new List<MeshRenderer>();
+        var colors = new List<Color>();
+
+        foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>(true))
+        {
+            if (renderer.name == "Sweat" || renderer.enabled == false || renderer.gameObject.activeInHierarchy == false || renderer.sharedMaterial == null)
+                continue;
+
+            renderers.Add(renderer);
+            colors.Add(renderer.sharedMaterial.color);
+        }
+
+        _renderers = renderers.ToArray();
+        _baseColors = colors.ToArray();
     }
 
     private void OnProgress(float progress)

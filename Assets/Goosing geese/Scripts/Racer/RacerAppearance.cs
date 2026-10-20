@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class RacerAppearance : MonoBehaviour
     private Renderer[] _originalRenderers;
     private GameObject _replacement;
     private OverheatTracker _overheat;
+
+    public event Action AppearanceChanged;
 
     private void Awake()
     {
@@ -42,6 +45,8 @@ public class RacerAppearance : MonoBehaviour
 
         foreach (Renderer renderer in _originalRenderers)
             renderer.material.color = tint;
+
+        AppearanceChanged?.Invoke();
     }
 
     public void ShowModel(GameObject prefab)
@@ -67,6 +72,8 @@ public class RacerAppearance : MonoBehaviour
 
         foreach (Collider collider in _replacement.GetComponentsInChildren<Collider>())
             collider.enabled = false;
+
+        AppearanceChanged?.Invoke();
     }
 
     private void ClearReplacement()
