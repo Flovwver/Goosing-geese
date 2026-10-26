@@ -15,6 +15,7 @@ public class GameScreens : MonoBehaviour
     [SerializeField] private GarageView _garage;
 
     private GameObject _pedal;
+    private PedalPromptView _pedalPrompt;
     private RectTransform _safeArea;
     private GameObject _panel;
     private Text _status;
@@ -54,6 +55,7 @@ public class GameScreens : MonoBehaviour
         GameUiFactory.UpdateSafeArea(_safeArea);
         bool showNavigation = _panel == null && _garage.IsVisible == false && _race.State != RaceState.Result;
         _pedal.SetActive(_race.State != RaceState.Result && _garage.IsVisible == false);
+        _pedalPrompt.SetVisible(showNavigation && _race.State == RaceState.Waiting);
         _gear.SetActive(showNavigation);
         _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
         _garageButton.SetActive(showNavigation && _race.State == RaceState.Waiting);
@@ -79,6 +81,9 @@ public class GameScreens : MonoBehaviour
     {
         _race.StateChanged -= OnStateChanged;
         _garage.VisibilityChanged -= OnGarageVisibilityChanged;
+
+        if (_pedalPrompt != null)
+            _pedalPrompt.SetVisible(false);
     }
 
     private string L(string russian, string english)
@@ -144,6 +149,7 @@ public class GameScreens : MonoBehaviour
         GameUiFactory.Place(bar, new Vector2(0.22f, 0.914f), new Vector2(0.91f, 0.954f));
         PedalButton pedal = _pedal != null ? _pedal.GetComponent<PedalButton>() : FindFirstObjectByType<PedalButton>(FindObjectsInactive.Include);
         _pedal = pedal.gameObject;
+        _pedalPrompt = pedal.GetComponent<PedalPromptView>();
         RectTransform pedalRect = pedal.GetComponent<RectTransform>();
         pedalRect.SetParent(_safeArea, false);
         pedalRect.localScale = Vector3.one;
