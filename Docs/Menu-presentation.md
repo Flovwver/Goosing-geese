@@ -25,6 +25,11 @@ PedalPromptView displays a centered, pulsing random phrase only on the unobstruc
 - No player build or push was performed.
 ## Semicircular speedometer
 
-SpeedometerDialGraphic draws a fixed 180-degree arc and needle with UI geometry. Zero speed points left, half of the selected maximum points up, and the selected maximum points right. Values are clamped at both ends. Racer thresholds drive the green/yellow/red arc boundaries, including handling upgrades; the MAX label retains the selected model's upgraded speed. The gauge does not receive pointer raycasts.
+SpeedometerDialGraphic draws a fixed 180-degree arc and needle with UI geometry. Zero speed points left, half of the selected maximum points up, and the selected maximum points right. Values are clamped at both ends. Racer thresholds drive the green/yellow/red arc boundaries, including handling upgrades; the numbered scale follows the selected model's upgraded speed. The gauge does not receive pointer raycasts.
 
 Verified needle directions at 0%, 50% and 100%, negative/over-limit values, empty/full color zones, live handling and maximum-speed bindings, portrait layout, and one correctly bound dial after script reload. The old linear Slider components were removed. Unity reported no errors; no player build was made.
+## Numeric gauge scale
+
+SpeedometerScaleView replaces the MAX caption with 0, the green/yellow boundary speed, the yellow/red boundary speed and the selected maximum. Displayed speeds are rounded to integers. Coincident boundaries and identical rounded labels share a single numbered tick; nearby labels are separated horizontally when their vertical ranges overlap. Minor ticks divide the same fixed semicircle into ten intervals and are omitted near numbered ticks. Scale spacing and geometry are configurable on the view components.
+
+Verified the default 0/50/75/100 scale, collapsed yellow zone (0/75/100), empty edge zones, zero maximum, upgraded maximum, close boundaries near the center and either end, and valid mesh geometry with merged ticks. Portrait Game View and normal Play/Stop checks reported no errors.
