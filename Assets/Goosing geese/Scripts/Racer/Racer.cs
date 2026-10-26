@@ -137,6 +137,9 @@ public class Racer : MonoBehaviour
 
         _roadNavigator.UpdateTarget(transform.position);
 
+        if (IsFinished == false && _roadNavigator.IsFinishReached)
+            FinishRace();
+
         if (_roadNavigator.IsPathCompleted)
         {
             RaisePathCompleted();

@@ -21,6 +21,7 @@ public class RoadPath
 
     public IReadOnlyList<RoadPiece> Pieces => _pieces;
 
+    public int FinishWaypointIndex { get; private set; }
     public Transform FinishPoint { get; private set; }
     public RoadCurve Curve { get; private set; }
     public int Count => _waypoints.Count;
@@ -52,6 +53,7 @@ public class RoadPath
     public void SetFinishWaypoint(int index)
     {
         FinishPoint = TryGetWaypoint(index, out Transform point) ? point : null;
+        FinishWaypointIndex = FinishPoint != null ? index : 0;
     }
 
     public bool TryGetWaypoint(int index, out Transform waypoint)

@@ -3,6 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Mover : MonoBehaviour
 {
+    [SerializeField] private bool _lockVerticalPosition = true;
+
     private Steering _steering;
     private Rigidbody _rigidbody;
     private Movement _movement;
@@ -97,6 +99,11 @@ public class Mover : MonoBehaviour
             return;
 
         _rigidbody = GetComponent<Rigidbody>();
+
+        // The track is flat; seam contacts must not launch the racer vertically.
+        if (_lockVerticalPosition)
+            _rigidbody.constraints |= RigidbodyConstraints.FreezePositionY;
+
         _steering = new Steering();
         _movement = new Movement(_rigidbody);
         _bodyRotation = new BodyRotation(_rigidbody);

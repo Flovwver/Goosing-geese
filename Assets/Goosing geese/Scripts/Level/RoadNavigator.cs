@@ -15,6 +15,7 @@ public class RoadNavigator : MonoBehaviour
     public Vector3 TargetPosition { get; private set; }
     public Vector3 ClosestPosition { get; private set; }
     public bool IsPathCompleted { get; private set; } = true;
+    public bool IsFinishReached { get; private set; }
 
     private void OnDrawGizmosSelected()
     {
@@ -38,6 +39,7 @@ public class RoadNavigator : MonoBehaviour
         _path = path;
         _currentSegment = 0;
         _distanceAlongPath = 0f;
+        IsFinishReached = false;
         IsPathCompleted = path == null || path.Curve == null || path.Curve.Points.Count == 0;
 
         if (IsPathCompleted == false)
@@ -67,6 +69,15 @@ public class RoadNavigator : MonoBehaviour
         }
 
         ClosestPosition = curve.GetPointAtDistance(_distanceAlongPath);
+
+        if (IsFinishReached == false && _path.FinishWaypointIndex > 0
+            && _distanceAlongPath >= curve.GetSegmentEndDistance(_path.FinishWaypointIndex - 1))
+        {
+            Vector3 offsetFromRoute = currentPosition - ClosestPosition;
+            offsetFromRoute.y = 0f;
+            IsFinishReached = offsetFromRoute.sqrMagnitude <= _settings.FinishHalfWidth * _settings.FinishHalfWidth;
+        }
+
         TargetPosition = curve.GetPointAtDistance(_distanceAlongPath + Mathf.Max(0f, _settings.LookAheadDistance));
 
         Vector3 tangent = curve.GetPointAtDistance(_distanceAlongPath + _settings.LookAheadDistance + 1f) - TargetPosition;
