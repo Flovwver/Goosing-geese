@@ -6,7 +6,6 @@ using UnityEngine;
 public class PlayerProgress
 {
     private const string SaveKey = "GoosingGeese.Profile.v1";
-    private const int WinReward = 100;
     private const int DailyRaceTarget = 3;
     private const int DailyWinTarget = 1;
     private const int GlobalWinTarget = 10;
@@ -20,6 +19,8 @@ public class PlayerProgress
     public bool WalletInitialized;
     public List<RacerUpgradeProgress> Upgrades = new List<RacerUpgradeProgress>();
     public int Level = 1;
+    public int HighestCompletedLevel;
+    public bool CampaignInitialized;
     public int Wins;
     public int Races;
     public string DailyDate;
@@ -64,14 +65,40 @@ public class PlayerProgress
             progress.Upgrades = new List<RacerUpgradeProgress>();
 
         progress.Level = Mathf.Max(1, progress.Level);
+
+        if (progress.CampaignInitialized == false)
+        {
+            progress.HighestCompletedLevel = progress.Level - 1;
+            progress.CampaignInitialized = true;
+        }
+
+        progress.HighestCompletedLevel = Mathf.Max(0, progress.HighestCompletedLevel);
         progress.MusicVolume = Mathf.Clamp01(progress.MusicVolume);
         progress.EffectsVolume = Mathf.Clamp01(progress.EffectsVolume);
         progress.RefreshDay();
         return progress;
     }
 
-    public int RecordRace(bool won)
+    public int GetUnlockedLevel(int stageCount)
     {
+        return Mathf.Clamp(HighestCompletedLevel + 1, 1, stageCount);
+    }
+
+    public bool TrySelectLevel(int number, int stageCount)
+    {
+        if (number < 1 || number > GetUnlockedLevel(stageCount))
+            return false;
+
+        Level = number;
+        Save();
+        return true;
+    }
+
+    public int RecordRace(bool won, int number, int reward, int firstClearBonus)
+    {
+        if (number < 1 || number > HighestCompletedLevel + 1)
+            throw new ArgumentOutOfRangeException(nameof(number));
+
         RefreshDay();
         Races++;
         DailyRaces++;
@@ -84,11 +111,13 @@ public class PlayerProgress
 
         Wins++;
         DailyWins++;
-        Points += WinReward;
-        Wallet += WinReward;
-        Level++;
+        bool firstClear = number > HighestCompletedLevel;
+        int earned = Mathf.Max(0, reward) + (firstClear ? Mathf.Max(0, firstClearBonus) : 0);
+        Points += earned;
+        Wallet += earned;
+        HighestCompletedLevel = Mathf.Max(HighestCompletedLevel, number);
         Save();
-        return WinReward;
+        return earned;
     }
 
     public int GetQuestProgress(int quest)

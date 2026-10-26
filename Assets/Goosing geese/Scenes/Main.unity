@@ -1217,6 +1217,7 @@ GameObject:
   - component: {fileID: 1081964717}
   - component: {fileID: 1081964716}
   - component: {fileID: 1081964715}
+  - component: {fileID: 1081964718}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -1239,8 +1240,6 @@ MonoBehaviour:
   _roadStartPoint: {fileID: 1242738828}
   _settings: {fileID: 11400000, guid: a89aed623746447b9df737176ec8f8ff, type: 2}
   _racer: {fileID: 265920761}
-  _piecesPerLevel: 2
-  _maximumPieces: 60
   _minimumRoadSpacing: 24
   _layoutValidationAttempts: 20
 --- !u!4 &1081964705
@@ -1292,6 +1291,7 @@ MonoBehaviour:
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _input: {fileID: 280129367}
+  _campaign: {fileID: 11400000, guid: cb5d7c486faf6f449a08baa74a728bd5, type: 2}
 --- !u!114 &1081964709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1329,6 +1329,7 @@ MonoBehaviour:
   _player: {fileID: 265920761}
   _opponents: {fileID: 1081964709}
   _garage: {fileID: 1081964716}
+  _campaignView: {fileID: 1081964718}
 --- !u!114 &1081964711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1443,6 +1444,20 @@ MonoBehaviour:
   _race: {fileID: 1081964708}
   _appearances: {fileID: 11400000, guid: 3e3286f7c977296498d1d131a5672028, type: 2}
   _rules: {fileID: 11400000, guid: e5e965a100704eb4fbdb852423030c72, type: 2}
+--- !u!114 &1081964718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff78409a98581574fa10af554089a8c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CampaignView
+  _race: {fileID: 1081964708}
+  _audio: {fileID: 1081964713}
 --- !u!1 &1208900206
 GameObject:
   m_ObjectHideFlags: 0

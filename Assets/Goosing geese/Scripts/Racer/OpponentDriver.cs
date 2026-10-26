@@ -44,6 +44,12 @@ public class OpponentDriver : MonoBehaviour
             _racer.Cooldown();
     }
 
+    public void Configure(float cruiseSpeed, float cornerSpeed)
+    {
+        _cruiseSpeed = Mathf.Clamp01(cruiseSpeed);
+        _cornerSpeed = Mathf.Clamp01(cornerSpeed);
+    }
+
     public void SetPath(RoadPath path)
     {
         _path = path;

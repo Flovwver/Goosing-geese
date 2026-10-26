@@ -123,7 +123,7 @@ public class RaceResultView : MonoBehaviour
 
         AddLabel("+" + _race.LastReward + L(" очков", " points"), 30);
 
-        if (_race.PlayerWon)
+        if (_race.PlayerWon && _race.HasNextLevel)
             AddButton(L("Следующий уровень", "Next level"), _race.NextLevel);
 
         AddButton(L("Повторить трассу", "Retry track"), _race.Retry);

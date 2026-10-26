@@ -7,6 +7,7 @@ public class RaceController : MonoBehaviour
     [SerializeField] private Level _level;
     [SerializeField] private Racer _player;
     [SerializeField] private InputSwitch _input;
+    [SerializeField] private CampaignSettings _campaign;
 
     public event Action<RaceState> StateChanged;
     public event Action<bool> RaceEnded;
@@ -16,10 +17,14 @@ public class RaceController : MonoBehaviour
     public RaceOutcome Outcome { get; private set; }
     public PlayerProgress Progress { get; private set; }
     public int LastReward { get; private set; }
+    public CampaignSettings Campaign => _campaign;
+    public CampaignStage CurrentStage => _campaign.GetStage(Progress.Level);
+    public bool HasNextLevel => _level.Number < _campaign.Count;
 
     private void Awake()
     {
         Progress = PlayerProgress.Load();
+        Progress.Level = Mathf.Clamp(Progress.Level, 1, Progress.GetUnlockedLevel(_campaign.Count));
 
         if (_level == null)
             _level = GetComponent<Level>();
@@ -84,9 +89,10 @@ public class RaceController : MonoBehaviour
 
     public void NextLevel()
     {
-        if (State != RaceState.Result || PlayerWon == false)
+        if (State != RaceState.Result || PlayerWon == false || HasNextLevel == false)
             return;
 
+        Progress.TrySelectLevel(_level.Number + 1, _campaign.Count);
         Time.timeScale = 1f;
         _level.BuildRoad();
         _player.ResetRace();
@@ -94,10 +100,17 @@ public class RaceController : MonoBehaviour
 
     public void ReturnToMenu()
     {
-        if (State == RaceState.Result && PlayerWon)
-            NextLevel();
-        else
-            Retry();
+        Retry();
+    }
+
+    public bool SelectLevel(int number)
+    {
+        if (State != RaceState.Waiting || Progress.TrySelectLevel(number, _campaign.Count) == false)
+            return false;
+
+        _level.BuildRoad();
+        _player.ResetRace();
+        return true;
     }
 
     public void EndRace(bool playerWon, RaceOutcome outcome = RaceOutcome.OpponentFinished)
@@ -107,7 +120,7 @@ public class RaceController : MonoBehaviour
 
         PlayerWon = playerWon;
         Outcome = playerWon ? RaceOutcome.FinishedFirst : outcome;
-        LastReward = Progress.RecordRace(playerWon);
+        LastReward = Progress.RecordRace(playerWon, _level.Number, CurrentStage.Reward, CurrentStage.FirstClearBonus);
         SetState(RaceState.Result);
         _input.ResetInput();
 

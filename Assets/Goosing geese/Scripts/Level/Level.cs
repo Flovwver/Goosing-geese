@@ -9,8 +9,6 @@ public class Level : MonoBehaviour
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
 
-    [SerializeField, Min(0)] private int _piecesPerLevel = 2;
-    [SerializeField, Min(1)] private int _maximumPieces = 60;
     [SerializeField, Min(0f)] private float _minimumRoadSpacing = 24f;
     [SerializeField, Min(1)] private int _layoutValidationAttempts = 20;
 
@@ -73,7 +71,7 @@ public class Level : MonoBehaviour
 
     public void BuildRoad()
     {
-        CreateLevel(Environment.TickCount);
+        CreateLevel(GetComponent<RaceController>().CurrentStage.Seed);
     }
 
     public void CreateLevel(int seed)
@@ -83,9 +81,17 @@ public class Level : MonoBehaviour
         RaceController race = GetComponent<RaceController>();
         int level = race != null ? race.Progress.Level : 1;
         Number = level;
-        _mainPieceCount = Mathf.Clamp(_settings.RoadPieceCount + (level - 1) * _piecesPerLevel, 1, _maximumPieces);
+        CampaignStage stage = race.CurrentStage;
+        _mainPieceCount = Mathf.Max(1, stage.PieceCount);
         _curveSamples = Mathf.Max(1, _settings.CurveSamplesPerSegment);
         int runoutPieces = Mathf.Max(1, _settings.FinishRunoutPieces);
+        if (seed == stage.Seed && stage.Layout != null && stage.Layout.Length >= _mainPieceCount + runoutPieces)
+        {
+            _currentLayout = (RoadPieceType[])stage.Layout.Clone();
+            BuildCurrentLayout();
+            return;
+        }
+
         UnityEngine.Random.State randomState = UnityEngine.Random.state;
 
         try

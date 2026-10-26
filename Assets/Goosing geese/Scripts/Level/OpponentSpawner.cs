@@ -11,6 +11,7 @@ public class OpponentSpawner : MonoBehaviour
     private Racer _opponent;
     private RaceController _race;
     private RacerAppearance _appearance;
+    private RacerStats _runtimeStats;
 
     public Racer Opponent => _opponent;
 
@@ -62,8 +63,27 @@ public class OpponentSpawner : MonoBehaviour
             _opponent.Finished -= OnOpponentFinished;
     }
 
+    private void OnDestroy()
+    {
+        if (_runtimeStats != null)
+            Destroy(_runtimeStats);
+    }
+
     private void UpdateVehicle()
     {
+        if (_runtimeStats == null)
+        {
+            _runtimeStats = Instantiate(_opponent.BaseStats);
+            _runtimeStats.name = "Opponent stage stats";
+            _runtimeStats.hideFlags = HideFlags.DontSave;
+        }
+
+        CampaignStage stage = _race.CurrentStage;
+        _runtimeStats.MaxSpeed = stage.OpponentMaxSpeed;
+        _runtimeStats.Acceleration = stage.OpponentAcceleration;
+        _opponent.ConfigureStats(_runtimeStats);
+        _driver.Configure(stage.CruiseSpeed, stage.CornerSpeed);
+
         if (_vehiclePrefabs == null || _vehiclePrefabs.Length == 0)
             return;
 

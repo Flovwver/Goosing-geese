@@ -13,6 +13,7 @@ public class GameScreens : MonoBehaviour
     [SerializeField] private Racer _player;
     [SerializeField] private OpponentSpawner _opponents;
     [SerializeField] private GarageView _garage;
+    [SerializeField] private CampaignView _campaignView;
 
     private GameObject _pedal;
     private PedalPromptView _pedalPrompt;
@@ -27,6 +28,8 @@ public class GameScreens : MonoBehaviour
     private GameObject _garageButton;
     private GameObject _menuBackdrop;
     private Text _wallet;
+    private GameObject _levelButton;
+    private Text _levelLabel;
 
     private void Awake()
     {
@@ -42,6 +45,7 @@ public class GameScreens : MonoBehaviour
 
         _race.StateChanged += OnStateChanged;
         _garage.VisibilityChanged += OnGarageVisibilityChanged;
+        _campaignView.VisibilityChanged += OnCampaignVisibilityChanged;
 
         if (rebuilt)
             OnStateChanged(_race.State);
@@ -55,18 +59,20 @@ public class GameScreens : MonoBehaviour
     private void Update()
     {
         GameUiFactory.UpdateSafeArea(_safeArea);
-        bool showNavigation = _panel == null && _garage.IsVisible == false && _race.State != RaceState.Result;
-        _pedal.SetActive(_panel == null && _race.State != RaceState.Result && _garage.IsVisible == false);
+        bool showNavigation = _panel == null && _garage.IsVisible == false && _campaignView.IsVisible == false && _race.State != RaceState.Result;
+        _pedal.SetActive(_panel == null && _race.State != RaceState.Result && _garage.IsVisible == false && _campaignView.IsVisible == false);
         bool showStartMenu = showNavigation && _race.State == RaceState.Waiting;
         _pedalPrompt.SetVisible(showStartMenu);
         _menuBackdrop.SetActive(showStartMenu);
+        _levelButton.SetActive(showStartMenu);
+        _levelLabel.text = L("УРОВЕНЬ ", "LEVEL ") + _race.Progress.Level + " →";
         _wallet.text = _race.Progress.Wallet + L(" ОЧК.", " PTS");
         _gear.SetActive(showNavigation);
         _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
         _garageButton.SetActive(showNavigation && _race.State == RaceState.Waiting);
         UpdateInputAvailability();
-        _status.gameObject.SetActive(_garage.IsVisible == false);
-        _speedometer.gameObject.SetActive(_garage.IsVisible == false);
+        _status.gameObject.SetActive(_garage.IsVisible == false && _campaignView.IsVisible == false && _race.State != RaceState.Waiting);
+        _speedometer.gameObject.SetActive(_garage.IsVisible == false && _campaignView.IsVisible == false);
         string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
         string lead = "";
 
@@ -86,6 +92,7 @@ public class GameScreens : MonoBehaviour
     {
         _race.StateChanged -= OnStateChanged;
         _garage.VisibilityChanged -= OnGarageVisibilityChanged;
+        _campaignView.VisibilityChanged -= OnCampaignVisibilityChanged;
 
         if (_pedalPrompt != null)
             _pedalPrompt.SetVisible(false);
@@ -127,6 +134,11 @@ public class GameScreens : MonoBehaviour
         GameUiFactory.Place(garageLabel.rectTransform, new Vector2(0f, -0.25f), new Vector2(1f, 0.02f));
         Text trophyLabel = _ui.CreateLabel(_trophy.transform, L("РЕКОРД", "RECORD"), 18);
         GameUiFactory.Place(trophyLabel.rectTransform, new Vector2(-0.1f, -0.25f), new Vector2(1.1f, 0.02f));
+        Button levelButton = _ui.CreateButton(_safeArea, "", OpenCampaign);
+        _levelButton = levelButton.gameObject;
+        _levelLabel = levelButton.GetComponentInChildren<Text>();
+        _levelLabel.fontSize = 22;
+        GameUiFactory.Place((RectTransform)_levelButton.transform, new Vector2(0.31f, 0.815f), new Vector2(0.79f, 0.855f));
         BuildMenuChrome();
         ConfigureRaceHud();
     }
@@ -200,6 +212,7 @@ public class GameScreens : MonoBehaviour
         }
 
         _garage.Hide();
+        _campaignView.Hide();
         var rect = GameUiFactory.CreateRect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
         _panel = rect.gameObject;
 
@@ -239,15 +252,36 @@ public class GameScreens : MonoBehaviour
     private void UpdateInputAvailability()
     {
         bool acceptsInput = _race.State == RaceState.Waiting || _race.State == RaceState.Racing;
-        _input.enabled = acceptsInput && _panel == null && _garage.IsVisible == false;
+        _input.enabled = acceptsInput && _panel == null && _garage.IsVisible == false && _campaignView.IsVisible == false;
     }
 
     private void OnGarageVisibilityChanged(bool visible)
     {
         if (visible)
+        {
             ClosePanel();
+            _campaignView.Hide();
+        }
 
         UpdateInputAvailability();
+    }
+
+    private void OnCampaignVisibilityChanged(bool visible)
+    {
+        if (visible)
+        {
+            ClosePanel();
+            _garage.Hide();
+        }
+
+        UpdateInputAvailability();
+    }
+
+    private void OpenCampaign()
+    {
+        ClosePanel();
+        _garage.Hide();
+        _campaignView.Show();
     }
 
     private void OpenGarage()
