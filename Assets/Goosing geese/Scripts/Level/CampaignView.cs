@@ -20,6 +20,8 @@ public class CampaignView : MonoBehaviour
 
     public bool IsVisible => _canvas != null && _canvas.activeSelf;
 
+    private int VisibleStageCount => Mathf.Max(_race.Campaign.Count, _race.Progress.GetUnlockedLevel(int.MaxValue));
+
     private void Awake()
     {
         InitializeUi();
@@ -104,12 +106,12 @@ public class CampaignView : MonoBehaviour
         layout.childForceExpandHeight = false;
         _ui.CreateHeading(rect, L("УРОВНИ", "LEVELS"), 32);
 
-        for (int index = _page * PageSize; index < Mathf.Min(_race.Campaign.Count, (_page + 1) * PageSize); index++)
+        for (int index = _page * PageSize; index < Mathf.Min(VisibleStageCount, (_page + 1) * PageSize); index++)
         {
             int number = index + 1;
             CampaignStage stage = _race.Campaign.GetStage(number);
             bool completed = number <= _race.Progress.HighestCompletedLevel;
-            bool unlocked = number <= _race.Progress.GetUnlockedLevel(_race.Campaign.Count);
+            bool unlocked = number <= _race.Progress.GetUnlockedLevel(VisibleStageCount);
             string reward = stage.Reward + (completed ? "" : " +" + stage.FirstClearBonus);
             string text = number + " • " + stage.GetDifficultyName(_race.Progress.English)
                 + " • " + reward + L(" очк.", " pts")
@@ -127,8 +129,8 @@ public class CampaignView : MonoBehaviour
         horizontal.childControlHeight = true;
         horizontal.childForceExpandHeight = false;
         _ui.CreateButton(row, "<", () => ChangePage(-1)).interactable = _page > 0;
-        _ui.CreateLabel(row, (_page + 1) + " / " + Mathf.CeilToInt((float)_race.Campaign.Count / PageSize), 24);
-        _ui.CreateButton(row, ">", () => ChangePage(1)).interactable = (_page + 1) * PageSize < _race.Campaign.Count;
+        _ui.CreateLabel(row, (_page + 1) + " / " + Mathf.CeilToInt((float)VisibleStageCount / PageSize), 24);
+        _ui.CreateButton(row, ">", () => ChangePage(1)).interactable = (_page + 1) * PageSize < VisibleStageCount;
         _ui.CreateButton(rect, L("Назад", "Back"), Hide);
     }
 

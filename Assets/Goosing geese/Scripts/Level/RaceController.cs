@@ -19,12 +19,12 @@ public class RaceController : MonoBehaviour
     public int LastReward { get; private set; }
     public CampaignSettings Campaign => _campaign;
     public CampaignStage CurrentStage => _campaign.GetStage(Progress.Level);
-    public bool HasNextLevel => _level.Number < _campaign.Count;
+    public bool HasNextLevel => _level.Number < int.MaxValue;
 
     private void Awake()
     {
         Progress = PlayerProgress.Load();
-        Progress.Level = Mathf.Clamp(Progress.Level, 1, Progress.GetUnlockedLevel(_campaign.Count));
+        Progress.Level = Mathf.Clamp(Progress.Level, 1, Progress.GetUnlockedLevel(int.MaxValue));
 
         if (_level == null)
             _level = GetComponent<Level>();
@@ -92,7 +92,7 @@ public class RaceController : MonoBehaviour
         if (State != RaceState.Result || PlayerWon == false || HasNextLevel == false)
             return;
 
-        Progress.TrySelectLevel(_level.Number + 1, _campaign.Count);
+        Progress.TrySelectLevel(_level.Number + 1, int.MaxValue);
         Time.timeScale = 1f;
         _level.BuildRoad();
         _player.ResetRace();
@@ -105,7 +105,7 @@ public class RaceController : MonoBehaviour
 
     public bool SelectLevel(int number)
     {
-        if (State != RaceState.Waiting || Progress.TrySelectLevel(number, _campaign.Count) == false)
+        if (State != RaceState.Waiting || Progress.TrySelectLevel(number, int.MaxValue) == false)
             return false;
 
         _level.BuildRoad();
