@@ -16,7 +16,7 @@ public class RacerGarage : MonoBehaviour
 
     public int SelectedIndex => Mathf.Clamp(_race.Progress.Appearance, 0, _appearances.Count - 1);
     public int PreviewIndex => _previewIndex >= 0 ? _previewIndex : SelectedIndex;
-    public int ModelCount => _appearances.Count;
+    public int AppearanceCount => _appearances.Count;
     public int AvailablePoints => _race.Progress.Wallet;
     public int TotalPoints => _race.Progress.Points;
     public int HighestCompletedLevel => _race.Progress.HighestCompletedLevel;
@@ -50,9 +50,32 @@ public class RacerGarage : MonoBehaviour
         }
     }
 
+    public int[] GetPreviewColorIndices()
+    {
+        return _appearances.GetColorIndices(PreviewIndex);
+    }
+
+    public Color GetColor(int index)
+    {
+        return _appearances.GetEntry(index).Tint;
+    }
+
+    public void BrowseRelativeModel(int direction)
+    {
+        if (direction != -1 && direction != 1)
+            return;
+
+        int index = _appearances.GetRelativeModelIndex(PreviewIndex, direction);
+
+        if (_appearances.GetEntry(index).UpgradeId == SelectedEntry.UpgradeId)
+            index = SelectedIndex;
+
+        Browse(index);
+    }
+
     public bool Browse(int index)
     {
-        if (_race.State != RaceState.Waiting || index < 0 || index >= ModelCount)
+        if (_race.State != RaceState.Waiting || index < 0 || index >= AppearanceCount)
             return false;
 
         _previewIndex = index;
@@ -68,7 +91,7 @@ public class RacerGarage : MonoBehaviour
 
     public bool IsOwned(int index)
     {
-        return index >= 0 && index < ModelCount
+        return index >= 0 && index < AppearanceCount
             && _race.Progress.OwnedModels.Contains(_appearances.GetEntry(index).UpgradeId);
     }
 

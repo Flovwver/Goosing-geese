@@ -16,6 +16,8 @@ MonoBehaviour:
   - _upgradeId: goose
     _russianName: "\u0411\u0435\u043B\u044B\u0439 \u0433\u0443\u0441\u044C"
     _englishName: White goose
+    _russianModelName: Гусь
+    _englishModelName: Goose
     _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
     _model: {fileID: 0}
     _tint: {r: 1, g: 1, b: 1, a: 1}
@@ -28,6 +30,8 @@ MonoBehaviour:
   - _upgradeId: goose
     _russianName: "\u0413\u043E\u043B\u0443\u0431\u043E\u0439 \u0433\u0443\u0441\u044C"
     _englishName: Blue goose
+    _russianModelName: Гусь
+    _englishModelName: Goose
     _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
     _model: {fileID: 0}
     _tint: {r: 0.65, g: 0.85, b: 1, a: 1}
@@ -40,6 +44,8 @@ MonoBehaviour:
   - _upgradeId: goose
     _russianName: "\u0420\u043E\u0437\u043E\u0432\u044B\u0439 \u0433\u0443\u0441\u044C"
     _englishName: Pink goose
+    _russianModelName: Гусь
+    _englishModelName: Goose
     _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
     _model: {fileID: 0}
     _tint: {r: 1, g: 0.65, b: 0.75, a: 1}

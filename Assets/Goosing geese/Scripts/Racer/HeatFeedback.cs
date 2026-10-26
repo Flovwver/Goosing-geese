@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(600)]
 [RequireComponent(typeof(Racer))]
 public class HeatFeedback : MonoBehaviour
 {
@@ -74,7 +75,7 @@ public class HeatFeedback : MonoBehaviour
         RefreshRenderers();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         for (int index = 0; index < _renderers.Length; index++)
         {

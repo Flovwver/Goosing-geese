@@ -103,7 +103,7 @@ public class GarageView : MonoBehaviour
             return;
 
         ClearPanels();
-        RectTransform header = CreatePanel("Garage header", new Vector2(0f, 0.76f), Vector2.one);
+        RectTransform header = CreatePanel("Garage header", new Vector2(0f, 0.69f), Vector2.one);
         _header = header.gameObject;
         _ui.CreateHeading(header, L("ГАРАЖ", "GARAGE"), 38);
         Text balance = _ui.CreateLabel(header, L("Доступно: ", "Available: ") + _garage.AvailablePoints + L(" • Всего: ", " • Total: ") + _garage.TotalPoints, 24);
@@ -113,6 +113,7 @@ public class GarageView : MonoBehaviour
         balanceOutline.effectColor = GameUiTheme.Ink;
         balanceOutline.effectDistance = new Vector2(1f, -1f);
         BuildModelSelector(header);
+        BuildColorSelector(header);
         BuildPurchaseButton(header);
         RectTransform footer = CreatePanel("Garage upgrades", Vector2.zero, new Vector2(1f, 0.4f));
         _footer = footer.gameObject;
@@ -148,10 +149,37 @@ public class GarageView : MonoBehaviour
         layout.childForceExpandHeight = false;
         Button previous = _ui.CreateButton(row, "<", () => SelectRelative(-1));
         previous.GetComponent<LayoutElement>().preferredWidth = 70f;
-        Text name = _ui.CreateLabel(row, _garage.PreviewEntry.GetName(_race.Progress.English) + "\n" + L("Скорость ", "Speed ") + _garage.PreviewEntry.Stats.MaxSpeed.ToString("0") + L(" • Зел. до ", " • Green cap ") + (_garage.PreviewEntry.MaximumGreenZone * 100f).ToString("0") + "%", 24);
+        Text name = _ui.CreateLabel(row, _garage.PreviewEntry.GetModelName(_race.Progress.English) + "\n" + L("Скорость ", "Speed ") + _garage.PreviewEntry.Stats.MaxSpeed.ToString("0") + L(" • Зел. до ", " • Green cap ") + (_garage.PreviewEntry.MaximumGreenZone * 100f).ToString("0") + "%", 24);
         name.GetComponent<LayoutElement>().flexibleWidth = 1f;
         Button next = _ui.CreateButton(row, ">", () => SelectRelative(1));
         next.GetComponent<LayoutElement>().preferredWidth = 70f;
+    }
+
+    private void BuildColorSelector(Transform parent)
+    {
+        int[] colors = _garage.GetPreviewColorIndices();
+
+        if (colors.Length < 2)
+            return;
+
+        var row = GameUiFactory.CreateRect("Color selector", parent, Vector2.zero, Vector2.one);
+        row.gameObject.AddComponent<LayoutElement>().preferredHeight = 48f;
+        var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 12f;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+
+        foreach (int index in colors)
+        {
+            Button swatch = _ui.CreateButton(row, index == _garage.PreviewIndex ? "✓" : "", () => _garage.Browse(index));
+            swatch.GetComponent<Image>().color = _garage.GetColor(index);
+            swatch.GetComponent<LayoutElement>().preferredHeight = 48f;
+            swatch.GetComponentInChildren<Text>().color = GameUiTheme.Ink;
+            var outline = swatch.gameObject.AddComponent<Outline>();
+            outline.effectColor = index == _garage.PreviewIndex ? GameUiTheme.Accent : GameUiTheme.Ink;
+            outline.effectDistance = Vector2.one * 2f;
+        }
     }
 
     private void BuildPurchaseButton(Transform parent)
@@ -176,8 +204,7 @@ public class GarageView : MonoBehaviour
 
     private void SelectRelative(int direction)
     {
-        int next = (_garage.PreviewIndex + direction + _garage.ModelCount) % _garage.ModelCount;
-        _garage.Browse(next);
+        _garage.BrowseRelativeModel(direction);
     }
 
     private void AddUpgradeButton(Transform parent, RacerUpgradeKind kind)

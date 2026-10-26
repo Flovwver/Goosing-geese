@@ -8,6 +8,36 @@ public class RacerAppearanceCatalog : ScriptableObject
 
     public int Count => _entries != null ? _entries.Length : 0;
 
+    public int GetRelativeModelIndex(int index, int direction)
+    {
+        string currentId = GetEntry(index).UpgradeId;
+        int next = index;
+
+        for (int count = 0; count < Count; count++)
+        {
+            next = (next + direction + Count) % Count;
+
+            if (GetEntry(next).UpgradeId != currentId)
+                return next;
+        }
+
+        return index;
+    }
+
+    public int[] GetColorIndices(int index)
+    {
+        var colors = new System.Collections.Generic.List<int>();
+        string modelId = GetEntry(index).UpgradeId;
+
+        for (int candidate = 0; candidate < Count; candidate++)
+        {
+            if (GetEntry(candidate).UpgradeId == modelId)
+                colors.Add(candidate);
+        }
+
+        return colors.ToArray();
+    }
+
     public Entry GetEntry(int index)
     {
         if (Count == 0)
@@ -22,6 +52,8 @@ public class RacerAppearanceCatalog : ScriptableObject
         [SerializeField] private string _upgradeId;
         [SerializeField] private string _russianName;
         [SerializeField] private string _englishName;
+        [SerializeField] private string _russianModelName;
+        [SerializeField] private string _englishModelName;
         [SerializeField] private RacerStats _stats;
         [SerializeField] private GameObject _model;
         [SerializeField] private Color _tint = Color.white;
@@ -44,6 +76,12 @@ public class RacerAppearanceCatalog : ScriptableObject
         public GameObject Model => _model;
         public Color Tint => _tint;
         public Sprite PedalSprite => _pedalSprite;
+
+        public string GetModelName(bool english)
+        {
+            string name = english ? _englishModelName : _russianModelName;
+            return string.IsNullOrEmpty(name) ? GetName(english) : name;
+        }
 
         public string GetName(bool english)
         {
