@@ -68,7 +68,7 @@ public class RaceResultView : MonoBehaviour
         }
 
         _panel = null;
-        _ui = new GameUiFactory(Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"), _audio.PlayClick);
+        _ui = new GameUiFactory(GameUiTheme.LoadFont(), _audio.PlayClick);
         _canvasRoot = GameUiFactory.CreateCanvas("Race result", transform, CanvasSortingOrder);
         _safeArea = GameUiFactory.CreateRect("Safe area", _canvasRoot.transform, Vector2.zero, Vector2.one);
         var rect = GameUiFactory.CreateRect("Show result on tap", _canvasRoot.transform, Vector2.zero, Vector2.one);

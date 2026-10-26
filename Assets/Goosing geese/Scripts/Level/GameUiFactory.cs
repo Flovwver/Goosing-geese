@@ -9,7 +9,7 @@ public class GameUiFactory
     private const float LabelHeightMultiplier = 2.4f;
     private const float ButtonHeight = 68f;
     private const int ButtonFontSize = 25;
-    private static readonly Color ButtonColor = new Color(0.12f, 0.32f, 0.36f);
+    private static readonly Color ButtonColor = GameUiTheme.Button;
 
     private readonly Font _font;
     private readonly Action _playClick;
@@ -65,6 +65,7 @@ public class GameUiFactory
         label.font = _font;
         label.fontSize = size;
         label.color = Color.white;
+        label.fontStyle = FontStyle.Normal;
         label.alignment = TextAnchor.MiddleCenter;
         label.text = text;
         label.raycastTarget = false;
@@ -76,6 +77,9 @@ public class GameUiFactory
     {
         var rect = CreateRect(text, parent, Vector2.zero, Vector2.one);
         rect.gameObject.AddComponent<Image>().color = ButtonColor;
+        var shadow = rect.gameObject.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0.02f, 0.42f, 0.6f, 0.35f);
+        shadow.effectDistance = new Vector2(0f, -3f);
         var button = rect.gameObject.AddComponent<Button>();
         button.onClick.AddListener(() =>
         {

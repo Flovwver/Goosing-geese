@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class GarageView : MonoBehaviour
 {
     private const int CanvasSortingOrder = 25;
-    private static readonly Color PanelColor = new Color(0.05f, 0.09f, 0.12f, 0.96f);
+    private static readonly Color PanelColor = GameUiTheme.Panel;
 
     [SerializeField] private RaceController _race;
     [SerializeField] private RacerGarage _garage;
@@ -89,9 +89,9 @@ public class GarageView : MonoBehaviour
 
         _header = null;
         _footer = null;
-        _ui = new GameUiFactory(Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"), _audio.PlayClick);
+        _ui = new GameUiFactory(GameUiTheme.LoadFont(), _audio.PlayClick);
         _canvasRoot = GameUiFactory.CreateCanvas("Garage", transform, CanvasSortingOrder);
-        _canvasRoot.AddComponent<Image>().color = new Color(0.02f, 0.04f, 0.06f, 0.25f);
+        _canvasRoot.AddComponent<Image>().color = Color.clear;
         _safeArea = GameUiFactory.CreateRect("Safe area", _canvasRoot.transform, Vector2.zero, Vector2.one);
         _canvasRoot.SetActive(false);
     }
@@ -102,12 +102,17 @@ public class GarageView : MonoBehaviour
             return;
 
         ClearPanels();
-        RectTransform header = CreatePanel("Garage header", new Vector2(0.04f, 0.78f), new Vector2(0.96f, 0.98f));
+        RectTransform header = CreatePanel("Garage header", new Vector2(0f, 0.76f), Vector2.one);
         _header = header.gameObject;
-        _ui.CreateLabel(header, L("ГАРАЖ", "GARAGE"), 30);
-        _ui.CreateLabel(header, L("Доступно: ", "Available: ") + _garage.AvailablePoints + L(" • Всего: ", " • Total: ") + _garage.TotalPoints, 22);
+        _ui.CreateLabel(header, L("ГАРАЖ", "GARAGE"), 38);
+        Text balance = _ui.CreateLabel(header, L("Доступно: ", "Available: ") + _garage.AvailablePoints + L(" • Всего: ", " • Total: ") + _garage.TotalPoints, 24);
+        balance.color = GameUiTheme.Accent;
+        balance.fontStyle = FontStyle.Bold;
+        var balanceOutline = balance.gameObject.AddComponent<Outline>();
+        balanceOutline.effectColor = GameUiTheme.Ink;
+        balanceOutline.effectDistance = new Vector2(1f, -1f);
         BuildModelSelector(header);
-        RectTransform footer = CreatePanel("Garage upgrades", new Vector2(0.04f, 0.03f), new Vector2(0.96f, 0.42f));
+        RectTransform footer = CreatePanel("Garage upgrades", Vector2.zero, new Vector2(1f, 0.4f));
         _footer = footer.gameObject;
 
         foreach (RacerUpgradeKind kind in Enum.GetValues(typeof(RacerUpgradeKind)))
@@ -122,7 +127,7 @@ public class GarageView : MonoBehaviour
         rect.gameObject.AddComponent<Image>().color = PanelColor;
         var layout = rect.gameObject.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(16, 16, 16, 16);
-        layout.spacing = 8f;
+        layout.spacing = 4f;
         layout.childControlHeight = true;
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
@@ -134,7 +139,7 @@ public class GarageView : MonoBehaviour
         var row = GameUiFactory.CreateRect("Model selector", parent, Vector2.zero, Vector2.one);
         row.gameObject.AddComponent<LayoutElement>().preferredHeight = 60f;
         var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 8f;
+        layout.spacing = 4f;
         layout.childControlWidth = true;
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
@@ -162,7 +167,18 @@ public class GarageView : MonoBehaviour
             + "\n" + GetPreview(kind, maximum);
         Button button = _ui.CreateButton(parent, text, () => _garage.TryUpgrade(kind));
         button.GetComponent<LayoutElement>().preferredHeight = 82f;
-        button.GetComponentInChildren<Text>().fontSize = 22;
+        button.GetComponent<Image>().color = (int)kind % 2 == 0 ? GameUiTheme.LightRow : GameUiTheme.AlternateRow;
+        Text label = button.GetComponentInChildren<Text>();
+        label.fontSize = 26;
+        label.color = GameUiTheme.Ink;
+        label.alignment = TextAnchor.MiddleLeft;
+        GameUiFactory.Place(label.rectTransform, new Vector2(0.04f, 0.04f), new Vector2(0.84f, 0.96f));
+        var action = GameUiFactory.CreateRect("Upgrade action", button.transform, new Vector2(0.86f, 0f), Vector2.one);
+        var actionImage = action.gameObject.AddComponent<Image>();
+        actionImage.color = GameUiTheme.Button;
+        actionImage.raycastTarget = false;
+        Text actionLabel = _ui.CreateLabel(action, maximum ? "MAX" : "+", maximum ? 16 : 42);
+        actionLabel.color = GameUiTheme.Accent;
         button.interactable = _garage.CanUpgrade(kind);
     }
 

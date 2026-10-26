@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class GameScreens : MonoBehaviour
 {
     private const int CanvasSortingOrder = 20;
-    private static readonly Color PanelColor = new Color(0.05f, 0.09f, 0.12f, 0.96f);
-    private static readonly Color ButtonColor = new Color(0.12f, 0.32f, 0.36f);
+    private static readonly Color PanelColor = GameUiTheme.Panel;
+    private static readonly Color ButtonColor = GameUiTheme.Button;
 
     [SerializeField] private RaceController _race;
     [SerializeField] private InputSwitch _input;
@@ -25,6 +25,8 @@ public class GameScreens : MonoBehaviour
     private GameObject _gear;
     private GameObject _trophy;
     private GameObject _garageButton;
+    private GameObject _menuBackdrop;
+    private Text _wallet;
 
     private void Awake()
     {
@@ -54,8 +56,11 @@ public class GameScreens : MonoBehaviour
     {
         GameUiFactory.UpdateSafeArea(_safeArea);
         bool showNavigation = _panel == null && _garage.IsVisible == false && _race.State != RaceState.Result;
-        _pedal.SetActive(_race.State != RaceState.Result && _garage.IsVisible == false);
-        _pedalPrompt.SetVisible(showNavigation && _race.State == RaceState.Waiting);
+        _pedal.SetActive(_panel == null && _race.State != RaceState.Result && _garage.IsVisible == false);
+        bool showStartMenu = showNavigation && _race.State == RaceState.Waiting;
+        _pedalPrompt.SetVisible(showStartMenu);
+        _menuBackdrop.SetActive(showStartMenu);
+        _wallet.text = _race.Progress.Wallet + L(" ОЧК.", " PTS");
         _gear.SetActive(showNavigation);
         _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
         _garageButton.SetActive(showNavigation && _race.State == RaceState.Waiting);
@@ -93,7 +98,7 @@ public class GameScreens : MonoBehaviour
 
     private void InitializeUi()
     {
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        Font font = GameUiTheme.LoadFont();
         _ui = new GameUiFactory(font, GetComponent<GameAudio>().PlayClick);
 
         if (_canvasRoot != null)
@@ -120,7 +125,37 @@ public class GameScreens : MonoBehaviour
         _garageButton = MakeIconButton("Garage", MenuSymbol.Garage, OpenGarage, new Vector2(0.025f, 0.045f), new Vector2(0.185f, 0.145f), new Color(0.7f, 0.86f, 1f));
         Text garageLabel = _ui.CreateLabel(_garageButton.transform, L("ГАРАЖ", "GARAGE"), 18);
         GameUiFactory.Place(garageLabel.rectTransform, new Vector2(0f, -0.25f), new Vector2(1f, 0.02f));
+        Text trophyLabel = _ui.CreateLabel(_trophy.transform, L("РЕКОРД", "RECORD"), 18);
+        GameUiFactory.Place(trophyLabel.rectTransform, new Vector2(-0.1f, -0.25f), new Vector2(1.1f, 0.02f));
+        BuildMenuChrome();
         ConfigureRaceHud();
+    }
+
+    private void BuildMenuChrome()
+    {
+        var rect = GameUiFactory.CreateRect("Start menu chrome", _safeArea, Vector2.zero, Vector2.one);
+        _menuBackdrop = rect.gameObject;
+        rect.SetAsFirstSibling();
+        var header = GameUiFactory.CreateRect("Sky header", rect, new Vector2(0f, 0.875f), Vector2.one);
+        var headerImage = header.gameObject.AddComponent<Image>();
+        headerImage.color = GameUiTheme.Header;
+        headerImage.raycastTarget = false;
+        var footer = GameUiFactory.CreateRect("Navigation dock", rect, Vector2.zero, new Vector2(1f, 0.17f));
+        var footerImage = footer.gameObject.AddComponent<Image>();
+        footerImage.color = GameUiTheme.Header;
+        footerImage.raycastTarget = false;
+        Text title = _ui.CreateLabel(rect, "GOOSING\nGEESE", 68);
+        title.fontStyle = FontStyle.Bold;
+        title.lineSpacing = 0.85f;
+        GameUiFactory.Place(title.rectTransform, new Vector2(0.12f, 0.65f), new Vector2(0.88f, 0.81f));
+        var outline = title.gameObject.AddComponent<Outline>();
+        outline.effectColor = GameUiTheme.Ink;
+        outline.effectDistance = new Vector2(3f, -3f);
+        _wallet = _ui.CreateLabel(rect, "", 24);
+        _wallet.color = GameUiTheme.Accent;
+        _wallet.alignment = TextAnchor.MiddleRight;
+        _wallet.fontStyle = FontStyle.Bold;
+        GameUiFactory.Place(_wallet.rectTransform, new Vector2(0.55f, 0.96f), new Vector2(0.96f, 0.995f));
     }
 
     private GameObject MakeIconButton(string name, MenuSymbol symbol, Action action, Vector2 min, Vector2 max, Color tint)
@@ -129,7 +164,7 @@ public class GameScreens : MonoBehaviour
         Text label = button.GetComponentInChildren<Text>();
         label.gameObject.SetActive(false);
         Destroy(label.gameObject);
-        button.GetComponent<Image>().color = new Color(0.04f, 0.09f, 0.11f, 0.82f);
+        button.GetComponent<Image>().color = GameUiTheme.Button;
         GameUiFactory.Place((RectTransform)button.transform, min, max);
         var iconRect = GameUiFactory.CreateRect("Symbol", button.transform, Vector2.zero, Vector2.one);
         var icon = iconRect.gameObject.AddComponent<MenuSymbolGraphic>();
