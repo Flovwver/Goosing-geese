@@ -20,6 +20,11 @@ MonoBehaviour:
     _model: {fileID: 0}
     _tint: {r: 1, g: 1, b: 1, a: 1}
     _pedalSprite: {fileID: 21300000, guid: d08a031a506b3d94380ed82691d5be84, type: 3}
+    _purchasePrice: 0
+    _unlockLevel: 0
+    _maximumGreenZone: 0.8
+    _maximumRedStart: 0.92
+    _upgradePriceMultiplier: 1
   - _upgradeId: goose
     _russianName: "\u0413\u043E\u043B\u0443\u0431\u043E\u0439 \u0433\u0443\u0441\u044C"
     _englishName: Blue goose
@@ -27,6 +32,11 @@ MonoBehaviour:
     _model: {fileID: 0}
     _tint: {r: 0.65, g: 0.85, b: 1, a: 1}
     _pedalSprite: {fileID: 21300000, guid: d08a031a506b3d94380ed82691d5be84, type: 3}
+    _purchasePrice: 0
+    _unlockLevel: 0
+    _maximumGreenZone: 0.8
+    _maximumRedStart: 0.92
+    _upgradePriceMultiplier: 1
   - _upgradeId: goose
     _russianName: "\u0420\u043E\u0437\u043E\u0432\u044B\u0439 \u0433\u0443\u0441\u044C"
     _englishName: Pink goose
@@ -34,24 +44,44 @@ MonoBehaviour:
     _model: {fileID: 0}
     _tint: {r: 1, g: 0.65, b: 0.75, a: 1}
     _pedalSprite: {fileID: 21300000, guid: d08a031a506b3d94380ed82691d5be84, type: 3}
+    _purchasePrice: 0
+    _unlockLevel: 0
+    _maximumGreenZone: 0.8
+    _maximumRedStart: 0.92
+    _upgradePriceMultiplier: 1
   - _upgradeId: car
     _russianName: "\u0410\u0432\u0442\u043E\u043C\u043E\u0431\u0438\u043B\u044C"
     _englishName: Car
-    _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
+    _stats: {fileID: 11400000, guid: 860e5b9f14f17d04aa7cc17395572f44, type: 2}
     _model: {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
     _tint: {r: 1, g: 1, b: 1, a: 1}
     _pedalSprite: {fileID: 21300000, guid: 17b2f54ad7967844fb5019c82b7f9014, type: 3}
+    _purchasePrice: 800
+    _unlockLevel: 8
+    _maximumGreenZone: 0.87
+    _maximumRedStart: 0.95
+    _upgradePriceMultiplier: 1.1
   - _upgradeId: tractor
     _russianName: "\u0422\u0440\u0430\u043A\u0442\u043E\u0440"
     _englishName: Tractor
-    _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
+    _stats: {fileID: 11400000, guid: 3fac64188c9413743855e57d76be7b1e, type: 2}
     _model: {fileID: 118780, guid: 2204ec8a2d6a8fe45900f91c3ffb2300, type: 3}
     _tint: {r: 1, g: 1, b: 1, a: 1}
     _pedalSprite: {fileID: 21300000, guid: e153fb949ce484d4bbce25ef07e9831b, type: 3}
+    _purchasePrice: 1200
+    _unlockLevel: 12
+    _maximumGreenZone: 0.72
+    _maximumRedStart: 0.94
+    _upgradePriceMultiplier: 1.15
   - _upgradeId: goat
     _russianName: "\u041A\u043E\u0437\u0451\u043B"
     _englishName: Goat
-    _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
+    _stats: {fileID: 11400000, guid: 7c3240e5dfa48df4fb6e433a847959b3, type: 2}
     _model: {fileID: 3791262560391127436, guid: 515a296395b52b3419a053dc468bbd0c, type: 3}
     _tint: {r: 1, g: 1, b: 1, a: 1}
     _pedalSprite: {fileID: 21300000, guid: c644c60ddd803bb449ccbe206b8aaac8, type: 3}
+    _purchasePrice: 1800
+    _unlockLevel: 18
+    _maximumGreenZone: 0.92
+    _maximumRedStart: 0.95
+    _upgradePriceMultiplier: 1.25

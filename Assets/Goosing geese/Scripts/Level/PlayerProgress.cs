@@ -18,6 +18,8 @@ public class PlayerProgress
     public int Wallet;
     public bool WalletInitialized;
     public List<RacerUpgradeProgress> Upgrades = new List<RacerUpgradeProgress>();
+    public List<string> OwnedModels = new List<string> { "goose" };
+    public bool OwnershipInitialized;
     public int Level = 1;
     public int HighestCompletedLevel;
     public bool CampaignInitialized;
@@ -81,7 +83,7 @@ public class PlayerProgress
 
     public int GetUnlockedLevel(int stageCount)
     {
-        return Mathf.Clamp(HighestCompletedLevel + 1, 1, stageCount);
+        return (int)Math.Max(1L, Math.Min((long)HighestCompletedLevel + 1L, Math.Max(1, stageCount)));
     }
 
     public bool TrySelectLevel(int number, int stageCount)
@@ -96,7 +98,7 @@ public class PlayerProgress
 
     public int RecordRace(bool won, int number, int reward, int firstClearBonus)
     {
-        if (number < 1 || number > HighestCompletedLevel + 1)
+        if (number < 1 || (long)number > (long)HighestCompletedLevel + 1L)
             throw new ArgumentOutOfRangeException(nameof(number));
 
         RefreshDay();

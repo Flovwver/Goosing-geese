@@ -33,7 +33,7 @@ public class GarageView : MonoBehaviour
         if (_ui == null)
             InitializeUi();
 
-        _garage.SelectionChanged += Refresh;
+        _garage.PreviewChanged += Refresh;
         _garage.UpgradesChanged += Refresh;
         _race.StateChanged += OnStateChanged;
 
@@ -49,7 +49,7 @@ public class GarageView : MonoBehaviour
 
     private void OnDisable()
     {
-        _garage.SelectionChanged -= Refresh;
+        _garage.PreviewChanged -= Refresh;
         _garage.UpgradesChanged -= Refresh;
         _race.StateChanged -= OnStateChanged;
         Hide();
@@ -71,6 +71,7 @@ public class GarageView : MonoBehaviour
             return;
 
         _canvasRoot.SetActive(false);
+        _garage.EndPreview();
         VisibilityChanged?.Invoke(false);
     }
 
@@ -112,6 +113,7 @@ public class GarageView : MonoBehaviour
         balanceOutline.effectColor = GameUiTheme.Ink;
         balanceOutline.effectDistance = new Vector2(1f, -1f);
         BuildModelSelector(header);
+        BuildPurchaseButton(header);
         RectTransform footer = CreatePanel("Garage upgrades", Vector2.zero, new Vector2(1f, 0.4f));
         _footer = footer.gameObject;
 
@@ -143,33 +145,60 @@ public class GarageView : MonoBehaviour
         layout.childControlWidth = true;
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
         Button previous = _ui.CreateButton(row, "<", () => SelectRelative(-1));
         previous.GetComponent<LayoutElement>().preferredWidth = 70f;
-        Text name = _ui.CreateLabel(row, _garage.SelectedEntry.GetName(_race.Progress.English), 24);
+        Text name = _ui.CreateLabel(row, _garage.PreviewEntry.GetName(_race.Progress.English) + "\n" + L("Скорость ", "Speed ") + _garage.PreviewEntry.Stats.MaxSpeed.ToString("0") + L(" • Зел. до ", " • Green cap ") + (_garage.PreviewEntry.MaximumGreenZone * 100f).ToString("0") + "%", 24);
         name.GetComponent<LayoutElement>().flexibleWidth = 1f;
         Button next = _ui.CreateButton(row, ">", () => SelectRelative(1));
         next.GetComponent<LayoutElement>().preferredWidth = 70f;
     }
 
+    private void BuildPurchaseButton(Transform parent)
+    {
+        bool owned = _garage.IsOwned(_garage.PreviewIndex);
+        bool selected = _garage.PreviewIndex == _garage.SelectedIndex;
+        string text = owned ? selected ? L("Выбрано", "Selected") : L("Выбрать", "Select")
+            : _garage.HighestCompletedLevel < _garage.PreviewEntry.UnlockLevel
+                ? L("После уровня ", "After level ") + _garage.PreviewEntry.UnlockLevel + " • " + _garage.PreviewEntry.PurchasePrice
+                : L("Купить: ", "Buy: ") + _garage.PreviewEntry.PurchasePrice + L(" очк.", " pts");
+        Button button = _ui.CreateButton(parent, text, () =>
+        {
+            if (owned)
+                _garage.Select(_garage.PreviewIndex);
+            else
+                _garage.TryPurchase();
+        });
+        button.GetComponent<LayoutElement>().preferredHeight = 48f;
+        button.GetComponentInChildren<Text>().fontSize = 22;
+        button.interactable = owned ? selected == false : _garage.CanPurchase();
+    }
+
     private void SelectRelative(int direction)
     {
-        int next = (_garage.SelectedIndex + direction + _garage.ModelCount) % _garage.ModelCount;
-        _garage.Select(next);
+        int next = (_garage.PreviewIndex + direction + _garage.ModelCount) % _garage.ModelCount;
+        _garage.Browse(next);
     }
 
     private void AddUpgradeButton(Transform parent, RacerUpgradeKind kind)
     {
         int level = _garage.GetUpgradeLevel(kind);
-        bool maximum = level >= _garage.MaximumUpgradeLevel
-            || Mathf.Approximately(_garage.GetUpgradeValue(kind), _garage.GetUpgradeValue(kind, 1));
+        bool thermalLock = kind == RacerUpgradeKind.Handling && _garage.IsHandlingThermallyLimited();
+        bool unchanged = Mathf.Approximately(_garage.GetUpgradeValue(kind), _garage.GetUpgradeValue(kind, 1));
+        bool maximum = level >= _garage.MaximumUpgradeLevel || (unchanged && thermalLock == false);
         string price = maximum ? L("МАКС.", "MAX") : _garage.GetUpgradePrice(kind) + L(" очк.", " pts");
+        string preview = unchanged && thermalLock ? L("Улучши термостойкость", "Improve heat resistance") : GetPreview(kind, maximum);
+
+        if (_garage.HighestCompletedLevel < _garage.GetUpgradeRequiredStage(kind) && maximum == false)
+            preview = L("После уровня ", "After level ") + _garage.GetUpgradeRequiredStage(kind);
+
         string text = GetUpgradeName(kind) + "  " + level + "/" + _garage.MaximumUpgradeLevel + " • " + price
-            + "\n" + GetPreview(kind, maximum);
+            + "\n" + preview;
         Button button = _ui.CreateButton(parent, text, () => _garage.TryUpgrade(kind));
-        button.GetComponent<LayoutElement>().preferredHeight = 82f;
+        button.GetComponent<LayoutElement>().preferredHeight = 68f;
         button.GetComponent<Image>().color = (int)kind % 2 == 0 ? GameUiTheme.LightRow : GameUiTheme.AlternateRow;
         Text label = button.GetComponentInChildren<Text>();
-        label.fontSize = 26;
+        label.fontSize = 22;
         label.color = GameUiTheme.Ink;
         label.alignment = TextAnchor.MiddleLeft;
         GameUiFactory.Place(label.rectTransform, new Vector2(0.04f, 0.04f), new Vector2(0.84f, 0.96f));
@@ -194,6 +223,8 @@ public class GarageView : MonoBehaviour
                 return L("Охлаждение", "Cooling");
             case RacerUpgradeKind.Handling:
                 return L("Управляемость", "Handling");
+            case RacerUpgradeKind.ThermalResistance:
+                return L("Термостойкость", "Heat resistance");
             default:
                 throw new ArgumentOutOfRangeException(nameof(kind));
         }
@@ -203,10 +234,16 @@ public class GarageView : MonoBehaviour
     {
         float current = _garage.GetUpgradeValue(kind);
         float next = _garage.GetUpgradeValue(kind, 1);
-        string prefix = kind == RacerUpgradeKind.Handling ? L("Зелёная зона: ", "Green zone: ")
+
+        if (kind == RacerUpgradeKind.ThermalResistance)
+        {
+            current = 1f - current;
+            next = 1f - next;
+        }
+        string prefix = kind == RacerUpgradeKind.ThermalResistance ? L("Красная зона: ", "Red zone: ") : kind == RacerUpgradeKind.Handling ? L("Зелёная зона: ", "Green zone: ")
             : kind == RacerUpgradeKind.Cooling ? L("Спад нагрева: ×", "Cooling rate: ×") : "";
-        float scale = kind == RacerUpgradeKind.Handling ? 100f : 1f;
-        string suffix = kind == RacerUpgradeKind.Handling ? "%" : "";
+        float scale = kind == RacerUpgradeKind.Handling || kind == RacerUpgradeKind.ThermalResistance ? 100f : 1f;
+        string suffix = kind == RacerUpgradeKind.Handling || kind == RacerUpgradeKind.ThermalResistance ? "%" : "";
         string preview = prefix + (current * scale).ToString("0.##") + suffix;
 
         if (maximum == false)

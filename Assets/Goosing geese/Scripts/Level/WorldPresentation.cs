@@ -40,7 +40,7 @@ public class WorldPresentation : MonoBehaviour
 
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += ApplyAppearance;
-        _garage.SelectionChanged += ApplyAppearance;
+        _garage.PreviewChanged += ApplyAppearance;
     }
 
     private void Start()
@@ -52,7 +52,7 @@ public class WorldPresentation : MonoBehaviour
     {
         _level.PathBuilt -= OnPathBuilt;
         _player.RaceRestarted -= ApplyAppearance;
-        _garage.SelectionChanged -= ApplyAppearance;
+        _garage.PreviewChanged -= ApplyAppearance;
     }
 
     private void OnDestroy()
@@ -66,7 +66,7 @@ public class WorldPresentation : MonoBehaviour
 
     public void ApplyAppearance()
     {
-        RacerAppearanceCatalog.Entry appearance = _appearances.GetEntry(_race.Progress.Appearance);
+        RacerAppearanceCatalog.Entry appearance = _appearances.GetEntry(_garage.PreviewIndex);
 
         if (appearance == null)
             return;

@@ -3,5 +3,6 @@ public enum RacerUpgradeKind
     Acceleration,
     TopSpeed,
     Cooling,
-    Handling
+    Handling,
+    ThermalResistance
 }

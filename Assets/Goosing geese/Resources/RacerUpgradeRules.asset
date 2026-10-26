@@ -15,8 +15,11 @@ MonoBehaviour:
   _maximumLevel: 5
   _basePrice: 100
   _pricePerLevel: 100
+  _firstUpgradeStage: 2
+  _upgradeStageStep: 3
   _accelerationGain: 0.1
   _topSpeedGain: 0.05
   _coolingGain: 0.2
-  _greenZoneGain: 0.04
-  _minimumYellowZone: 0.05
+  _greenZoneGain: 0.07
+  _thermalGain: 0.04
+  _minimumYellowZone: 0

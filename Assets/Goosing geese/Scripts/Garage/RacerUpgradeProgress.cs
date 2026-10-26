@@ -9,6 +9,7 @@ public class RacerUpgradeProgress
     public int TopSpeed;
     public int Cooling;
     public int Handling;
+    public int ThermalResistance;
 
     public int GetLevel(RacerUpgradeKind kind)
     {
@@ -22,6 +23,8 @@ public class RacerUpgradeProgress
                 return Mathf.Max(0, Cooling);
             case RacerUpgradeKind.Handling:
                 return Mathf.Max(0, Handling);
+            case RacerUpgradeKind.ThermalResistance:
+                return Mathf.Max(0, ThermalResistance);
             default:
                 throw new ArgumentOutOfRangeException(nameof(kind));
         }
@@ -44,6 +47,9 @@ public class RacerUpgradeProgress
                 break;
             case RacerUpgradeKind.Handling:
                 Handling = level;
+                break;
+            case RacerUpgradeKind.ThermalResistance:
+                ThermalResistance = level;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(kind));
