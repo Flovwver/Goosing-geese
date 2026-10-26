@@ -73,6 +73,16 @@ public class GameUiFactory
         return label;
     }
 
+    public Text CreateHeading(Transform parent, string text, int size)
+    {
+        Text label = CreateLabel(parent, text, size);
+        label.font = GameUiTheme.LoadHeadingFont();
+        label.resizeTextForBestFit = true;
+        label.resizeTextMinSize = ButtonFontSize;
+        label.resizeTextMaxSize = size;
+        return label;
+    }
+
     public Button CreateButton(Transform parent, string text, Action action)
     {
         var rect = CreateRect(text, parent, Vector2.zero, Vector2.one);

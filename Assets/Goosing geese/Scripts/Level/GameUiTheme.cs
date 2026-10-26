@@ -2,7 +2,8 @@ using UnityEngine;
 
 public static class GameUiTheme
 {
-    private const string FontResourcePath = "Fonts/PoiretOne-Regular";
+    private const string FontResourcePath = "Fonts/RussoOne/RussoOne-Regular";
+    private const string HeadingFontResourcePath = "Fonts/RubikMonoOne/RubikMonoOne-Regular";
 
     public static readonly Color Panel = new Color(0.25f, 0.81f, 0.94f, 0.98f);
     public static readonly Color Header = new Color(0.12f, 0.72f, 0.89f, 1f);
@@ -15,5 +16,10 @@ public static class GameUiTheme
     public static Font LoadFont()
     {
         return Resources.Load<Font>(FontResourcePath);
+    }
+
+    public static Font LoadHeadingFont()
+    {
+        return Resources.Load<Font>(HeadingFontResourcePath);
     }
 }

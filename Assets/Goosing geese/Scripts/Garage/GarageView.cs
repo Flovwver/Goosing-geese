@@ -104,7 +104,7 @@ public class GarageView : MonoBehaviour
         ClearPanels();
         RectTransform header = CreatePanel("Garage header", new Vector2(0f, 0.76f), Vector2.one);
         _header = header.gameObject;
-        _ui.CreateLabel(header, L("ГАРАЖ", "GARAGE"), 38);
+        _ui.CreateHeading(header, L("ГАРАЖ", "GARAGE"), 38);
         Text balance = _ui.CreateLabel(header, L("Доступно: ", "Available: ") + _garage.AvailablePoints + L(" • Всего: ", " • Total: ") + _garage.TotalPoints, 24);
         balance.color = GameUiTheme.Accent;
         balance.fontStyle = FontStyle.Bold;

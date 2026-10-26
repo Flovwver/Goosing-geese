@@ -144,8 +144,8 @@ public class GameScreens : MonoBehaviour
         var footerImage = footer.gameObject.AddComponent<Image>();
         footerImage.color = GameUiTheme.Header;
         footerImage.raycastTarget = false;
-        Text title = _ui.CreateLabel(rect, "GOOSING\nGEESE", 68);
-        title.fontStyle = FontStyle.Bold;
+        Text title = _ui.CreateHeading(rect, "GOOSING\nGEESE", 68);
+        title.fontStyle = FontStyle.Normal;
         title.lineSpacing = 0.85f;
         GameUiFactory.Place(title.rectTransform, new Vector2(0.12f, 0.65f), new Vector2(0.88f, 0.81f));
         var outline = title.gameObject.AddComponent<Outline>();
@@ -210,7 +210,7 @@ public class GameScreens : MonoBehaviour
         layout.childControlHeight = true;
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
-        _ui.CreateLabel(rect, title, 32);
+        _ui.CreateHeading(rect, title, 32);
         UpdateInputAvailability();
     }
 
