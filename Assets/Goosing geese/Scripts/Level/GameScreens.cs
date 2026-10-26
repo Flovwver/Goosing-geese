@@ -181,7 +181,7 @@ public class GameScreens : MonoBehaviour
         RectTransform bar = _speedometer.GetComponent<RectTransform>();
         bar.SetParent(_safeArea, false);
         bar.localScale = Vector3.one;
-        GameUiFactory.Place(bar, new Vector2(0.22f, 0.914f), new Vector2(0.91f, 0.954f));
+        GameUiFactory.Place(bar, new Vector2(0.27f, 0.875f), new Vector2(0.83f, 0.995f));
         PedalButton pedal = _pedal != null ? _pedal.GetComponent<PedalButton>() : FindFirstObjectByType<PedalButton>(FindObjectsInactive.Include);
         _pedal = pedal.gameObject;
         _pedalPrompt = pedal.GetComponent<PedalPromptView>();

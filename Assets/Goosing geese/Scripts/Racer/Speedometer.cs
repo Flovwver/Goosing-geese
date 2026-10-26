@@ -2,37 +2,27 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteAlways]
-[RequireComponent(typeof(Slider))]
 public class Speedometer : MonoBehaviour
 {
     [SerializeField] private Racer _racer;
-    [SerializeField] private Slider _greenZoneSlider;
-    [SerializeField] private Slider _yellowZoneSlider;
+    [SerializeField] private SpeedometerDialGraphic _dial;
     [SerializeField] private Text _maximumSpeedLabel;
 
-    private Slider _slider;
     private float _displayedMaximumSpeed;
     private bool _hasDisplayedMaximumSpeed;
 
     private void OnEnable()
     {
-        _slider = GetComponent<Slider>();
         _hasDisplayedMaximumSpeed = false;
     }
 
     private void Update()
     {
-        if (_racer == null || _slider == null)
+        if (_racer == null || _dial == null)
             return;
 
-        if (_greenZoneSlider != null)
-            _greenZoneSlider.SetValueWithoutNotify(_racer.YellowZoneThreshold);
-
-        if (_yellowZoneSlider != null)
-            _yellowZoneSlider.SetValueWithoutNotify(_racer.RedZoneThreshold);
-
         float speed = Application.isPlaying ? Mathf.Clamp01(_racer.NormalizedSpeed) : 0f;
-        _slider.SetValueWithoutNotify(speed);
+        _dial.SetValues(speed, _racer.YellowZoneThreshold, _racer.RedZoneThreshold);
         UpdateMaximumSpeed();
     }
 

@@ -23,3 +23,8 @@ PedalPromptView displays a centered, pulsing random phrase only on the unobstruc
 - Confirmed start chrome is hidden during racing, pause and results.
 - Confirmed English garage labels and successful editor compilation.
 - No player build or push was performed.
+## Semicircular speedometer
+
+SpeedometerDialGraphic draws a fixed 180-degree arc and needle with UI geometry. Zero speed points left, half of the selected maximum points up, and the selected maximum points right. Values are clamped at both ends. Racer thresholds drive the green/yellow/red arc boundaries, including handling upgrades; the MAX label retains the selected model's upgraded speed. The gauge does not receive pointer raycasts.
+
+Verified needle directions at 0%, 50% and 100%, negative/over-limit values, empty/full color zones, live handling and maximum-speed bindings, portrait layout, and one correctly bound dial after script reload. The old linear Slider components were removed. Unity reported no errors; no player build was made.
