@@ -3,11 +3,15 @@ using UnityEngine;
 
 public class RoadPathView : MonoBehaviour
 {
-    private const float GuidanceSectionLength = 5f;
+    private const float MinimumSampleSpacing = 0.25f;
 
     [SerializeField] private Level _level;
     [SerializeField] private Material _material;
-    [SerializeField, Min(0f)] private float _previewDistance = 45f;
+    [SerializeField, Min(0f), Tooltip("Total blend length in metres, centered on a straight/turn boundary.")]
+    private float _transitionLength = 12f;
+    [SerializeField, Min(MinimumSampleSpacing)] private float _sampleSpacing = 2f;
+    [SerializeField] private Color _straightColor = Color.yellow;
+    [SerializeField] private Color _turnColor = Color.green;
 
     private GameObject _lines;
 
@@ -30,16 +34,6 @@ public class RoadPathView : MonoBehaviour
         Clear();
     }
 
-    private Color GetRecommendedColor(RoadPath path, int segment, float distance)
-    {
-        bool corner = path.Pieces[segment].Type != RoadPieceType.Straight;
-
-        if (segment + 1 < path.Pieces.Count && path.Curve.GetSegmentEndDistance(segment) - distance <= _previewDistance)
-            corner |= path.Pieces[segment + 1].Type != RoadPieceType.Straight;
-
-        return corner ? Color.green : Color.yellow;
-    }
-
     private void OnPathBuilt(RoadPath path, RoadSettings settings)
     {
         Show(path, settings);
@@ -52,53 +46,83 @@ public class RoadPathView : MonoBehaviour
         if (settings.ShowPathLine == false)
             return;
 
-        _lines = new GameObject("Speed guidance");
+        _lines = new GameObject("Road guidance");
         _lines.transform.SetParent(transform, false);
-        var points = new List<Vector3>();
-        Color color = Color.clear;
         Vector3 heightOffset = Vector3.up * settings.PathLineHeight;
+        float spacing = Mathf.Max(MinimumSampleSpacing, _sampleSpacing);
         float start = 0f;
 
         for (int segment = 0; segment < path.Curve.SegmentCount; segment++)
         {
             float end = path.Curve.GetSegmentEndDistance(segment);
+            var points = new List<Vector3>();
 
-            for (float distance = start; distance < end; distance += GuidanceSectionLength)
-            {
-                Color sectionColor = GetRecommendedColor(path, segment, distance);
+            for (float distance = start; distance < end; distance += spacing)
+                points.Add(path.Curve.GetPointAtDistance(distance) + heightOffset);
 
-                if (points.Count > 0 && sectionColor != color)
-                {
-                    AddLine(points, color, settings);
-                    points.Clear();
-                }
+            points.Add(path.Curve.GetPointAtDistance(end) + heightOffset);
 
-                color = sectionColor;
-
-                if (points.Count == 0)
-                    points.Add(path.Curve.GetPointAtDistance(distance) + heightOffset);
-
-                points.Add(path.Curve.GetPointAtDistance(Mathf.Min(end, distance + GuidanceSectionLength)) + heightOffset);
-            }
+            if (points.Count > 1)
+                AddLine(points, BuildGradient(path, segment), settings);
 
             start = end;
         }
-
-        if (points.Count > 1)
-            AddLine(points, color, settings);
     }
 
-    private void AddLine(List<Vector3> points, Color color, RoadSettings settings)
+    private Gradient BuildGradient(RoadPath path, int segment)
     {
-        var go = new GameObject("Speed section");
+        Color ownColor = GetPieceColor(path, segment);
+        float startBlend = GetBlendHalfLength(path, segment - 1, segment);
+        float endBlend = GetBlendHalfLength(path, segment, segment + 1);
+        float length = GetSegmentLength(path, segment);
+        Color startColor = startBlend > 0f ? Color.Lerp(GetPieceColor(path, segment - 1), ownColor, 0.5f) : ownColor;
+        Color endColor = endBlend > 0f ? Color.Lerp(ownColor, GetPieceColor(path, segment + 1), 0.5f) : ownColor;
+        var keys = new List<GradientColorKey> { new GradientColorKey(startColor, 0f) };
+        float startTime = length > Mathf.Epsilon ? startBlend / length : 0f;
+        float endTime = length > Mathf.Epsilon ? 1f - endBlend / length : 1f;
+
+        if (startTime > 0f)
+            keys.Add(new GradientColorKey(ownColor, startTime));
+
+        if (endTime < 1f && endTime > startTime)
+            keys.Add(new GradientColorKey(ownColor, endTime));
+
+        keys.Add(new GradientColorKey(endColor, 1f));
+        var gradient = new Gradient();
+        gradient.SetKeys(keys.ToArray(), new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+        return gradient;
+    }
+
+    private float GetBlendHalfLength(RoadPath path, int left, int right)
+    {
+        if (left < 0 || right >= path.Curve.SegmentCount || GetPieceColor(path, left) == GetPieceColor(path, right))
+            return 0f;
+
+        float shortest = Mathf.Min(GetSegmentLength(path, left), GetSegmentLength(path, right));
+        return Mathf.Min(Mathf.Max(0f, _transitionLength), shortest) * 0.5f;
+    }
+
+    private Color GetPieceColor(RoadPath path, int segment)
+    {
+        return path.Pieces[segment].Type == RoadPieceType.Straight ? _straightColor : _turnColor;
+    }
+
+    private float GetSegmentLength(RoadPath path, int segment)
+    {
+        float start = segment > 0 ? path.Curve.GetSegmentEndDistance(segment - 1) : 0f;
+        return path.Curve.GetSegmentEndDistance(segment) - start;
+    }
+
+    private void AddLine(List<Vector3> points, Gradient gradient, RoadSettings settings)
+    {
+        var go = new GameObject("Road section");
         go.transform.SetParent(_lines.transform, false);
         var line = go.AddComponent<LineRenderer>();
         line.useWorldSpace = true;
         line.sharedMaterial = _material;
         line.startWidth = settings.PathLineWidth;
         line.endWidth = settings.PathLineWidth;
-        line.startColor = color;
-        line.endColor = color;
+        line.colorGradient = gradient;
         line.positionCount = points.Count;
         line.SetPositions(points.ToArray());
         line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;

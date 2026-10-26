@@ -1050,7 +1050,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadPathView
   _level: {fileID: 1081964704}
   _material: {fileID: 2100000, guid: 77dd07f8738af9b40bed9c8d9c417255, type: 2}
-  _previewDistance: 45
+  _transitionLength: 12
+  _sampleSpacing: 2
+  _straightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _turnColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1081964708
 MonoBehaviour:
   m_ObjectHideFlags: 0
