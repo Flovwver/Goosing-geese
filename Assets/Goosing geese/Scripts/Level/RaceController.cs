@@ -29,7 +29,7 @@ public class RaceController : MonoBehaviour
 
     private void Awake()
     {
-        Progress = PlayerProgress.Load();
+        Progress = PlayerProgressStore.Load();
         Progress.Level = Mathf.Clamp(Progress.Level, 1, Progress.GetUnlockedLevel(int.MaxValue));
 
         if (_level == null)
@@ -162,6 +162,8 @@ public class RaceController : MonoBehaviour
         Outcome = playerWon ? RaceOutcome.FinishedFirst : outcome;
         CampaignStage stage = _campaign.GetStage(_level.Number);
         LastReward = Progress.RecordRace(playerWon, _level.Number, stage.Reward, stage.FirstClearBonus);
+        PlayerProgressStore.Save(Progress);
+        LocalLeaderboard.Record(Progress.PlayerName, Progress.Points);
         _input.SetInputEnabled(false);
         SetState(RaceState.Result);
 
@@ -179,10 +181,13 @@ public class RaceController : MonoBehaviour
             return false;
 
         if (_level.TryBuildRoad(out string error))
+        {
+            PlayerProgressStore.Save(Progress);
             return true;
+        }
 
         Progress.Level = previous;
-        Progress.Save();
+        PlayerProgressStore.Save(Progress);
         Debug.LogError("Level selection failed: " + error, this);
         return false;
     }

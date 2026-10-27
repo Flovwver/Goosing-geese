@@ -46,7 +46,7 @@ public class RacerGarage : MonoBehaviour
             }
 
             progress.OwnershipInitialized = true;
-            progress.Save();
+            PlayerProgressStore.Save(progress);
         }
     }
 
@@ -102,7 +102,7 @@ public class RacerGarage : MonoBehaviour
 
         _race.Progress.Appearance = index;
         _previewIndex = -1;
-        _race.Progress.Save();
+        PlayerProgressStore.Save(_race.Progress);
         SelectionChanged?.Invoke();
         PreviewChanged?.Invoke();
         return true;
@@ -186,7 +186,7 @@ public class RacerGarage : MonoBehaviour
 
         progress.SetLevel(kind, GetUpgradeLevel(kind) + 1);
         _race.Progress.Wallet -= price;
-        _race.Progress.Save();
+        PlayerProgressStore.Save(_race.Progress);
         UpgradesChanged?.Invoke();
         return true;
     }

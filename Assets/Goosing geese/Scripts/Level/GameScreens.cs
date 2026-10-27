@@ -318,7 +318,7 @@ public class GameScreens : MonoBehaviour
         _ui.CreateButton(_panel.transform, _race.Progress.English ? "Русский" : "English", () =>
         {
             _race.Progress.English = !_race.Progress.English;
-            _race.Progress.Save();
+            PlayerProgressStore.Save(_race.Progress);
             OpenSettings();
         });
         _ui.CreateButton(_panel.transform, L("Задания", "Quests"), ShowQuests);
@@ -338,7 +338,7 @@ public class GameScreens : MonoBehaviour
         input.onEndEdit.AddListener(value =>
         {
             _race.Progress.PlayerName = string.IsNullOrWhiteSpace(value) ? "Player" : value.Trim();
-            _race.Progress.Save();
+            PlayerProgressStore.Save(_race.Progress);
         });
     }
 
@@ -356,14 +356,13 @@ public class GameScreens : MonoBehaviour
         slider.onValueChanged.AddListener(v =>
         {
             apply(v);
-            _race.Progress.Save();
+            PlayerProgressStore.Save(_race.Progress);
         });
     }
 
     private void ShowLeaderboard()
     {
         ShowPanel(L("Локальный рекорд", "Local leaderboard"), "leaderboard");
-        LocalLeaderboard.Record(_race.Progress.PlayerName, _race.Progress.Points);
         var entries = LocalLeaderboard.Read();
         string rows = "";
 
@@ -391,13 +390,18 @@ public class GameScreens : MonoBehaviour
         for (int i = 0; i < names.Length; i++)
         {
             int quest = i;
-            string title = names[i] + "  " + _race.Progress.GetQuestProgress(i) + "/" + _race.Progress.GetQuestTarget(i);
+            string title = names[i] + "  " + QuestTracker.GetProgress(_race.Progress, i, DateTime.Today) + "/" + QuestTracker.GetTarget(i);
             var button = _ui.CreateButton(_panel.transform, title, () =>
             {
-                _race.Progress.ClaimQuest(quest);
+                if (QuestTracker.TryClaim(_race.Progress, quest, DateTime.Today))
+                {
+                    PlayerProgressStore.Save(_race.Progress);
+                    LocalLeaderboard.Record(_race.Progress.PlayerName, _race.Progress.Points);
+                }
+
                 ShowQuests();
             });
-            button.interactable = !_race.Progress.IsQuestClaimed(i) && _race.Progress.GetQuestProgress(i) >= _race.Progress.GetQuestTarget(i);
+            button.interactable = !QuestTracker.IsClaimed(_race.Progress, i, DateTime.Today) && QuestTracker.GetProgress(_race.Progress, i, DateTime.Today) >= QuestTracker.GetTarget(i);
         }
 
         _ui.CreateLabel(_panel.transform, L("Нажми выполненное задание, чтобы получить очки", "Tap a completed quest to claim points"), 22);
@@ -410,7 +414,7 @@ public class GameScreens : MonoBehaviour
         _ui.CreateButton(_panel.transform, L("Сменить окружение", "Change scenery"), () =>
         {
             _race.Progress.Environment = (_race.Progress.Environment + 1) % 3;
-            _race.Progress.Save();
+            PlayerProgressStore.Save(_race.Progress);
             GetComponent<WorldPresentation>().Rebuild();
         });
         _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
