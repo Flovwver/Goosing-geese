@@ -8,63 +8,46 @@ public class Racer : MonoBehaviour
 {
     [SerializeField] private RacerStats _stats;
 
+    private GripModel _gripModel;
     private OverheatTracker _overheatTracker;
     private Mover _mover;
     private RoadNavigator _roadNavigator;
-    private RacerStats _runtimeStats;
-
-    private bool _isPathCompletedRaised;
-    private Vector3 _startPosition;
-    private Quaternion _startRotation;
+    private RacerConfiguration _configuration;
 
     public event Action<float> OverheatProgressChanged;
     public event Action Exploded;
     public event Action PathCompleted;
     public event Action RaceRestarted;
     public event Action Finished;
+    public event Action ConfigurationChanged;
 
     public bool IsFinished { get; private set; }
-
+    public bool CanRace => _overheatTracker.IsExploded == false && _roadNavigator.IsPathCompleted == false;
+    public RacerConfiguration Configuration => _configuration;
     public RacerStats BaseStats => _stats;
-    public float MaxSpeed => ActiveStats.MaxSpeed;
-    public float YellowZoneThreshold => ActiveStats.YellowZoneThreshold;
-    public float RedZoneThreshold => ActiveStats.RedZoneThreshold;
-
+    public float MaxSpeed => _configuration?.MaxSpeed ?? _stats.MaxSpeed;
+    public float YellowZoneThreshold => _configuration?.YellowZoneThreshold ?? _stats.YellowZoneThreshold;
+    public float RedZoneThreshold => _configuration?.RedZoneThreshold ?? _stats.RedZoneThreshold;
     public float NormalizedSpeed => MaxSpeed > 0f ? GetCurrentSpeed() / MaxSpeed : 0f;
-
-    private RacerStats ActiveStats => _runtimeStats != null ? _runtimeStats : _stats;
 
     private void Awake()
     {
-        _overheatTracker = GetComponent<OverheatTracker>();
-        _mover = GetComponent<Mover>();
-        _mover.Configure(ActiveStats);
-        _roadNavigator = GetComponent<RoadNavigator>();
-        _startPosition = transform.position;
-        _startRotation = transform.rotation;
+        InitializeComponents();
     }
 
     private void OnEnable()
     {
+        InitializeComponents();
         _overheatTracker.ProgressChanged += OnOverheatProgressChanged;
         _overheatTracker.Exploded += OnExploded;
-    }
-
-    private void Update()
-    {
-        if (IsFinished)
-            Advance(false);
+        _roadNavigator.PathCompleted += OnPathCompleted;
     }
 
     private void OnDisable()
     {
         _overheatTracker.ProgressChanged -= OnOverheatProgressChanged;
         _overheatTracker.Exploded -= OnExploded;
-    }
-
-    public void StopMovement()
-    {
-        _mover.Stop();
+        _roadNavigator.PathCompleted -= OnPathCompleted;
     }
 
     public float GetCurrentSpeed()
@@ -74,62 +57,68 @@ public class Racer : MonoBehaviour
 
     public void ConfigureStats(RacerStats stats)
     {
-        _runtimeStats = stats;
-        _mover.Configure(ActiveStats);
+        _configuration = new RacerConfiguration(stats);
+        _mover.Configure(_configuration);
+        ConfigurationChanged?.Invoke();
     }
 
-    public void SetPath(RoadPath path)
-    {
-        _isPathCompletedRaised = false;
-        _roadNavigator.SetPath(path);
-    }
-
-    public void Accelerate()
-    {
-        if (IsFinished == false)
-            Advance(true);
-    }
-
-    public void ResetRace()
+    public void Prepare(RoadPath path, RacerDefinition definition)
     {
         IsFinished = false;
-        _isPathCompletedRaised = false;
-        _mover.TeleportTo(_startPosition, _startRotation);
+        _configuration = definition.Stats;
+        _mover.Configure(_configuration);
+        _roadNavigator.Configure(definition.Navigation);
+        _mover.TeleportTo(definition.Position, definition.Rotation);
+        _roadNavigator.SetPath(path);
         _overheatTracker.ResetOverheat();
         RaceRestarted?.Invoke();
     }
 
-    public void Cooldown()
+    public RacerDefinition CaptureDefinition(Vector3 position, Quaternion rotation)
     {
-        if (IsFinished == false)
-            Advance(false);
+        return new RacerDefinition(_configuration, _roadNavigator.CaptureConfiguration(), position, rotation);
+    }
+
+    public void StopMovement()
+    {
+        _mover.Stop();
     }
 
     public void ReleaseThrottle()
     {
-        _mover.ReleaseThrottle();
+        _mover?.ReleaseThrottle();
+    }
+
+    public void Accelerate()
+    {
+        Tick(true, Time.deltaTime);
+    }
+
+    public void Cooldown()
+    {
+        Tick(false, Time.deltaTime);
     }
 
     public void FinishRace()
     {
-        if (IsFinished || _overheatTracker.IsExploded || _isPathCompletedRaised)
+        if (IsFinished || _overheatTracker.IsExploded || (_roadNavigator.IsPathCompleted && _roadNavigator.IsFinishReached == false))
             return;
 
         IsFinished = true;
         _overheatTracker.ResetOverheat();
-        _mover.SetDrag(ActiveStats.FinishDrag);
+        _mover.SetDrag(_configuration.FinishDrag);
         _mover.MoveTowards(_roadNavigator.TargetPosition, false, 0f);
         Finished?.Invoke();
     }
 
-    private void Advance(bool isAccelerating)
+    public void Tick(bool isAccelerating, float deltaTime)
     {
-        if (_overheatTracker.IsExploded || _isPathCompletedRaised)
+        if (_overheatTracker.IsExploded || _roadNavigator.IsPathCompleted)
             return;
 
         if (IsFinished == false)
         {
-            _overheatTracker.Tick(GetCurrentSpeed(), ActiveStats);
+            _overheatTracker.Tick(GetCurrentSpeed(), _configuration, deltaTime);
 
             if (_overheatTracker.IsExploded)
                 return;
@@ -141,20 +130,32 @@ public class Racer : MonoBehaviour
             FinishRace();
 
         if (_roadNavigator.IsPathCompleted)
-        {
-            RaisePathCompleted();
             return;
-        }
 
-        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerating, _overheatTracker.SlipFactor);
+        float slip = IsFinished ? 0f : _gripModel.CalculateSlipFactor(GetCurrentSpeed(), _configuration);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerating && IsFinished == false, slip);
     }
 
-    private void RaisePathCompleted()
+    private void InitializeComponents()
     {
-        if (_isPathCompletedRaised)
-            return;
+        _overheatTracker = GetComponent<OverheatTracker>();
+        _mover = GetComponent<Mover>();
+        _roadNavigator = GetComponent<RoadNavigator>();
 
-        _isPathCompletedRaised = true;
+        if (_gripModel == null)
+            _gripModel = new GripModel();
+
+        if (_configuration == null)
+            _configuration = new RacerConfiguration(_stats);
+
+        _mover.Configure(_configuration);
+    }
+
+    private void OnPathCompleted()
+    {
+        if (IsFinished == false && _roadNavigator.IsFinishReached)
+            FinishRace();
+
         _mover.Stop();
         PathCompleted?.Invoke();
     }

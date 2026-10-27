@@ -12,6 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b17bd02f4ec448a844fa38bb4fc71e7, type: 3}
   m_Name: RoadSettings
   m_EditorClassIdentifier: Assembly-CSharp::RoadSettings
+  RoadPieceCount: 20
+  MaxGenerationAttempts: 100
+  FinishRunoutPieces: 3
+  CurveSamplesPerSegment: 24
+  ShowPathLine: 1
+  PathLineColor: {r: 0, g: 1, b: 1, a: 1}
+  PathLineWidth: 0.25
+  PathLineHeight: 2.1
+  DrawPathGizmos: 1
+  WaypointGizmoRadius: 0.3
+  ShowSpeedHints: 1
   _availablePieceTypes: 000000000100000002000000
   _piecePrefabs:
   - _type: 0
@@ -20,12 +31,3 @@ MonoBehaviour:
     _prefab: {fileID: 7886673770279700980, guid: 4e7a44725912a6749942322285a7b9ab, type: 3}
   - _type: 2
     _prefab: {fileID: 3628304544319266350, guid: 5d01fbd589c6eb542ba764e2ba5d07a4, type: 3}
-  RoadPieceCount: 20
-  MaxGenerationAttempts: 100
-  CurveSamplesPerSegment: 24
-  ShowPathLine: 1
-  PathLineColor: {r: 0, g: 1, b: 1, a: 1}
-  PathLineWidth: 0.25
-  PathLineHeight: 2.1
-  DrawPathGizmos: 1
-  WaypointGizmoRadius: 0.3

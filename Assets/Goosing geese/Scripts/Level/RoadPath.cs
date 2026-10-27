@@ -56,6 +56,11 @@ public class RoadPath
         FinishWaypointIndex = FinishPoint != null ? index : 0;
     }
 
+    public RoadPieceType GetPieceType(int index)
+    {
+        return _pieces[index].Type;
+    }
+
     public bool TryGetWaypoint(int index, out Transform waypoint)
     {
         if (index < 0 || index >= _waypoints.Count)

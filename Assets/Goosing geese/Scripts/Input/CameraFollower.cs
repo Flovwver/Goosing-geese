@@ -27,10 +27,9 @@ public class CameraFollower : MonoBehaviour
         if (_racer == null)
             return;
 
-        _racer.Finished += OnRaceFinished;
-        _racer.Exploded += OnRaceFinished;
-        _racer.RaceRestarted += OnRaceRestarted;
-        _isFollowing = _racer.IsFinished == false;
+        _race.RaceEnded += OnRaceEnded;
+        _race.Prepared += OnRaceRestarted;
+        _isFollowing = _race.State != RaceState.Result;
     }
 
     private void LateUpdate()
@@ -55,12 +54,11 @@ public class CameraFollower : MonoBehaviour
         if (_racer == null)
             return;
 
-        _racer.Finished -= OnRaceFinished;
-        _racer.Exploded -= OnRaceFinished;
-        _racer.RaceRestarted -= OnRaceRestarted;
+        _race.RaceEnded -= OnRaceEnded;
+        _race.Prepared -= OnRaceRestarted;
     }
 
-    private void OnRaceFinished()
+    private void OnRaceEnded(bool playerWon)
     {
         _isFollowing = false;
         _velocity = Vector3.zero;

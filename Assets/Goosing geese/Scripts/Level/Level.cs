@@ -4,39 +4,48 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-
     [SerializeField] private Transform _roadStartPoint;
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
-
+    [SerializeField] private FinishLine _finishLine;
+    [SerializeField] private RaceController _race;
     [SerializeField, Min(0f)] private float _minimumRoadSpacing = 24f;
     [SerializeField, Min(1)] private int _layoutValidationAttempts = 20;
 
-    private RoadLayoutGenerator _roadLayoutGenerator;
     private RoadBuilder _roadBuilder;
-    private RoadLayoutGeometry _layoutGeometry;
     private RoadPath _roadPath;
-
     private List<RoadPiece> _builtPieces;
-    private bool _restoreAfterReload;
     private RoadPieceType[] _currentLayout;
+    private Vector3 _racerStartPosition;
+    private Quaternion _racerStartRotation;
+    private Vector3 _roadStartPosition;
+    private Quaternion _roadStartRotation;
     private int _mainPieceCount;
-    private int _curveSamples;
+    private string _roadSnapshot;
+    private string _racerSnapshot;
+    private string _navigationSnapshot;
+    private bool _restoreAfterReload;
 
-    public event Action<RoadPath, RoadSettings> PathBuilt;
+    public event Action<RoadPath, RoadConfiguration> PathBuilt;
 
+    public LevelDefinition CurrentDefinition { get; private set; }
+    public RoadSpeedProfile SpeedProfile { get; private set; }
     public int Seed { get; private set; }
     public int Number { get; private set; }
 
     private void Awake()
     {
-        InitializeComponents();
+        _racerStartPosition = _racer.transform.position;
+        _racerStartRotation = _racer.transform.rotation;
+        InitializeReferences();
     }
 
     private void OnEnable()
     {
-        InitializeComponents();
-        _restoreAfterReload = _roadPath == null && _builtPieces.Count > 0;
+        InitializeReferences();
+        _finishLine.Crossed += OnFinishCrossed;
+        _racer.ConfigurationChanged += OnRacerConfigurationChanged;
+        _restoreAfterReload = CurrentDefinition == null && _builtPieces.Count > 0;
     }
 
     private void Start()
@@ -50,14 +59,14 @@ public class Level : MonoBehaviour
             return;
 
         _restoreAfterReload = false;
-        _roadPath = new RoadPath(_builtPieces);
-        ConfigurePath();
-        _racer.ResetRace();
+        RestoreAfterReload();
     }
 
     private void OnDrawGizmos()
     {
-        if (_settings == null || _settings.DrawPathGizmos == false || _roadPath == null)
+        RoadConfiguration settings = CurrentDefinition?.Settings;
+
+        if (settings == null || settings.DrawPathGizmos == false || _roadPath == null)
             return;
 
         Gizmos.color = Color.yellow;
@@ -65,120 +74,257 @@ public class Level : MonoBehaviour
         for (int i = 0; i < _roadPath.Count; i++)
         {
             if (_roadPath.TryGetWaypoint(i, out Transform waypoint))
-                Gizmos.DrawWireSphere(waypoint.position, _settings.WaypointGizmoRadius);
+                Gizmos.DrawWireSphere(waypoint.position, settings.WaypointGizmoRadius);
         }
+    }
+
+    private void OnDisable()
+    {
+        _finishLine.Crossed -= OnFinishCrossed;
+        _racer.ConfigurationChanged -= OnRacerConfigurationChanged;
+    }
+
+    private void OnDestroy()
+    {
+        ClearBuiltRoad();
     }
 
     public void BuildRoad()
     {
-        CreateLevel(GetComponent<RaceController>().CurrentStage.Seed);
+        if (TryBuildRoad(out string error) == false)
+            Debug.LogError("Level creation failed: " + error, this);
+    }
+
+    public bool TryBuildRoad(out string error)
+    {
+        return TryBuildRoad(_race.CurrentStage.Seed, out error);
     }
 
     public void CreateLevel(int seed)
     {
-        InitializeComponents();
-        Seed = seed;
-        RaceController race = GetComponent<RaceController>();
-        int level = race != null ? race.Progress.Level : 1;
-        Number = level;
-        CampaignStage stage = race.CurrentStage;
-        _mainPieceCount = Mathf.Max(1, stage.PieceCount);
-        _curveSamples = Mathf.Max(1, _settings.CurveSamplesPerSegment);
-        int runoutPieces = Mathf.Max(1, _settings.FinishRunoutPieces);
-        if (seed == stage.Seed && stage.Layout != null && stage.Layout.Length >= _mainPieceCount + runoutPieces)
-        {
-            _currentLayout = (RoadPieceType[])stage.Layout.Clone();
-            BuildCurrentLayout();
-            return;
-        }
+        if (TryBuildRoad(seed, out string error) == false)
+            Debug.LogError("Level creation failed: " + error, this);
+    }
 
-        UnityEngine.Random.State randomState = UnityEngine.Random.state;
+    public bool TryRestoreLevel(LevelDefinition definition, out string error)
+    {
+        RoadBuilder builder = null;
+        RoadPath path;
+        RoadSpeedProfile profile;
 
         try
         {
-            UnityEngine.Random.InitState(seed);
-            _currentLayout = new RoadPieceType[0];
+            if (definition == null)
+                throw new ArgumentNullException(nameof(definition));
 
-            for (int attempt = 0; attempt < Mathf.Max(1, _layoutValidationAttempts); attempt++)
-            {
-                RoadPieceType[] candidate = _roadLayoutGenerator.Generate(_mainPieceCount, runoutPieces);
+            RoadConfiguration settings = definition.Settings;
+            builder = new RoadBuilder(settings.PiecePrefabs);
+            path = builder.Build(definition.Layout, definition.StartPosition, definition.StartRotation);
+            path.SetFinishWaypoint(settings.RoadPieceCount);
+            path.BuildCurve(settings.CurveSamplesPerSegment);
 
-                if (_layoutGeometry.IsValid(candidate, _roadStartPoint, _minimumRoadSpacing, _curveSamples))
-                {
-                    _currentLayout = candidate;
-                    break;
-                }
-            }
+            if (path.FinishPoint == null || path.Curve.Length <= 0f || float.IsNaN(path.Curve.Length) || float.IsInfinity(path.Curve.Length))
+                throw new InvalidOperationException("The built road has invalid geometry or no finish.");
+
+            profile = new RoadSpeedProfile(path.Curve, definition.Racer.Stats);
         }
-        finally
+        catch (Exception exception)
         {
-            UnityEngine.Random.state = randomState;
+            builder?.Clear();
+            error = exception.Message;
+            return false;
         }
 
-        if (_currentLayout.Length == 0)
-        {
-            _currentLayout = new RoadPieceType[_mainPieceCount + runoutPieces];
+        ClearBuiltRoad();
+        CurrentDefinition = definition;
+        Seed = definition.Seed;
+        Number = definition.Number;
+        _mainPieceCount = definition.Settings.RoadPieceCount;
+        _roadStartPosition = definition.StartPosition;
+        _roadStartRotation = definition.StartRotation;
+        _racerStartPosition = definition.Racer.Position;
+        _racerStartRotation = definition.Racer.Rotation;
+        _currentLayout = new RoadPieceType[definition.Layout.Count];
 
-            for (int i = 0; i < _currentLayout.Length; i++)
-                _currentLayout[i] = RoadPieceType.Straight;
-        }
+        for (int index = 0; index < _currentLayout.Length; index++)
+            _currentLayout[index] = definition.Layout[index];
 
-        BuildCurrentLayout();
+        _roadBuilder = builder;
+        _roadPath = path;
+        _builtPieces = new List<RoadPiece>(path.Pieces);
+        SpeedProfile = profile;
+        CaptureReloadSnapshot();
+        builder.Activate();
+        PlaceFinishLine();
+        PrepareRace();
+        PathBuilt?.Invoke(path, definition.Settings);
+        error = null;
+        return true;
     }
 
     public void RestartRace()
     {
-        BuildCurrentLayout();
-        _racer.ResetRace();
+        if (_roadPath != null)
+            PrepareRace();
     }
 
-    public bool TryGetBuiltPath(out RoadPath path, out RoadSettings settings)
+    public bool TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings)
     {
         path = _roadPath;
-        settings = _settings;
+        settings = CurrentDefinition?.Settings;
         return path != null && path.Curve != null;
     }
 
-    private void BuildCurrentLayout()
+    private bool TryBuildRoad(int seed, out string error)
     {
-        InitializeComponents();
-        _restoreAfterReload = false;
-        _roadPath = _roadBuilder.Build(_currentLayout, _roadStartPoint);
-        ConfigurePath();
+        LevelDefinition definition;
+
+        try
+        {
+            if (_roadStartPoint == null)
+                throw new InvalidOperationException("A road start point must be assigned.");
+
+            CampaignStage stage = _race.CurrentStage;
+            var settings = new RoadConfiguration(_settings, stage.PieceCount);
+            RoadPieceType[] layout = GenerateLayout(seed, stage, settings);
+            RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
+            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation, racer, _race.Progress.Level);
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+            return false;
+        }
+
+        return TryRestoreLevel(definition, out error);
     }
 
-    private void ConfigurePath()
+    private RoadPieceType[] GenerateLayout(int seed, CampaignStage stage, RoadConfiguration settings)
     {
-        _roadPath.SetFinishWaypoint(_mainPieceCount);
+        var prefabs = new Dictionary<RoadPieceType, RoadPiece>();
 
-        _roadPath.BuildCurve(_curveSamples);
-        _racer.SetPath(_roadPath);
-        PathBuilt?.Invoke(_roadPath, _settings);
+        foreach (KeyValuePair<RoadPieceType, RoadPiece> pair in settings.PiecePrefabs)
+            prefabs.Add(pair.Key, pair.Value);
+
+        var geometry = new RoadLayoutGeometry(prefabs);
+        int count = settings.RoadPieceCount + settings.FinishRunoutPieces;
+
+        if (seed == stage.Seed && stage.Layout != null && stage.Layout.Length == count
+            && geometry.IsValid(stage.Layout, _roadStartPoint, _minimumRoadSpacing, settings.CurveSamplesPerSegment))
+            return (RoadPieceType[])stage.Layout.Clone();
+
+        var generator = new RoadLayoutGenerator(settings.AvailablePieceTypes, settings.MaxGenerationAttempts, seed);
+
+        for (int attempt = 0; attempt < Mathf.Max(1, _layoutValidationAttempts); attempt++)
+        {
+            RoadPieceType[] candidate = generator.Generate(settings.RoadPieceCount, settings.FinishRunoutPieces);
+
+            if (geometry.IsValid(candidate, _roadStartPoint, _minimumRoadSpacing, settings.CurveSamplesPerSegment))
+                return candidate;
+        }
+
+        var fallback = new RoadPieceType[count];
+
+        for (int index = 0; index < fallback.Length; index++)
+            fallback[index] = RoadPieceType.Straight;
+
+        return fallback;
     }
 
-    private void InitializeComponents()
+    private void InitializeReferences()
     {
-        if (_roadBuilder != null)
-            return;
-
         if (_builtPieces == null)
             _builtPieces = new List<RoadPiece>();
 
-        _roadLayoutGenerator = new RoadLayoutGenerator(_settings.AvailablePieceTypes, _settings.MaxGenerationAttempts);
-        var prefabs = BuildPiecePrefabsByType();
-        _roadBuilder = new RoadBuilder(prefabs, _builtPieces);
-        _layoutGeometry = new RoadLayoutGeometry(prefabs);
+        if (_race == null)
+            _race = GetComponent<RaceController>();
+
+        if (_finishLine == null)
+            _finishLine = FindFirstObjectByType<FinishLine>();
     }
 
-    private Dictionary<RoadPieceType, RoadPiece> BuildPiecePrefabsByType()
+    private void ClearBuiltRoad()
     {
-        var piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>();
-
-        foreach (RoadSettings.PiecePrefabEntry entry in _settings.PiecePrefabs)
+        if (_roadBuilder != null)
         {
-            piecePrefabsByType.Add(entry.Type, entry.Prefab);
+            _roadBuilder.Clear();
+        }
+        else if (_builtPieces != null && _builtPieces.Count > 0 && _builtPieces[0] != null)
+        {
+            GameObject root = _builtPieces[0].transform.parent.gameObject;
+            root.SetActive(false);
+
+            if (Application.isPlaying)
+                Destroy(root);
+            else
+                DestroyImmediate(root);
         }
 
-        return piecePrefabsByType;
+        _builtPieces?.Clear();
+    }
+
+    private void OnFinishCrossed(Racer racer)
+    {
+        if (_race.isActiveAndEnabled && _race.State == RaceState.Racing)
+            racer.FinishRace();
+    }
+
+    private void PlaceFinishLine()
+    {
+        Transform point = _roadPath.FinishPoint;
+        _finishLine.gameObject.SetActive(point != null);
+
+        if (point != null)
+            _finishLine.transform.SetPositionAndRotation(point.position, point.rotation);
+    }
+
+    private void PrepareRace()
+    {
+        _racer.Prepare(_roadPath, CurrentDefinition.Racer);
+        _race.Prepare();
+    }
+
+    private void OnRacerConfigurationChanged()
+    {
+        if (CurrentDefinition == null || _race.State != RaceState.Waiting)
+            return;
+
+        RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
+        CurrentDefinition = new LevelDefinition(Seed, _currentLayout, CurrentDefinition.Settings, _roadStartPosition, _roadStartRotation, racer, Number);
+        SpeedProfile = new RoadSpeedProfile(_roadPath.Curve, racer.Stats);
+        CaptureReloadSnapshot();
+    }
+
+    private void CaptureReloadSnapshot()
+    {
+        _roadSnapshot = CurrentDefinition.Settings.ToJson();
+        _racerSnapshot = CurrentDefinition.Racer.Stats.ToJson();
+        _navigationSnapshot = CurrentDefinition.Racer.Navigation.ToJson();
+    }
+
+    private void RestoreAfterReload()
+    {
+        var road = ScriptableObject.CreateInstance<RoadSettings>();
+        var racer = ScriptableObject.CreateInstance<RacerStats>();
+        var navigation = ScriptableObject.CreateInstance<NavigationSettings>();
+
+        try
+        {
+            JsonUtility.FromJsonOverwrite(_roadSnapshot, road);
+            JsonUtility.FromJsonOverwrite(_racerSnapshot, racer);
+            JsonUtility.FromJsonOverwrite(_navigationSnapshot, navigation);
+            var settings = new RoadConfiguration(road, _mainPieceCount);
+            var start = new RacerDefinition(new RacerConfiguration(racer), new NavigationConfiguration(navigation), _racerStartPosition, _racerStartRotation);
+            var definition = new LevelDefinition(Seed, _currentLayout, settings, _roadStartPosition, _roadStartRotation, start, Number);
+
+            if (TryRestoreLevel(definition, out string error) == false)
+                Debug.LogError("Level reload recovery failed: " + error, this);
+        }
+        finally
+        {
+            Destroy(road);
+            Destroy(racer);
+            Destroy(navigation);
+        }
     }
 }

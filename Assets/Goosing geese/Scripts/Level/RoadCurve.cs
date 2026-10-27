@@ -26,6 +26,16 @@ public class RoadCurve
         return _distances[_waypointIndices[segment + 1]];
     }
 
+    public int GetSegmentStartIndex(int segment)
+    {
+        return _waypointIndices[segment];
+    }
+
+    public int GetSegmentEndIndex(int segment)
+    {
+        return _waypointIndices[segment + 1];
+    }
+
     public float FindClosestDistance(Vector3 position, int segment, float minimumDistance)
     {
         float bestDistance = Mathf.Clamp(minimumDistance, _distances[_waypointIndices[segment]], GetSegmentEndDistance(segment));

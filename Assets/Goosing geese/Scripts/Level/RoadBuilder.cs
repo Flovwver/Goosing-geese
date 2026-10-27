@@ -1,54 +1,98 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RoadBuilder
 {
     private readonly Dictionary<RoadPieceType, RoadPiece> _piecePrefabsByType;
-    private readonly List<RoadPiece> _placedPieces;
 
-    public RoadBuilder(Dictionary<RoadPieceType, RoadPiece> piecePrefabsByType, List<RoadPiece> placedPieces)
+    private GameObject _root;
+
+    public RoadBuilder(IReadOnlyDictionary<RoadPieceType, RoadPiece> piecePrefabsByType)
     {
-        _piecePrefabsByType = piecePrefabsByType;
-        _placedPieces = placedPieces;
+        _piecePrefabsByType = new Dictionary<RoadPieceType, RoadPiece>();
+
+        foreach (KeyValuePair<RoadPieceType, RoadPiece> pair in piecePrefabsByType)
+            _piecePrefabsByType.Add(pair.Key, pair.Value);
     }
 
-    public RoadPath Build(RoadPieceType[] layout, Transform startPoint)
+    public RoadPath Build(IReadOnlyList<RoadPieceType> layout, Vector3 startPosition, Quaternion startRotation)
     {
-        Clear();
+        Validate(layout);
+        var root = new GameObject("Road");
+        root.SetActive(false);
+        var pieces = new List<RoadPiece>();
 
-        Transform previousExitPoint = startPoint;
-
-        for (int pieceIndex = 0; pieceIndex < layout.Length; pieceIndex++)
+        try
         {
-            RoadPiece piecePrefab = _piecePrefabsByType[layout[pieceIndex]];
-            RoadPiece placedPiece = Object.Instantiate(piecePrefab);
+            Vector3 position = startPosition;
+            Quaternion rotation = startRotation;
 
-            AlignPieceToPoint(placedPiece, previousExitPoint);
+            for (int pieceIndex = 0; pieceIndex < layout.Count; pieceIndex++)
+            {
+                RoadPiece piece = UnityEngine.Object.Instantiate(_piecePrefabsByType[layout[pieceIndex]], root.transform);
+                AlignPieceToPoint(piece, position, rotation);
+                pieces.Add(piece);
+                position = piece.ExitPoint.position;
+                rotation = piece.ExitPoint.rotation;
+            }
 
-            _placedPieces.Add(placedPiece);
-            previousExitPoint = placedPiece.ExitPoint;
+            var path = new RoadPath(pieces);
+            Clear();
+            _root = root;
+            return path;
         }
+        catch
+        {
+            DestroyRoot(root);
+            throw;
+        }
+    }
 
-        return new RoadPath(_placedPieces);
+    public void Activate()
+    {
+        _root.SetActive(true);
     }
 
     public void Clear()
     {
-        for (int pieceIndex = 0; pieceIndex < _placedPieces.Count; pieceIndex++)
-        {
-            _placedPieces[pieceIndex].gameObject.SetActive(false);
-            Object.Destroy(_placedPieces[pieceIndex].gameObject);
-        }
+        if (_root == null)
+            return;
 
-        _placedPieces.Clear();
+        DestroyRoot(_root);
+        _root = null;
     }
 
-    private void AlignPieceToPoint(RoadPiece piece, Transform targetPoint)
+    private static void DestroyRoot(GameObject root)
     {
-        float rotationDelta = targetPoint.eulerAngles.y - piece.EntryPoint.eulerAngles.y;
-        piece.transform.RotateAround(piece.EntryPoint.position, Vector3.up, rotationDelta);
+        root.SetActive(false);
 
+        if (Application.isPlaying)
+            UnityEngine.Object.Destroy(root);
+        else
+            UnityEngine.Object.DestroyImmediate(root);
+    }
+
+    private void AlignPieceToPoint(RoadPiece piece, Vector3 position, Quaternion rotation)
+    {
+        float rotationDelta = rotation.eulerAngles.y - piece.EntryPoint.eulerAngles.y;
+        piece.transform.RotateAround(piece.EntryPoint.position, Vector3.up, rotationDelta);
         Vector3 entryToPieceOffset = piece.transform.position - piece.EntryPoint.position;
-        piece.transform.position = targetPoint.position + entryToPieceOffset;
+        piece.transform.position = position + entryToPieceOffset;
+    }
+
+    private void Validate(IReadOnlyList<RoadPieceType> layout)
+    {
+        if (layout == null || layout.Count == 0)
+            throw new ArgumentException("The road layout must contain at least one piece.");
+
+        foreach (RoadPieceType type in layout)
+        {
+            if (!_piecePrefabsByType.TryGetValue(type, out RoadPiece prefab) || prefab == null)
+                throw new ArgumentException($"A road prefab is missing for {type}.");
+
+            if (prefab.Type != type || prefab.EntryPoint == null || prefab.ExitPoint == null)
+                throw new ArgumentException($"Road prefab {prefab.name} has invalid type or connection points.");
+        }
     }
 }

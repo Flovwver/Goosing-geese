@@ -23,7 +23,7 @@ public class RoadSafety : MonoBehaviour
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += OnRestarted;
 
-        if (_level.TryGetBuiltPath(out RoadPath path, out RoadSettings settings))
+        if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
             OnPathBuilt(path, settings);
     }
 
@@ -47,7 +47,7 @@ public class RoadSafety : MonoBehaviour
         _hasPath = false;
     }
 
-    private void OnPathBuilt(RoadPath path, RoadSettings settings)
+    private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
     {
         _hasPath = path != null && path.Curve != null;
         _offRoadTimer = 0f;

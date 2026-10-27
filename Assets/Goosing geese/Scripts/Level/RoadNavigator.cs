@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class RoadNavigator : MonoBehaviour
@@ -5,10 +6,14 @@ public class RoadNavigator : MonoBehaviour
     [SerializeField] private NavigationSettings _settings;
 
     private RoadPath _path;
+    private NavigationConfiguration _configuration;
     private int _currentSegment;
     private float _distanceAlongPath;
     private float _laneOffset;
 
+    public event Action PathCompleted;
+
+    public NavigationConfiguration Configuration => _configuration;
     public int CurrentSegment => _currentSegment;
     public float DistanceAlongPath => _distanceAlongPath;
 
@@ -17,16 +22,37 @@ public class RoadNavigator : MonoBehaviour
     public bool IsPathCompleted { get; private set; } = true;
     public bool IsFinishReached { get; private set; }
 
+    private void Awake()
+    {
+        _configuration = CaptureConfiguration();
+    }
+
+    private void OnEnable()
+    {
+        if (_configuration == null)
+            _configuration = CaptureConfiguration();
+    }
+
     private void OnDrawGizmosSelected()
     {
         if (_path == null || IsPathCompleted)
             return;
 
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(ClosestPosition, _settings.DebugPointRadius);
+        Gizmos.DrawWireSphere(ClosestPosition, _configuration.DebugPointRadius);
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(TargetPosition, _settings.DebugPointRadius);
+        Gizmos.DrawWireSphere(TargetPosition, _configuration.DebugPointRadius);
         Gizmos.DrawLine(transform.position, TargetPosition);
+    }
+
+    public NavigationConfiguration CaptureConfiguration()
+    {
+        return new NavigationConfiguration(_settings);
+    }
+
+    public void Configure(NavigationConfiguration configuration)
+    {
+        _configuration = configuration;
     }
 
     public void SetLaneOffset(float offset)
@@ -45,7 +71,7 @@ public class RoadNavigator : MonoBehaviour
         if (IsPathCompleted == false)
         {
             ClosestPosition = path.Curve.GetPointAtDistance(0f);
-            TargetPosition = path.Curve.GetPointAtDistance(_settings.LookAheadDistance);
+            TargetPosition = path.Curve.GetPointAtDistance(_configuration.LookAheadDistance);
         }
     }
 
@@ -61,7 +87,7 @@ public class RoadNavigator : MonoBehaviour
             _distanceAlongPath = curve.FindClosestDistance(currentPosition, _currentSegment, _distanceAlongPath);
             float endDistance = curve.GetSegmentEndDistance(_currentSegment);
 
-            if (endDistance - _distanceAlongPath > _settings.WaypointPassTolerance)
+            if (endDistance - _distanceAlongPath > _configuration.WaypointPassTolerance)
                 break;
 
             _distanceAlongPath = endDistance;
@@ -75,19 +101,22 @@ public class RoadNavigator : MonoBehaviour
         {
             Vector3 offsetFromRoute = currentPosition - ClosestPosition;
             offsetFromRoute.y = 0f;
-            IsFinishReached = offsetFromRoute.sqrMagnitude <= _settings.FinishHalfWidth * _settings.FinishHalfWidth;
+            IsFinishReached = offsetFromRoute.sqrMagnitude <= _configuration.FinishHalfWidth * _configuration.FinishHalfWidth;
         }
 
-        TargetPosition = curve.GetPointAtDistance(_distanceAlongPath + Mathf.Max(0f, _settings.LookAheadDistance));
+        TargetPosition = curve.GetPointAtDistance(_distanceAlongPath + Mathf.Max(0f, _configuration.LookAheadDistance));
 
-        Vector3 tangent = curve.GetPointAtDistance(_distanceAlongPath + _settings.LookAheadDistance + 1f) - TargetPosition;
+        Vector3 tangent = curve.GetPointAtDistance(_distanceAlongPath + _configuration.LookAheadDistance + 1f) - TargetPosition;
         TargetPosition += Vector3.Cross(Vector3.up, tangent.normalized) * _laneOffset;
 
         if (_currentSegment >= curve.SegmentCount)
         {
             Vector3 offset = currentPosition - curve.GetPointAtDistance(curve.Length);
             offset.y = 0f;
-            IsPathCompleted = offset.sqrMagnitude <= _settings.ArrivalDistance * _settings.ArrivalDistance;
+            IsPathCompleted = offset.sqrMagnitude <= _configuration.ArrivalDistance * _configuration.ArrivalDistance;
+
+            if (IsPathCompleted)
+                PathCompleted?.Invoke();
         }
     }
 

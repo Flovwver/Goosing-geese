@@ -27,7 +27,7 @@ public class OpponentDriver : MonoBehaviour
 
     private void Update()
     {
-        if (_race.State != RaceState.Racing || _racer.IsFinished || _path == null)
+        if (_race.isActiveAndEnabled == false || _race.State != RaceState.Racing || _racer.IsFinished || _path == null)
             return;
 
         int segment = Mathf.Min(_navigator.CurrentSegment, _path.Pieces.Count - 1);
@@ -53,13 +53,15 @@ public class OpponentDriver : MonoBehaviour
     public void SetPath(RoadPath path)
     {
         _path = path;
-        _racer.SetPath(path);
         ResetOpponent();
     }
 
     public void ResetOpponent()
     {
-        _racer.ResetRace();
-        GetComponent<Mover>().TeleportTo(_startPosition + _startRotation * Vector3.right * _laneOffset, _startRotation);
+        if (_path == null)
+            return;
+
+        RacerDefinition definition = _racer.CaptureDefinition(_startPosition + _startRotation * Vector3.right * _laneOffset, _startRotation);
+        _racer.Prepare(_path, definition);
     }
 }

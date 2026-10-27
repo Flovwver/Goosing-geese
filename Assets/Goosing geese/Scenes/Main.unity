@@ -160,7 +160,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32bb4f54472e1b64dbfd5c1f5229781c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputSwitch
-  _racer: {fileID: 265920761}
 --- !u!114 &280129368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1240,6 +1239,8 @@ MonoBehaviour:
   _roadStartPoint: {fileID: 1242738828}
   _settings: {fileID: 11400000, guid: a89aed623746447b9df737176ec8f8ff, type: 2}
   _racer: {fileID: 265920761}
+  _finishLine: {fileID: 1657735648}
+  _race: {fileID: 1081964708}
   _minimumRoadSpacing: 24
   _layoutValidationAttempts: 20
 --- !u!4 &1081964705
@@ -1953,6 +1954,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1466587189}
   m_CullTransparentMesh: 1
+--- !u!114 &1657735648 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1161628895886758186, guid: a60003e97b32eaa4fbeb19e97dd92b07, type: 3}
+  m_PrefabInstance: {fileID: 4131863152634964888}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ad7666a070390645902644a0fb655c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinishLine
 --- !u!1 &1828235865
 GameObject:
   m_ObjectHideFlags: 0

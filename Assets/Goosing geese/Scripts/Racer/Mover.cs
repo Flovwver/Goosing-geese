@@ -9,12 +9,12 @@ public class Mover : MonoBehaviour
     private Rigidbody _rigidbody;
     private Movement _movement;
     private BodyRotation _bodyRotation;
-    private RacerStats _stats;
+    private RacerConfiguration _stats;
     private float? _dragOverride;
     private Vector3 _targetPosition;
     private float _slipFactor;
     private bool _hasMovementTarget;
-    private bool _isAccelerating;
+    private bool _isAccelerate;
 
     private void Awake()
     {
@@ -31,7 +31,7 @@ public class Mover : MonoBehaviour
         if (_stats == null)
             return;
 
-        float drag = _dragOverride ?? (_isAccelerating ? _stats.Drag : _stats.CoastingDrag);
+        float drag = _dragOverride ?? (_isAccelerate ? _stats.Drag : _stats.CoastingDrag);
         _movement.ApplyDrag(drag);
 
         if (_hasMovementTarget == false)
@@ -40,7 +40,7 @@ public class Mover : MonoBehaviour
         _steering.UpdateDirection(_rigidbody.position, _rigidbody.rotation, _targetPosition, _stats.MaxSteeringAngle);
         Vector3 movementDirection = _steering.GetMovementDirection(_rigidbody.rotation);
         float currentSpeed = _movement.GetCurrentSpeed();
-        _movement.Apply(movementDirection, currentSpeed, _isAccelerating, _slipFactor, _stats, Time.fixedDeltaTime);
+        _movement.Apply(movementDirection, currentSpeed, _isAccelerate, _slipFactor, _stats, Time.fixedDeltaTime);
         _bodyRotation.Apply(movementDirection, _steering.LocalWheelDirection, _steering.AngleLimit, currentSpeed, _stats, Time.fixedDeltaTime);
     }
 
@@ -50,23 +50,23 @@ public class Mover : MonoBehaviour
         return _movement.GetCurrentSpeed();
     }
 
-    public void Configure(RacerStats stats)
+    public void Configure(RacerConfiguration stats)
     {
         InitializeComponents();
         _stats = stats;
     }
 
-    public void MoveTowards(Vector3 targetPosition, bool isAccelerating, float slipFactor)
+    public void MoveTowards(Vector3 targetPosition, bool isAccelerate, float slipFactor)
     {
         _slipFactor = Mathf.Clamp01(slipFactor);
         _targetPosition = targetPosition;
         _hasMovementTarget = true;
-        _isAccelerating = isAccelerating;
+        _isAccelerate = isAccelerate;
     }
 
     public void ReleaseThrottle()
     {
-        _isAccelerating = false;
+        _isAccelerate = false;
     }
 
     public void SetDrag(float drag)
@@ -80,7 +80,7 @@ public class Mover : MonoBehaviour
         _slipFactor = 0f;
         _steering?.Reset();
         _hasMovementTarget = false;
-        _isAccelerating = false;
+        _isAccelerate = false;
         _movement?.Stop();
         _bodyRotation?.Stop();
     }

@@ -28,6 +28,7 @@ public class OpponentSpawner : MonoBehaviour
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += OnRestarted;
         _race.RaceEnded += OnRaceEnded;
+        _race.Disabled += OnControllerDisabled;
 
         if (_opponent != null)
             _opponent.Finished += OnOpponentFinished;
@@ -49,7 +50,7 @@ public class OpponentSpawner : MonoBehaviour
 
         _appearance.ShowOriginal(new Color(1f, 0.7f, 0.2f));
 
-        if (_level.TryGetBuiltPath(out RoadPath path, out RoadSettings settings))
+        if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
         {
             _driver.SetPath(path);
             UpdateVehicle();
@@ -61,6 +62,7 @@ public class OpponentSpawner : MonoBehaviour
         _level.PathBuilt -= OnPathBuilt;
         _player.RaceRestarted -= OnRestarted;
         _race.RaceEnded -= OnRaceEnded;
+        _race.Disabled -= OnControllerDisabled;
 
         if (_opponent != null)
             _opponent.Finished -= OnOpponentFinished;
@@ -81,7 +83,7 @@ public class OpponentSpawner : MonoBehaviour
             _runtimeStats.hideFlags = HideFlags.DontSave;
         }
 
-        CampaignStage stage = _race.CurrentStage;
+        CampaignStage stage = _race.Campaign.GetStage(_level.Number);
         _runtimeStats.MaxSpeed = stage.OpponentMaxSpeed;
         _runtimeStats.Acceleration = stage.OpponentAcceleration;
         float speedRatio = stage.OpponentMaxSpeed / Mathf.Max(1f, _opponent.BaseStats.MaxSpeed);
@@ -98,7 +100,7 @@ public class OpponentSpawner : MonoBehaviour
         _appearance.ShowModel(_vehiclePrefabs[index]);
     }
 
-    private void OnPathBuilt(RoadPath path, RoadSettings settings)
+    private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
     {
         if (_driver != null)
         {
@@ -123,6 +125,12 @@ public class OpponentSpawner : MonoBehaviour
 
     private void OnRaceEnded(bool playerWon)
     {
-        _opponent.StopMovement();
+        OnControllerDisabled();
+    }
+
+    private void OnControllerDisabled()
+    {
+        if (_opponent != null)
+            _opponent.StopMovement();
     }
 }

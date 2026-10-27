@@ -4,5 +4,6 @@ public enum RaceOutcome
     OpponentFinished,
     Overheated,
     OffRoad,
-    RouteEnded
+    RouteEnded,
+    None
 }

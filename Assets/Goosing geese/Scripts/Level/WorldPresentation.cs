@@ -185,7 +185,7 @@ public class WorldPresentation : MonoBehaviour
         }
     }
 
-    private void OnPathBuilt(RoadPath path, RoadSettings settings)
+    private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
     {
         _path = path;
         Rebuild();

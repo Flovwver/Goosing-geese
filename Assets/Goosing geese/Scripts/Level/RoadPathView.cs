@@ -22,7 +22,7 @@ public class RoadPathView : MonoBehaviour
 
         _level.PathBuilt += OnPathBuilt;
 
-        if (_level.TryGetBuiltPath(out RoadPath path, out RoadSettings settings))
+        if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
             Show(path, settings);
     }
 
@@ -34,12 +34,12 @@ public class RoadPathView : MonoBehaviour
         Clear();
     }
 
-    private void OnPathBuilt(RoadPath path, RoadSettings settings)
+    private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
     {
         Show(path, settings);
     }
 
-    private void Show(RoadPath path, RoadSettings settings)
+    private void Show(RoadPath path, RoadConfiguration settings)
     {
         Clear();
 
@@ -113,7 +113,7 @@ public class RoadPathView : MonoBehaviour
         return path.Curve.GetSegmentEndDistance(segment) - start;
     }
 
-    private void AddLine(List<Vector3> points, Gradient gradient, RoadSettings settings)
+    private void AddLine(List<Vector3> points, Gradient gradient, RoadConfiguration settings)
     {
         var go = new GameObject("Road section");
         go.transform.SetParent(_lines.transform, false);

@@ -1,61 +1,21 @@
+using System;
 using UnityEngine;
 
 public class InputSwitch : MonoBehaviour
 {
-    [SerializeField] private Racer _racer;
-
     private bool _pedalIsPressed;
     private bool _keyboardIsPressed;
-
     private bool _hasFocus = true;
     private bool _isPaused;
-    private RaceController _race;
+    private bool _canInput = true;
+
+    public event Action Cleared;
 
     public bool IsThrottlePressed => _pedalIsPressed || _keyboardIsPressed;
-
-    private void Awake()
-    {
-        _race = FindFirstObjectByType<RaceController>();
-    }
-
-    private void OnEnable()
-    {
-        _racer.RaceRestarted += ResetInput;
-        _racer.Finished += ResetInput;
-    }
-
-    private void Update()
-    {
-        if (_racer.IsFinished)
-            return;
-
-        if (_race != null)
-        {
-            if (_race.State == RaceState.Waiting && IsThrottlePressed)
-                _race.StartRace();
-
-            if (_race.State != RaceState.Racing)
-                return;
-        }
-
-        bool isAccelerating = IsThrottlePressed;
-
-        if (isAccelerating == false)
-        {
-            _racer.Cooldown();
-        }
-        else
-        {
-            _racer.Accelerate();
-        }
-    }
 
     private void OnApplicationFocus(bool hasFocus)
     {
         _hasFocus = hasFocus;
-
-        if (hasFocus == false && _race != null)
-            _race.Pause();
 
         if (hasFocus == false)
             ResetInput();
@@ -65,21 +25,12 @@ public class InputSwitch : MonoBehaviour
     {
         _isPaused = isPaused;
 
-        if (isPaused && _race != null)
-            _race.Pause();
-
         if (isPaused)
             ResetInput();
     }
 
     private void OnDisable()
     {
-        if (_racer != null)
-        {
-            _racer.RaceRestarted -= ResetInput;
-            _racer.Finished -= ResetInput;
-        }
-
         ResetInput();
     }
 
@@ -87,19 +38,22 @@ public class InputSwitch : MonoBehaviour
     {
         _pedalIsPressed = false;
         _keyboardIsPressed = false;
+        Cleared?.Invoke();
+    }
 
-        if (_racer != null)
-            _racer.ReleaseThrottle();
+    public void SetInputEnabled(bool isEnabled)
+    {
+        _canInput = isEnabled;
+        ResetInput();
     }
 
     public void SetPedalPressed(bool isPressed)
     {
-        _pedalIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false && _racer.IsFinished == false;
+        _pedalIsPressed = isPressed && _canInput && isActiveAndEnabled && _hasFocus && _isPaused == false;
     }
 
     public void SetKeyboardPressed(bool isPressed)
     {
-        _keyboardIsPressed = isPressed && isActiveAndEnabled && _hasFocus && _isPaused == false && _racer.IsFinished == false;
+        _keyboardIsPressed = isPressed && _canInput && isActiveAndEnabled && _hasFocus && _isPaused == false;
     }
-
 }
