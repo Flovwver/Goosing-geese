@@ -6,10 +6,8 @@ public class GameScreens : MonoBehaviour
 {
     private const int CanvasSortingOrder = 20;
     private static readonly Color PanelColor = GameUiTheme.Panel;
-    private static readonly Color ButtonColor = GameUiTheme.Button;
 
     [SerializeField] private RaceController _race;
-    [SerializeField] private InputSwitch _input;
     [SerializeField] private Racer _player;
     [SerializeField] private OpponentSpawner _opponents;
     [SerializeField] private GarageView _garage;
@@ -20,6 +18,10 @@ public class GameScreens : MonoBehaviour
     private RectTransform _safeArea;
     private GameObject _panel;
     private Text _status;
+    private SettingsView _settingsView;
+    private LeaderboardView _leaderboardView;
+    private QuestsView _questsView;
+    private ScenerySelectionView _sceneryView;
     private GameUiFactory _ui;
     private GameObject _canvasRoot;
     private Speedometer _speedometer;
@@ -47,8 +49,8 @@ public class GameScreens : MonoBehaviour
         _garage.VisibilityChanged += OnGarageVisibilityChanged;
         _campaignView.VisibilityChanged += OnCampaignVisibilityChanged;
 
-        if (rebuilt)
-            OnStateChanged(_race.State);
+        OnStateChanged(_race.State);
+        UpdateInputAvailability();
     }
 
     private void Start()
@@ -70,7 +72,6 @@ public class GameScreens : MonoBehaviour
         _gear.SetActive(showNavigation);
         _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
         _garageButton.SetActive(showNavigation && _race.State == RaceState.Waiting);
-        UpdateInputAvailability();
         _status.gameObject.SetActive(_garage.IsVisible == false && _campaignView.IsVisible == false && _race.State != RaceState.Waiting);
         _speedometer.gameObject.SetActive(_garage.IsVisible == false && _campaignView.IsVisible == false);
         string state = _race.State == RaceState.Waiting ? L("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? L("Результат", "Result") : _race.State == RaceState.Paused ? L("Пауза", "Paused") : L("Гонка", "Race");
@@ -93,6 +94,7 @@ public class GameScreens : MonoBehaviour
         _race.StateChanged -= OnStateChanged;
         _garage.VisibilityChanged -= OnGarageVisibilityChanged;
         _campaignView.VisibilityChanged -= OnCampaignVisibilityChanged;
+        _race.SetInputBlocked(false);
 
         if (_pedalPrompt != null)
             _pedalPrompt.SetVisible(false);
@@ -107,6 +109,10 @@ public class GameScreens : MonoBehaviour
     {
         Font font = GameUiTheme.LoadFont();
         _ui = new GameUiFactory(font, GetComponent<GameAudio>().PlayClick);
+        _settingsView = new SettingsView(_race.Progress, _ui);
+        _leaderboardView = new LeaderboardView(_race.Progress, _ui);
+        _questsView = new QuestsView(_race.Progress, _ui);
+        _sceneryView = new ScenerySelectionView(_race.Progress, _ui);
 
         if (_canvasRoot != null)
         {
@@ -251,8 +257,7 @@ public class GameScreens : MonoBehaviour
 
     private void UpdateInputAvailability()
     {
-        bool acceptsInput = _race.State == RaceState.Waiting || _race.State == RaceState.Racing;
-        _input.enabled = acceptsInput && _panel == null && _garage.IsVisible == false && _campaignView.IsVisible == false;
+        _race.SetInputBlocked(_panel != null || _garage.IsVisible || _campaignView.IsVisible);
     }
 
     private void OnGarageVisibilityChanged(bool visible)
@@ -312,112 +317,25 @@ public class GameScreens : MonoBehaviour
             return;
 
         ShowPanel(L("Настройки", "Settings"), "settings");
-        AddNameField();
-        AddVolume(L("Музыка", "Music"), _race.Progress.MusicVolume, value => _race.Progress.MusicVolume = value);
-        AddVolume(L("Эффекты", "Effects"), _race.Progress.EffectsVolume, value => _race.Progress.EffectsVolume = value);
-        _ui.CreateButton(_panel.transform, _race.Progress.English ? "Русский" : "English", () =>
-        {
-            _race.Progress.English = !_race.Progress.English;
-            PlayerProgressStore.Save(_race.Progress);
-            OpenSettings();
-        });
-        _ui.CreateButton(_panel.transform, L("Задания", "Quests"), ShowQuests);
-        _ui.CreateButton(_panel.transform, L("Окружение", "Scenery"), ShowScenery);
-        _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
-    }
-
-    private void AddNameField()
-    {
-        var rect = GameUiFactory.CreateRect("Player name", _panel.transform, Vector2.zero, Vector2.one);
-        rect.gameObject.AddComponent<Image>().color = ButtonColor;
-        rect.gameObject.AddComponent<LayoutElement>().preferredHeight = 55f;
-        var input = rect.gameObject.AddComponent<InputField>();
-        input.textComponent = _ui.CreateLabel(rect, "", 24);
-        input.characterLimit = 20;
-        input.text = _race.Progress.PlayerName;
-        input.onEndEdit.AddListener(value =>
-        {
-            _race.Progress.PlayerName = string.IsNullOrWhiteSpace(value) ? "Player" : value.Trim();
-            PlayerProgressStore.Save(_race.Progress);
-        });
-    }
-
-    private void AddVolume(string title, float value, Action<float> apply)
-    {
-        _ui.CreateLabel(_panel.transform, title, 24);
-        var rect = GameUiFactory.CreateRect(title, _panel.transform, Vector2.zero, Vector2.one);
-        rect.gameObject.AddComponent<LayoutElement>().preferredHeight = 45f;
-        rect.gameObject.AddComponent<Image>().color = ButtonColor;
-        var slider = rect.gameObject.AddComponent<Slider>();
-        var fill = GameUiFactory.CreateRect("Fill", rect, Vector2.zero, Vector2.one);
-        fill.gameObject.AddComponent<Image>().color = new Color(0.4f, 0.9f, 0.65f);
-        slider.fillRect = fill;
-        slider.value = value;
-        slider.onValueChanged.AddListener(v =>
-        {
-            apply(v);
-            PlayerProgressStore.Save(_race.Progress);
-        });
+        _settingsView.Render(_panel.transform, OpenSettings, ShowQuests, ShowScenery, Back);
     }
 
     private void ShowLeaderboard()
     {
         ShowPanel(L("Локальный рекорд", "Local leaderboard"), "leaderboard");
-        var entries = LocalLeaderboard.Read();
-        string rows = "";
-
-        for (int i = 0; i < entries.Count; i++)
-        {
-            bool currentPlayer = entries[i].Name == _race.Progress.PlayerName;
-
-            if (i < 5 || currentPlayer)
-                rows += LocalLeaderboard.GetRank(entries, i) + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "") + "\n";
-        }
-
-        if (entries.Find(entry => entry.Name == _race.Progress.PlayerName) == null)
-            rows += (entries.Count + 1) + ". " + _race.Progress.PlayerName + " — " + _race.Progress.Points + " •";
-
-        _ui.CreateLabel(_panel.transform, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
-        _ui.CreateLabel(_panel.transform, L("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
-        _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
+        _leaderboardView.Render(_panel.transform, Back);
     }
 
     private void ShowQuests()
     {
         ShowPanel(L("Задания", "Quests"), "quests");
-        string[] names = { L("Сегодня: 3 гонки", "Today: 3 races"), L("Сегодня: 1 победа", "Today: 1 win"), L("Всего: 10 побед", "Total: 10 wins") };
-
-        for (int i = 0; i < names.Length; i++)
-        {
-            int quest = i;
-            string title = names[i] + "  " + QuestTracker.GetProgress(_race.Progress, i, DateTime.Today) + "/" + QuestTracker.GetTarget(i);
-            var button = _ui.CreateButton(_panel.transform, title, () =>
-            {
-                if (QuestTracker.TryClaim(_race.Progress, quest, DateTime.Today))
-                {
-                    PlayerProgressStore.Save(_race.Progress);
-                    LocalLeaderboard.Record(_race.Progress.PlayerName, _race.Progress.Points);
-                }
-
-                ShowQuests();
-            });
-            button.interactable = !QuestTracker.IsClaimed(_race.Progress, i, DateTime.Today) && QuestTracker.GetProgress(_race.Progress, i, DateTime.Today) >= QuestTracker.GetTarget(i);
-        }
-
-        _ui.CreateLabel(_panel.transform, L("Нажми выполненное задание, чтобы получить очки", "Tap a completed quest to claim points"), 22);
-        _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
+        _questsView.Render(_panel.transform, Back, ShowQuests);
     }
 
     private void ShowScenery()
     {
         ShowPanel(L("Окружение", "Scenery"), "appearance");
-        _ui.CreateButton(_panel.transform, L("Сменить окружение", "Change scenery"), () =>
-        {
-            _race.Progress.Environment = (_race.Progress.Environment + 1) % 3;
-            PlayerProgressStore.Save(_race.Progress);
-            GetComponent<WorldPresentation>().Rebuild();
-        });
-        _ui.CreateButton(_panel.transform, L("Назад", "Back"), Back);
+        _sceneryView.Render(_panel.transform, Back, GetComponent<WorldPresentation>().Rebuild);
     }
 
     private void Back()

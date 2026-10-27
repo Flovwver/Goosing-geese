@@ -15,7 +15,8 @@ MonoBehaviour:
   MaxSpeed: 100
   Acceleration: 100
   Drag: 0.05
-  CoastingDrag: 0.5
+  CoastingDrag: 1
+  FinishDrag: 1.5
   TurnSpeed: 300
   MaxSteeringAngle: 30
   DriftAlignmentSpeed: 90

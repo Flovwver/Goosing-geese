@@ -12,6 +12,7 @@ public class RaceController : MonoBehaviour
     private RaceState _stateBeforePause;
     private float _resumeTimeScale = 1f;
     private bool _ownsPause;
+    private bool _inputBlocked;
 
     public event Action<RaceState> StateChanged;
     public event Action<bool> RaceEnded;
@@ -52,7 +53,8 @@ public class RaceController : MonoBehaviour
         if (State == RaceState.Paused)
             SuspendTime();
 
-        _input.SetInputEnabled(State == RaceState.Waiting || State == RaceState.Racing);
+        _input.ResetInput();
+        UpdateInputAvailability();
     }
 
     private void Update()
@@ -90,9 +92,15 @@ public class RaceController : MonoBehaviour
         Disabled?.Invoke();
     }
 
+    public void SetInputBlocked(bool blocked)
+    {
+        _inputBlocked = blocked;
+        UpdateInputAvailability();
+    }
+
     public void StartRace()
     {
-        if (isActiveAndEnabled == false || State != RaceState.Waiting || _player.CanRace == false)
+        if (isActiveAndEnabled == false || State != RaceState.Waiting || _inputBlocked || _player.CanRace == false)
             return;
 
         SetState(RaceState.Racing);
@@ -115,7 +123,6 @@ public class RaceController : MonoBehaviour
             return;
 
         RestoreTimeScale();
-        _input.SetInputEnabled(true);
         SetState(_stateBeforePause);
     }
 
@@ -125,7 +132,7 @@ public class RaceController : MonoBehaviour
         PlayerWon = false;
         Outcome = RaceOutcome.None;
         LastReward = 0;
-        _input.SetInputEnabled(isActiveAndEnabled);
+        _input.ResetInput();
         SetState(RaceState.Waiting);
         Prepared?.Invoke();
     }
@@ -195,10 +202,20 @@ public class RaceController : MonoBehaviour
     private void SetState(RaceState state)
     {
         if (State == state)
+        {
+            UpdateInputAvailability();
             return;
+        }
 
         State = state;
+        UpdateInputAvailability();
         StateChanged?.Invoke(state);
+    }
+
+    private void UpdateInputAvailability()
+    {
+        _input.SetInputEnabled(isActiveAndEnabled && !_inputBlocked
+            && (State == RaceState.Waiting || State == RaceState.Racing));
     }
 
     private void OnPlayerFinished()

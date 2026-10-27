@@ -43,6 +43,9 @@ public class InputSwitch : MonoBehaviour
 
     public void SetInputEnabled(bool isEnabled)
     {
+        if (_canInput == isEnabled)
+            return;
+
         _canInput = isEnabled;
         ResetInput();
     }
