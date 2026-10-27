@@ -67,7 +67,7 @@ public class PedalView : MonoBehaviour
             return;
 
         _appearanceIndex = selected;
-        RacerAppearanceCatalog.Entry appearance = _appearances.GetEntry(selected);
+        RacerAppearanceDefinition appearance = _appearances.GetEntry(selected);
         Sprite sprite = appearance != null ? appearance.PedalSprite : null;
         _artwork.sprite = sprite;
         _shadow.sprite = sprite;

@@ -7,20 +7,20 @@ public static class LocalLeaderboard
     private const string SaveKey = "GoosingGeese.Leaderboard.v1";
     private const int MaximumEntries = 100;
 
-    public static List<Entry> Read()
+    public static List<LeaderboardEntry> Read()
     {
-        Table table = null;
+        LeaderboardData table = null;
 
         try
         {
-            table = JsonUtility.FromJson<Table>(PlayerPrefs.GetString(SaveKey, ""));
+            table = JsonUtility.FromJson<LeaderboardData>(PlayerPrefs.GetString(SaveKey, ""));
         }
         catch (ArgumentException)
         {
             table = null;
         }
 
-        var entries = table != null && table.Entries != null ? table.Entries : new List<Entry>();
+        var entries = table != null && table.Entries != null ? table.Entries : new List<LeaderboardEntry>();
         entries.RemoveAll(entry => entry == null || string.IsNullOrWhiteSpace(entry.Name));
         entries.Sort((first, second) => second.Score.CompareTo(first.Score));
         return entries;
@@ -30,10 +30,10 @@ public static class LocalLeaderboard
     {
         name = string.IsNullOrWhiteSpace(name) ? "Player" : name.Trim();
         var entries = Read();
-        Entry entry = entries.Find(item => item.Name == name);
+        LeaderboardEntry entry = entries.Find(item => item.Name == name);
 
         if (entry == null)
-            entries.Add(new Entry { Name = name, Score = Mathf.Max(0, score) });
+            entries.Add(new LeaderboardEntry { Name = name, Score = Mathf.Max(0, score) });
         else
             entry.Score = Mathf.Max(entry.Score, score);
 
@@ -42,11 +42,11 @@ public static class LocalLeaderboard
         if (entries.Count > MaximumEntries)
             entries.RemoveRange(MaximumEntries, entries.Count - MaximumEntries);
 
-        PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(new Table { Entries = entries }));
+        PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(new LeaderboardData { Entries = entries }));
         PlayerPrefs.Save();
     }
 
-    public static int GetRank(List<Entry> entries, int index)
+    public static int GetRank(List<LeaderboardEntry> entries, int index)
     {
         int rank = 1;
 
@@ -57,18 +57,5 @@ public static class LocalLeaderboard
         }
 
         return rank;
-    }
-
-    [Serializable]
-    public class Entry
-    {
-        public string Name;
-        public int Score;
-    }
-
-    [Serializable]
-    private class Table
-    {
-        public List<Entry> Entries;
     }
 }

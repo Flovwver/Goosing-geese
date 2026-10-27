@@ -33,7 +33,7 @@ public class RacerUpgradeRules : ScriptableObject
         return Mathf.Max(0, _firstUpgradeStage) + Mathf.Max(0, nextLevel - 1) * Mathf.Max(1, _upgradeStageStep);
     }
 
-    public float GetValue(RacerAppearanceCatalog.Entry model, RacerUpgradeKind kind, int level, int thermalLevel)
+    public float GetValue(RacerAppearanceDefinition model, RacerUpgradeKind kind, int level, int thermalLevel)
     {
         RacerStats source = model.Stats;
         level = Mathf.Clamp(level, 0, MaximumLevel);
@@ -56,7 +56,7 @@ public class RacerUpgradeRules : ScriptableObject
         }
     }
 
-    public void Apply(RacerAppearanceCatalog.Entry model, RacerUpgradeProgress progress, RacerStats target)
+    public void Apply(RacerAppearanceDefinition model, RacerUpgradeProgress progress, RacerStats target)
     {
         int thermal = progress != null ? progress.GetLevel(RacerUpgradeKind.ThermalResistance) : 0;
 
@@ -86,7 +86,7 @@ public class RacerUpgradeRules : ScriptableObject
         }
     }
 
-    private float GetRedStart(RacerAppearanceCatalog.Entry model, int level)
+    private float GetRedStart(RacerAppearanceDefinition model, int level)
     {
         float cap = Mathf.Clamp(model.MaximumRedStart, model.Stats.RedZoneThreshold, 1f);
         return Mathf.Min(cap, model.Stats.RedZoneThreshold + Mathf.Clamp(level, 0, MaximumLevel) * _thermalGain);

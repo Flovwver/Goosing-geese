@@ -66,7 +66,7 @@ public class WorldPresentation : MonoBehaviour
 
     public void ApplyAppearance()
     {
-        RacerAppearanceCatalog.Entry appearance = _appearances.GetEntry(_garage.PreviewIndex);
+        RacerAppearanceDefinition appearance = _appearances.GetEntry(_garage.PreviewIndex);
 
         if (appearance == null)
             return;

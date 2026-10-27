@@ -1,13 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum MenuSymbol
-{
-    Gear,
-    Trophy,
-    Garage
-}
-
 [RequireComponent(typeof(CanvasRenderer))]
 public class MenuSymbolGraphic : MaskableGraphic
 {

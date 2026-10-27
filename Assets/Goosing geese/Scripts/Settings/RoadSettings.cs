@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,18 +27,8 @@ public class RoadSettings : ScriptableObject
         RoadPieceType.RightTurn
     };
 
-    [SerializeField] private PiecePrefabEntry[] _piecePrefabs;
+    [SerializeField] private RoadPiecePrefabEntry[] _piecePrefabs;
 
     public RoadPieceType[] AvailablePieceTypes => _availablePieceTypes;
-    public IReadOnlyList<PiecePrefabEntry> PiecePrefabs => _piecePrefabs;
-
-    [Serializable]
-    public class PiecePrefabEntry
-    {
-        [SerializeField] private RoadPieceType _type;
-        [SerializeField] private RoadPiece _prefab;
-
-        public RoadPieceType Type => _type;
-        public RoadPiece Prefab => _prefab;
-    }
+    public IReadOnlyList<RoadPiecePrefabEntry> PiecePrefabs => _piecePrefabs;
 }

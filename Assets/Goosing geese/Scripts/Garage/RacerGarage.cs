@@ -21,8 +21,8 @@ public class RacerGarage : MonoBehaviour
     public int TotalPoints => _race.Progress.Points;
     public int HighestCompletedLevel => _race.Progress.HighestCompletedLevel;
     public int MaximumUpgradeLevel => _rules.MaximumLevel;
-    public RacerAppearanceCatalog.Entry SelectedEntry => _appearances.GetEntry(SelectedIndex);
-    public RacerAppearanceCatalog.Entry PreviewEntry => _appearances.GetEntry(PreviewIndex);
+    public RacerAppearanceDefinition SelectedEntry => _appearances.GetEntry(SelectedIndex);
+    public RacerAppearanceDefinition PreviewEntry => _appearances.GetEntry(PreviewIndex);
     public RacerStats BaseStats => SelectedEntry.Stats;
 
     private void Awake()
@@ -202,7 +202,7 @@ public class RacerGarage : MonoBehaviour
             _race.Progress.OwnedModels.Add(id);
     }
 
-    private RacerUpgradeProgress FindUpgrades(RacerAppearanceCatalog.Entry model)
+    private RacerUpgradeProgress FindUpgrades(RacerAppearanceDefinition model)
     {
         return _race.Progress.Upgrades.Find(progress => progress != null && progress.ModelId == model.UpgradeId);
     }

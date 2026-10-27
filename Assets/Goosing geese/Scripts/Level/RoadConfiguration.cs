@@ -33,7 +33,7 @@ public sealed class RoadConfiguration
         if (settings.PiecePrefabs == null)
             throw new ArgumentException("Road prefabs must be assigned.");
 
-        foreach (RoadSettings.PiecePrefabEntry entry in settings.PiecePrefabs)
+        foreach (RoadPiecePrefabEntry entry in settings.PiecePrefabs)
         {
             if (entry == null || entry.Prefab == null || prefabs.ContainsKey(entry.Type))
                 throw new ArgumentException("Road prefab entries must be unique and assigned.");

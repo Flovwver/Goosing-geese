@@ -1,12 +1,5 @@
 using System;
 
-public enum LevelDifficulty
-{
-    Easy,
-    Medium,
-    Hard
-}
-
 [Serializable]
 public class CampaignStage
 {
