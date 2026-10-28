@@ -54,7 +54,7 @@ public class RaceResultView : MonoBehaviour
         _canvasRoot.SetActive(false);
     }
 
-    private string L(string russian, string english)
+    private string Localize(string russian, string english)
     {
         return _race.Progress.English ? english : russian;
     }
@@ -116,18 +116,18 @@ public class RaceResultView : MonoBehaviour
         layout.childControlHeight = true;
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
-        AddLabel(_race.PlayerWon ? L("Победа!", "You won!") : L("Попробуем ещё?", "Try again?"), 32);
+        AddLabel(_race.PlayerWon ? Localize("Победа!", "You won!") : Localize("Попробуем ещё?", "Try again?"), 32);
 
         if (_race.PlayerWon == false)
             AddLabel(GetLossReason(), 24);
 
-        AddLabel("+" + _race.LastReward + L(" очков", " points"), 30);
+        AddLabel("+" + _race.LastReward + Localize(" очков", " points"), 30);
 
         if (_race.PlayerWon && _race.HasNextLevel)
-            AddButton(L("Следующий уровень", "Next level"), _race.NextLevel);
+            AddButton(Localize("Следующий уровень", "Next level"), _race.NextLevel);
 
-        AddButton(L("Повторить трассу", "Retry track"), _race.Retry);
-        AddButton(L("В главное меню", "Main menu"), _race.ReturnToMenu);
+        AddButton(Localize("Повторить трассу", "Retry track"), _race.Retry);
+        AddButton(Localize("В главное меню", "Main menu"), _race.ReturnToMenu);
     }
 
     private string GetLossReason()
@@ -135,13 +135,13 @@ public class RaceResultView : MonoBehaviour
         switch (_race.Outcome)
         {
             case RaceOutcome.Overheated:
-                return L("Перегрев", "Overheated");
+                return Localize("Перегрев", "Overheated");
             case RaceOutcome.OffRoad:
-                return L("Вылет с трассы", "Off the road");
+                return Localize("Вылет с трассы", "Off the road");
             case RaceOutcome.OpponentFinished:
-                return L("Соперник финишировал первым", "Your rival finished first");
+                return Localize("Соперник финишировал первым", "Your rival finished first");
             default:
-                return L("Трасса закончилась до финиша", "Route ended before the finish");
+                return Localize("Трасса закончилась до финиша", "Route ended before the finish");
         }
     }
 

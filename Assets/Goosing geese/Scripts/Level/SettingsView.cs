@@ -5,31 +5,41 @@ using UnityEngine.UI;
 public sealed class SettingsView
 {
     private readonly PlayerProgress _progress;
+    private readonly ProfileCommands _commands;
     private readonly GameUiFactory _ui;
 
     public SettingsView(PlayerProgress progress, GameUiFactory ui)
     {
         _progress = progress;
+        _commands = new ProfileCommands(progress);
         _ui = ui;
+    }
+
+    public void Save()
+    {
+        _commands.Save();
     }
 
     public void Render(Transform parent, Action reopen, Action quests, Action scenery, Action back)
     {
         AddNameField(parent);
-        AddVolume(parent, L("Музыка", "Music"), _progress.MusicVolume, value => _progress.MusicVolume = value);
-        AddVolume(parent, L("Эффекты", "Effects"), _progress.EffectsVolume, value => _progress.EffectsVolume = value);
+        AddVolume(parent, Localize("Музыка", "Music"), _progress.MusicVolume, _commands.SetMusicVolume);
+        AddVolume(parent, Localize("Эффекты", "Effects"), _progress.EffectsVolume, _commands.SetEffectsVolume);
         _ui.CreateButton(parent, _progress.English ? "Русский" : "English", () =>
         {
-            _progress.English = !_progress.English;
-            PlayerProgressStore.Save(_progress);
+            _commands.ToggleLanguage();
             reopen();
         });
-        _ui.CreateButton(parent, L("Задания", "Quests"), quests);
-        _ui.CreateButton(parent, L("Окружение", "Scenery"), scenery);
-        _ui.CreateButton(parent, L("Назад", "Back"), back);
+        _ui.CreateButton(parent, Localize("Задания", "Quests"), quests);
+        _ui.CreateButton(parent, Localize("Окружение", "Scenery"), scenery);
+        _ui.CreateButton(parent, Localize("Назад", "Back"), () =>
+        {
+            _commands.Save();
+            back();
+        });
     }
 
-    private string L(string russian, string english)
+    private string Localize(string russian, string english)
     {
         return _progress.English ? english : russian;
     }
@@ -45,8 +55,7 @@ public sealed class SettingsView
         input.text = _progress.PlayerName;
         input.onEndEdit.AddListener(value =>
         {
-            _progress.PlayerName = string.IsNullOrWhiteSpace(value) ? "Player" : value.Trim();
-            PlayerProgressStore.Save(_progress);
+            _commands.SetName(value);
         });
     }
 
@@ -61,10 +70,6 @@ public sealed class SettingsView
         fill.gameObject.AddComponent<Image>().color = new Color(0.4f, 0.9f, 0.65f);
         slider.fillRect = fill;
         slider.value = value;
-        slider.onValueChanged.AddListener(v =>
-        {
-            apply(v);
-            PlayerProgressStore.Save(_progress);
-        });
+        slider.onValueChanged.AddListener(value => apply(value));
     }
 }

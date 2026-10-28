@@ -9,7 +9,7 @@ public class CameraFollower : MonoBehaviour
 
     private Vector3 _velocity;
     private Racer _racer;
-    private bool _isFollowing = true;
+    private bool _followEnabled = true;
     private RaceController _race;
     private OpponentSpawner _opponents;
     private Quaternion _followingRotation;
@@ -29,12 +29,12 @@ public class CameraFollower : MonoBehaviour
 
         _race.RaceEnded += OnRaceEnded;
         _race.Prepared += OnRaceRestarted;
-        _isFollowing = _race.State != RaceState.Result;
+        _followEnabled = _race.State != RaceState.Result;
     }
 
     private void LateUpdate()
     {
-        if (_isFollowing == false)
+        if (_followEnabled == false)
             return;
 
         Vector3 focus = _target.position;
@@ -60,13 +60,13 @@ public class CameraFollower : MonoBehaviour
 
     private void OnRaceEnded(bool playerWon)
     {
-        _isFollowing = false;
+        _followEnabled = false;
         _velocity = Vector3.zero;
     }
 
     private void OnRaceRestarted()
     {
-        _isFollowing = true;
+        _followEnabled = true;
         _velocity = Vector3.zero;
         transform.position = _target.position + _settings.Offset;
     }

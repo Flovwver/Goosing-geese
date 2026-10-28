@@ -112,7 +112,7 @@ public class Racer : MonoBehaviour
         Finished?.Invoke();
     }
 
-    public void Tick(bool isAccelerating, float deltaTime)
+    public void Tick(bool isAccelerate, float deltaTime)
     {
         if (isActiveAndEnabled == false || _overheatTracker.IsExploded || _roadNavigator.IsPathCompleted)
             return;
@@ -134,7 +134,7 @@ public class Racer : MonoBehaviour
             return;
 
         float slip = IsFinished ? 0f : _gripModel.CalculateSlipFactor(GetCurrentSpeed(), _configuration);
-        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerating && IsFinished == false, slip);
+        _mover.MoveTowards(_roadNavigator.TargetPosition, isAccelerate && IsFinished == false, slip);
     }
 
     private void InitializeComponents()

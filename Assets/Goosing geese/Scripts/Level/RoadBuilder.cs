@@ -88,7 +88,7 @@ public class RoadBuilder
 
         foreach (RoadPieceType type in layout)
         {
-            if (!_piecePrefabsByType.TryGetValue(type, out RoadPiece prefab) || prefab == null)
+            if (_piecePrefabsByType.TryGetValue(type, out RoadPiece prefab) == false || prefab == null)
                 throw new ArgumentException($"A road prefab is missing for {type}.");
 
             if (prefab.Type != type || prefab.EntryPoint == null || prefab.ExitPoint == null)

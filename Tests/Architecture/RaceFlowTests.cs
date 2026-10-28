@@ -63,7 +63,7 @@ public static class RaceFlowTests
 
                 RaceOutcome expected = cycle % 2 == 0 ? RaceOutcome.FinishedFirst : RaceOutcome.Overheated;
                 Require(race.State == RaceState.Result && race.Outcome == expected && results == cycle + 1, "Each attempt must produce one immutable result.");
-                Require(!(bool)typeof(CameraFollower).GetField("_isFollowing", Flags).GetValue(camera), "Result must stop the camera.");
+                Require(!(bool)typeof(CameraFollower).GetField("_followEnabled", Flags).GetValue(camera), "Result must stop the camera.");
                 input.SetPedalPressed(true);
                 Require(!input.IsThrottlePressed, "Result must block throttle.");
 
@@ -74,7 +74,7 @@ public static class RaceFlowTests
                 repeat();
                 level.TryGetBuiltPath(out var repeated, out _);
                 Require(ReferenceEquals(path, repeated) && ReferenceEquals(definition, level.CurrentDefinition) && ReferenceEquals(profile, level.SpeedProfile), "Repeat must retain level geometry and speed guidance.");
-                Require((bool)typeof(CameraFollower).GetField("_isFollowing", Flags).GetValue(camera), "Repeat must restore the camera.");
+                Require((bool)typeof(CameraFollower).GetField("_followEnabled", Flags).GetValue(camera), "Repeat must restore the camera.");
                 regenerate();
                 Require(!ReferenceEquals(definition, level.CurrentDefinition) && race.State == RaceState.Waiting, "Regenerate button must create a new prepared level.");
             }

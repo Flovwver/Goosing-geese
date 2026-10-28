@@ -30,11 +30,11 @@ public sealed class LeaderboardView
             rows += (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
 
         _ui.CreateLabel(parent, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
-        _ui.CreateLabel(parent, L("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
-        _ui.CreateButton(parent, L("Назад", "Back"), back);
+        _ui.CreateLabel(parent, Localize("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
+        _ui.CreateButton(parent, Localize("Назад", "Back"), back);
     }
 
-    private string L(string russian, string english)
+    private string Localize(string russian, string english)
     {
         return _progress.English ? english : russian;
     }

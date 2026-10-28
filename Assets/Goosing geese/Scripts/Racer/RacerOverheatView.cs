@@ -12,7 +12,7 @@ public class RacerOverheatView : MonoBehaviour
 
     private Animator _animator;
     private ParticleSystem[] _explosionParticles;
-    private bool _isExploding;
+    private bool _explosionActive;
 
     public event Action ExplosionCompleted;
 
@@ -37,14 +37,14 @@ public class RacerOverheatView : MonoBehaviour
 
     private void Update()
     {
-        if (_isExploding == false)
+        if (_explosionActive == false)
             return;
 
         AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
 
         if (state.fullPathHash == ExplosionState && state.normalizedTime >= 1f)
         {
-            _isExploding = false;
+            _explosionActive = false;
             ExplosionCompleted?.Invoke();
         }
     }
@@ -64,13 +64,13 @@ public class RacerOverheatView : MonoBehaviour
     private void OnExploded()
     {
         ResetExplosionParticles();
-        _isExploding = true;
+        _explosionActive = true;
         _animator.SetTrigger(ExplodedParameter);
     }
 
     private void OnRaceRestarted()
     {
-        _isExploding = false;
+        _explosionActive = false;
         ResetExplosionParticles();
         _animator.Rebind();
         _animator.ResetTrigger(ExplodedParameter);
