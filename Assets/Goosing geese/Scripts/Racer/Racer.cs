@@ -22,7 +22,7 @@ public class Racer : MonoBehaviour
     public event Action ConfigurationChanged;
 
     public bool IsFinished { get; private set; }
-    public bool CanRace => _overheatTracker.IsExploded == false && _roadNavigator.IsPathCompleted == false;
+    public bool CanRace => IsFinished == false && isActiveAndEnabled && _overheatTracker.IsExploded == false && _roadNavigator.IsPathCompleted == false;
     public RacerConfiguration Configuration => _configuration;
     public RacerStats BaseStats => _stats;
     public float MaxSpeed => _configuration?.MaxSpeed ?? _stats.MaxSpeed;

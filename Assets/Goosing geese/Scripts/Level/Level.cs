@@ -89,6 +89,14 @@ public class Level : MonoBehaviour
         ClearBuiltRoad();
     }
 
+    public void PrepareOpponent(Racer opponent, RoadPath path, float laneOffset)
+    {
+        RacerDefinition player = CurrentDefinition.Racer;
+        Vector3 position = player.Position + player.Rotation * Vector3.right * laneOffset;
+        RacerDefinition definition = opponent.CaptureDefinition(position, player.Rotation);
+        opponent.Prepare(path, definition);
+    }
+
     public void SetSession(GameSession session)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));

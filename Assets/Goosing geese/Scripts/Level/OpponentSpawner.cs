@@ -14,6 +14,8 @@ public class OpponentSpawner : MonoBehaviour
     private RaceController _race;
     private RacerAppearance _appearance;
     private RacerStats _runtimeStats;
+    private RoadConfiguration _capturedRoad;
+    private CampaignStage _capturedStage;
     [SerializeField, Min(1f)] private float _turnRateMultiplier = 2f;
 
     public Racer Opponent => _opponent;
@@ -57,8 +59,9 @@ public class OpponentSpawner : MonoBehaviour
 
         if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
         {
-            _driver.SetPath(path);
             UpdateVehicle();
+            _driver.SetPath(path);
+            _level.PrepareOpponent(_opponent, path, _driver.LaneOffset);
         }
     }
 
@@ -91,7 +94,13 @@ public class OpponentSpawner : MonoBehaviour
             _runtimeStats.hideFlags = HideFlags.DontSave;
         }
 
-        CampaignStage stage = _race.Campaign.GetStage(_level.Number);
+        if (_capturedRoad != _level.CurrentDefinition.Settings)
+        {
+            _capturedRoad = _level.CurrentDefinition.Settings;
+            _capturedStage = _race.Campaign.GetStage(_level.Number);
+        }
+
+        CampaignStage stage = _capturedStage;
         _runtimeStats.MaxSpeed = stage.OpponentMaxSpeed;
         _runtimeStats.Acceleration = stage.OpponentAcceleration;
         float speedRatio = stage.OpponentMaxSpeed / Mathf.Max(1f, _opponent.BaseStats.MaxSpeed);
@@ -99,7 +108,7 @@ public class OpponentSpawner : MonoBehaviour
         _runtimeStats.YellowZoneThreshold = Mathf.Min(_runtimeStats.RedZoneThreshold,
             Mathf.Max(_opponent.BaseStats.YellowZoneThreshold, Mathf.Max(stage.CruiseSpeed, stage.CornerSpeed) + CornerGripMargin));
         _opponent.ConfigureStats(_runtimeStats);
-        _driver.Configure(stage.CruiseSpeed, stage.CornerSpeed);
+        _driver.Configure(_race, stage.CruiseSpeed, stage.CornerSpeed);
 
         if (_vehiclePrefabs == null || _vehiclePrefabs.Length == 0)
             return;
@@ -112,8 +121,9 @@ public class OpponentSpawner : MonoBehaviour
     {
         if (_driver != null)
         {
-            _driver.SetPath(path);
             UpdateVehicle();
+            _driver.SetPath(path);
+            _level.PrepareOpponent(_opponent, path, _driver.LaneOffset);
         }
     }
 
@@ -121,8 +131,8 @@ public class OpponentSpawner : MonoBehaviour
     {
         if (_driver != null)
         {
-            _driver.ResetOpponent();
-            UpdateVehicle();
+            if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
+                OnPathBuilt(path, settings);
         }
     }
 

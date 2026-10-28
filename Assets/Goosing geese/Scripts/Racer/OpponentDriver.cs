@@ -12,16 +12,15 @@ public class OpponentDriver : MonoBehaviour
     private Racer _racer;
     private RoadNavigator _navigator;
     private RoadPath _path;
-    private Vector3 _startPosition;
-    private Quaternion _startRotation;
+
+
+    public float LaneOffset => _laneOffset;
 
     private void Awake()
     {
         _racer = GetComponent<Racer>();
         _navigator = GetComponent<RoadNavigator>();
-        _race = FindFirstObjectByType<RaceController>();
-        _startPosition = transform.position;
-        _startRotation = transform.rotation;
+
         _navigator.SetLaneOffset(_laneOffset);
     }
 
@@ -46,8 +45,9 @@ public class OpponentDriver : MonoBehaviour
         _racer.StopMovement();
     }
 
-    public void Configure(float cruiseSpeed, float cornerSpeed)
+    public void Configure(RaceController race, float cruiseSpeed, float cornerSpeed)
     {
+        _race = race;
         _cruiseSpeed = Mathf.Clamp01(cruiseSpeed);
         _cornerSpeed = Mathf.Clamp01(cornerSpeed);
     }
@@ -55,15 +55,7 @@ public class OpponentDriver : MonoBehaviour
     public void SetPath(RoadPath path)
     {
         _path = path;
-        ResetOpponent();
+
     }
 
-    public void ResetOpponent()
-    {
-        if (_path == null)
-            return;
-
-        RacerDefinition definition = _racer.CaptureDefinition(_startPosition + _startRotation * Vector3.right * _laneOffset, _startRotation);
-        _racer.Prepare(_path, definition);
-    }
 }

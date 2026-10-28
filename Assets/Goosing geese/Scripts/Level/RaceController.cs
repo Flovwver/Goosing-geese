@@ -47,6 +47,12 @@ public class RaceController : MonoBehaviour
 
     private void OnEnable()
     {
+        if (Session == null)
+        {
+            Session = new GameSession(_level, _campaign, this);
+            _level.SetSession(Session);
+        }
+
         _player.Finished += OnPlayerFinished;
         _player.Exploded += OnPlayerExploded;
         _player.PathCompleted += OnPathCompleted;
