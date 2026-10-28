@@ -22,16 +22,15 @@ public class RaceController : MonoBehaviour
     public RaceState State { get; private set; } = RaceState.Waiting;
     public bool PlayerWon { get; private set; }
     public RaceOutcome Outcome { get; private set; } = RaceOutcome.None;
-    public PlayerProgress Progress { get; private set; }
+    public GameSession Session { get; private set; }
+    public PlayerProgress Progress => Session.Progress;
     public int LastReward { get; private set; }
     public CampaignSettings Campaign => _campaign;
-    public CampaignStage CurrentStage => _campaign.GetStage(Progress.Level);
-    public bool HasNextLevel => _level.Number < int.MaxValue;
+    public CampaignStage CurrentStage => Session.CurrentStage;
+    public bool HasNextLevel => Session.HasNextLevel;
 
     private void Awake()
     {
-        Progress = PlayerProgressStore.Load();
-        Progress.Level = Mathf.Clamp(Progress.Level, 1, Progress.GetUnlockedLevel(int.MaxValue));
 
         if (_level == null)
             _level = GetComponent<Level>();
@@ -41,6 +40,9 @@ public class RaceController : MonoBehaviour
 
         if (_input == null)
             _input = FindFirstObjectByType<InputSwitch>();
+
+        Session = new GameSession(_level, _campaign, this);
+        _level.SetSession(Session);
     }
 
     private void OnEnable()
@@ -139,25 +141,22 @@ public class RaceController : MonoBehaviour
 
     public void Retry()
     {
-        _level.RestartRace();
+        Session.Retry();
     }
 
     public void NextLevel()
     {
-        if (State != RaceState.Result || PlayerWon == false || HasNextLevel == false)
-            return;
-
-        TrySelectLevel(_level.Number + 1);
+        Session.NextLevel();
     }
 
     public void ReturnToMenu()
     {
-        Retry();
+        Session.ReturnToMenu();
     }
 
     public bool SelectLevel(int number)
     {
-        return State == RaceState.Waiting && TrySelectLevel(number);
+        return Session.SelectLevel(number);
     }
 
     public void EndRace(bool playerWon, RaceOutcome outcome = RaceOutcome.OpponentFinished)
@@ -167,10 +166,7 @@ public class RaceController : MonoBehaviour
 
         PlayerWon = playerWon;
         Outcome = playerWon ? RaceOutcome.FinishedFirst : outcome;
-        CampaignStage stage = _campaign.GetStage(_level.Number);
-        LastReward = Progress.RecordRace(playerWon, _level.Number, stage.Reward, stage.FirstClearBonus);
-        PlayerProgressStore.Save(Progress);
-        LocalLeaderboard.Record(Progress.PlayerName, Progress.Points);
+        LastReward = Session.RecordResult(playerWon);
         _input.SetInputEnabled(false);
         SetState(RaceState.Result);
 
@@ -180,24 +176,7 @@ public class RaceController : MonoBehaviour
         RaceEnded?.Invoke(playerWon);
     }
 
-    private bool TrySelectLevel(int number)
-    {
-        int previous = Progress.Level;
-
-        if (Progress.TrySelectLevel(number, int.MaxValue) == false)
-            return false;
-
-        if (_level.TryBuildRoad(out string error))
-        {
-            PlayerProgressStore.Save(Progress);
-            return true;
-        }
-
-        Progress.Level = previous;
-        PlayerProgressStore.Save(Progress);
-        Debug.LogError("Level selection failed: " + error, this);
-        return false;
-    }
+    
 
     private void SetState(RaceState state)
     {
@@ -214,7 +193,7 @@ public class RaceController : MonoBehaviour
 
     private void UpdateInputAvailability()
     {
-        _input.SetInputEnabled(isActiveAndEnabled && !_inputBlocked
+        _input.SetInputEnabled(isActiveAndEnabled && _inputBlocked == false
             && (State == RaceState.Waiting || State == RaceState.Racing));
     }
 

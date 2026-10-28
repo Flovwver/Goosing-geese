@@ -8,7 +8,7 @@ public class Level : MonoBehaviour
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
     [SerializeField] private FinishLine _finishLine;
-    [SerializeField] private RaceController _race;
+    private GameSession _session;
     [SerializeField, Min(0f)] private float _minimumRoadSpacing = 24f;
     [SerializeField, Min(1)] private int _layoutValidationAttempts = 20;
 
@@ -89,6 +89,11 @@ public class Level : MonoBehaviour
         ClearBuiltRoad();
     }
 
+    public void SetSession(GameSession session)
+    {
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+    }
+
     public void BuildRoad()
     {
         if (TryBuildRoad(out string error) == false)
@@ -97,7 +102,7 @@ public class Level : MonoBehaviour
 
     public bool TryBuildRoad(out string error)
     {
-        return TryBuildRoad(_race.CurrentStage.Seed, out error);
+        return TryBuildRoad(_session.CurrentStage.Seed, out error);
     }
 
     public void CreateLevel(int seed)
@@ -184,11 +189,11 @@ public class Level : MonoBehaviour
             if (_roadStartPoint == null)
                 throw new InvalidOperationException("A road start point must be assigned.");
 
-            CampaignStage stage = _race.CurrentStage;
+            CampaignStage stage = _session.CurrentStage;
             var settings = new RoadConfiguration(_settings, stage.PieceCount);
             RoadPieceType[] layout = GenerateLayout(seed, stage, settings);
             RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
-            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation, racer, _race.Progress.Level);
+            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation, racer, _session.Progress.Level);
         }
         catch (Exception exception)
         {
@@ -236,9 +241,6 @@ public class Level : MonoBehaviour
         if (_builtPieces == null)
             _builtPieces = new List<RoadPiece>();
 
-        if (_race == null)
-            _race = GetComponent<RaceController>();
-
         if (_finishLine == null)
             _finishLine = FindFirstObjectByType<FinishLine>();
     }
@@ -265,7 +267,7 @@ public class Level : MonoBehaviour
 
     private void OnFinishCrossed(Racer racer)
     {
-        if (_race.isActiveAndEnabled && _race.State == RaceState.Racing)
+        if (_session.IsRacing)
             racer.FinishRace();
     }
 
@@ -281,12 +283,12 @@ public class Level : MonoBehaviour
     private void PrepareRace()
     {
         _racer.Prepare(_roadPath, CurrentDefinition.Racer);
-        _race.Prepare();
+        _session.PrepareAttempt();
     }
 
     private void OnRacerConfigurationChanged()
     {
-        if (CurrentDefinition == null || _race.State != RaceState.Waiting)
+        if (CurrentDefinition == null || _session.IsWaiting == false)
             return;
 
         RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
