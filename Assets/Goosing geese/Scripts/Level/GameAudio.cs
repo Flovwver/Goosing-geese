@@ -69,7 +69,8 @@ public class GameAudio : MonoBehaviour
 
     public void PlayClick()
     {
-        _effects.PlayOneShot(_click, _race.Progress.EffectsVolume);
+        _effects.volume = _race.Progress.EffectsVolume;
+        _effects.PlayOneShot(_click);
     }
 
     private static AudioClip CreateTone(string name, float[] frequencies, float noteDuration)

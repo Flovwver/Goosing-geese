@@ -31,7 +31,12 @@ public class OpponentSpawner : MonoBehaviour
         _race.Disabled += OnControllerDisabled;
 
         if (_opponent != null)
+        {
             _opponent.Finished += OnOpponentFinished;
+
+            if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
+                OnPathBuilt(path, settings);
+        }
     }
 
     private void Start()
@@ -70,6 +75,9 @@ public class OpponentSpawner : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_opponent != null)
+            Destroy(_opponent.gameObject);
+
         if (_runtimeStats != null)
             Destroy(_runtimeStats);
     }

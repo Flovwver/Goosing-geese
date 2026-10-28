@@ -72,6 +72,11 @@ public class SpeedometerScaleView : MonoBehaviour
 
     private void LayoutLabels()
     {
+        if (_labels == null)
+            return;
+
+        int previousLabel = -1;
+
         for (int index = 0; index < _labels.Length; index++)
         {
             Text label = _labels[index];
@@ -89,18 +94,26 @@ public class SpeedometerScaleView : MonoBehaviour
             label.rectTransform.sizeDelta = new Vector2(_widths[index], _labelHeight);
             _positions[index] = _dial.GetScalePoint(_marks[index]);
 
-            if (index > 0 && Mathf.Abs(_positions[index].y - _positions[index - 1].y) < _labelHeight)
+            if (previousLabel >= 0 && Mathf.Abs(_positions[index].y - _positions[previousLabel].y) < _labelHeight)
             {
-                float minimumX = _positions[index - 1].x
-                    + (_widths[index - 1] + _widths[index]) * 0.5f + _labelGap;
+                float minimumX = _positions[previousLabel].x
+                    + (_widths[previousLabel] + _widths[index]) * 0.5f + _labelGap;
                 _positions[index].x = Mathf.Max(_positions[index].x, minimumX);
             }
+
+            previousLabel = index;
         }
 
-        float overflow = _positions[_markCount - 1].x + _widths[_markCount - 1] * 0.5f - _dial.rectTransform.rect.xMax;
+        if (previousLabel < 0)
+            return;
+
+        float overflow = _positions[previousLabel].x + _widths[previousLabel] * 0.5f - _dial.rectTransform.rect.xMax;
         float shift = Mathf.Max(0f, overflow);
 
-        for (int index = 0; index < _markCount; index++)
-            _labels[index].rectTransform.anchoredPosition = _positions[index] - Vector2.right * shift;
+        for (int index = 0; index < Mathf.Min(_markCount, _labels.Length); index++)
+        {
+            if (_labels[index] != null)
+                _labels[index].rectTransform.anchoredPosition = _positions[index] - Vector2.right * shift;
+        }
     }
 }

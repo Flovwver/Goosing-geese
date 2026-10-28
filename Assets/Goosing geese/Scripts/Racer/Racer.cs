@@ -45,6 +45,7 @@ public class Racer : MonoBehaviour
 
     private void OnDisable()
     {
+        _mover.Stop();
         _overheatTracker.ProgressChanged -= OnOverheatProgressChanged;
         _overheatTracker.Exploded -= OnExploded;
         _roadNavigator.PathCompleted -= OnPathCompleted;
@@ -113,7 +114,7 @@ public class Racer : MonoBehaviour
 
     public void Tick(bool isAccelerating, float deltaTime)
     {
-        if (_overheatTracker.IsExploded || _roadNavigator.IsPathCompleted)
+        if (isActiveAndEnabled == false || _overheatTracker.IsExploded || _roadNavigator.IsPathCompleted)
             return;
 
         if (IsFinished == false)

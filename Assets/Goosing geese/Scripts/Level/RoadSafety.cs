@@ -34,9 +34,10 @@ public class RoadSafety : MonoBehaviour
 
         Vector3 displacement = _player.transform.position - _navigator.ClosestPosition;
         displacement.y = 0f;
-        _offRoadTimer = displacement.sqrMagnitude > _roadHalfWidth * _roadHalfWidth ? _offRoadTimer + Time.deltaTime : 0f;
+        bool isOffRoad = displacement.sqrMagnitude > _roadHalfWidth * _roadHalfWidth;
+        _offRoadTimer = isOffRoad ? _offRoadTimer + Time.deltaTime : 0f;
 
-        if (_offRoadTimer >= _offRoadGraceTime)
+        if (isOffRoad && _offRoadTimer >= _offRoadGraceTime)
             _race.EndRace(false, RaceOutcome.OffRoad);
     }
 

@@ -41,6 +41,9 @@ public class WorldPresentation : MonoBehaviour
         _level.PathBuilt += OnPathBuilt;
         _player.RaceRestarted += ApplyAppearance;
         _garage.PreviewChanged += ApplyAppearance;
+
+        if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
+            OnPathBuilt(path, settings);
     }
 
     private void Start()
@@ -57,6 +60,9 @@ public class WorldPresentation : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_root != null)
+            Destroy(_root);
+
         foreach (Material material in _compatibleMaterialCopies)
             Destroy(material);
 
