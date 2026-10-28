@@ -8,6 +8,8 @@ public class RoadCurve
     private readonly List<float> _distances = new List<float>();
     private readonly List<int> _waypointIndices = new List<int>();
 
+    private IReadOnlyList<Vector3> _readOnlyView;
+
     public RoadCurve(IReadOnlyList<Vector3> points, IReadOnlyList<int> waypointIndices)
     {
         foreach (Vector3 point in points)
@@ -17,7 +19,7 @@ public class RoadCurve
             _waypointIndices.Add(index);
     }
 
-    public IReadOnlyList<Vector3> Points => _points;
+    public IReadOnlyList<Vector3> Points => _readOnlyView ?? (_readOnlyView = _points.AsReadOnly());
     public int SegmentCount => Mathf.Max(0, _waypointIndices.Count - 1);
     public float Length => _distances.Count > 0 ? _distances[_distances.Count - 1] : 0f;
 

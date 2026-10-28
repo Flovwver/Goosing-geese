@@ -27,13 +27,13 @@ public static class QuestTracker
     public static void RecordRace(PlayerProgress progress, bool won, DateTime date)
     {
         RefreshDay(progress, date);
-        progress.Races++;
-        progress.DailyRaces++;
+        progress.Races = (int)Math.Min(int.MaxValue, (long)progress.Races + 1);
+        progress.DailyRaces = (int)Math.Min(int.MaxValue, (long)progress.DailyRaces + 1);
 
         if (won)
         {
-            progress.Wins++;
-            progress.DailyWins++;
+            progress.Wins = (int)Math.Min(int.MaxValue, (long)progress.Wins + 1);
+            progress.DailyWins = (int)Math.Min(int.MaxValue, (long)progress.DailyWins + 1);
         }
     }
 
@@ -73,8 +73,7 @@ public static class QuestTracker
             return false;
 
         int reward = quest == 0 ? DailyRaceReward : quest == 1 ? DailyWinReward : GlobalWinReward;
-        progress.Points += reward;
-        progress.Wallet += reward;
+        progress.AddReward(reward);
 
         if (quest == 0)
             progress.DailyRacesClaimed = true;

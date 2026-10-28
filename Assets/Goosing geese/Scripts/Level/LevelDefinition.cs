@@ -15,7 +15,7 @@ public sealed class LevelDefinition
         Number = number;
         Seed = seed;
         Layout = Array.AsReadOnly((RoadPieceType[])layout.Clone());
-        Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        Settings = settings;
         StartPosition = startPosition;
         StartRotation = startRotation;
         Racer = racer ?? throw new ArgumentNullException(nameof(racer));

@@ -46,7 +46,9 @@ public class Mover : MonoBehaviour
 
     public float GetCurrentSpeed()
     {
-        InitializeComponents();
+        if (_movement == null)
+            InitializeComponents();
+
         return _movement.GetCurrentSpeed();
     }
 

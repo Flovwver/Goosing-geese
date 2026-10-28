@@ -38,10 +38,7 @@ public class OpponentDriver : MonoBehaviour
 
         float targetSpeed = corner ? _cornerSpeed : _cruiseSpeed;
 
-        if (_racer.NormalizedSpeed < targetSpeed)
-            _racer.Accelerate();
-        else
-            _racer.Cooldown();
+        _racer.Tick(_racer.NormalizedSpeed < targetSpeed, Time.deltaTime);
     }
 
     private void OnDisable()

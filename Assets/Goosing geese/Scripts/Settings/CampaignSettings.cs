@@ -32,7 +32,7 @@ public class CampaignSettings : ScriptableObject
         number = Mathf.Max(1, number);
 
         if (number <= Count)
-            return _stages[number - 1];
+            return CloneStage(_stages[number - 1]);
 
         if (_generatedStages.TryGetValue(number, out CampaignStage generated) == false)
         {
@@ -40,7 +40,12 @@ public class CampaignSettings : ScriptableObject
             _generatedStages.Add(number, generated);
         }
 
-        return generated;
+        return CloneStage(generated);
+    }
+
+    private CampaignStage CloneStage(CampaignStage stage)
+    {
+        return JsonUtility.FromJson<CampaignStage>(JsonUtility.ToJson(stage));
     }
 
     private CampaignStage GenerateStage(int number)

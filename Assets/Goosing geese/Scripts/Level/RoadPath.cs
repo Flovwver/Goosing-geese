@@ -6,6 +6,8 @@ public class RoadPath
     private readonly List<RoadPiece> _pieces = new List<RoadPiece>();
     private readonly List<Transform> _waypoints = new List<Transform>();
 
+    private IReadOnlyList<RoadPiece> _readOnlyView;
+
     public RoadPath(IReadOnlyList<RoadPiece> pieces)
     {
         foreach (RoadPiece piece in pieces)
@@ -19,7 +21,7 @@ public class RoadPath
         }
     }
 
-    public IReadOnlyList<RoadPiece> Pieces => _pieces;
+    public IReadOnlyList<RoadPiece> Pieces => _readOnlyView ?? (_readOnlyView = _pieces.AsReadOnly());
 
     public int FinishWaypointIndex { get; private set; }
     public Transform FinishPoint { get; private set; }

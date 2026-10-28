@@ -29,6 +29,15 @@ public class PlayerProgress
     public int Appearance;
     public int Environment;
 
+    public void AddReward(int amount)
+    {
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException(nameof(amount));
+
+        Points = (int)Math.Min(int.MaxValue, (long)Points + amount);
+        Wallet = (int)Math.Min(Points, (long)Wallet + amount);
+    }
+
     public int GetUnlockedLevel(int stageCount)
     {
         return (int)Math.Max(1L, Math.Min((long)HighestCompletedLevel + 1L, Math.Max(1, stageCount)));
@@ -54,9 +63,8 @@ public class PlayerProgress
             return 0;
 
         bool firstClear = number > HighestCompletedLevel;
-        int earned = Mathf.Max(0, reward) + (firstClear ? Mathf.Max(0, firstClearBonus) : 0);
-        Points += earned;
-        Wallet += earned;
+        int earned = (int)Math.Min(int.MaxValue, (long)Mathf.Max(0, reward) + (firstClear ? Mathf.Max(0, firstClearBonus) : 0));
+        AddReward(earned);
         HighestCompletedLevel = Mathf.Max(HighestCompletedLevel, number);
         return earned;
     }
