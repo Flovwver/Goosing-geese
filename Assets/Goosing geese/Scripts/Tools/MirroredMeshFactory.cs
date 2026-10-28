@@ -1,45 +1,49 @@
+using System;
 using UnityEngine;
 
-public static class MirroredMeshFactory
+public sealed class MirroredMeshFactory
 {
-    public static Mesh Create(Mesh sourceMesh)
+    public Mesh Create(Mesh sourceMesh)
     {
-        Vector3[] sourceVertices = sourceMesh.vertices;
-        Vector3[] mirroredVertices = new Vector3[sourceVertices.Length];
+        if (sourceMesh == null)
+            throw new ArgumentNullException(nameof(sourceMesh));
 
-        for (int vertexIndex = 0; vertexIndex < sourceVertices.Length; vertexIndex++)
+        Mesh mirrored = UnityEngine.Object.Instantiate(sourceMesh);
+        mirrored.name = sourceMesh.name + " (mirrored)";
+        Vector3[] vertices = mirrored.vertices;
+        Vector3[] normals = mirrored.normals;
+        Vector4[] tangents = mirrored.tangents;
+
+        for (int index = 0; index < vertices.Length; index++)
+            vertices[index].x = -vertices[index].x;
+
+        for (int index = 0; index < normals.Length; index++)
+            normals[index].x = -normals[index].x;
+
+        for (int index = 0; index < tangents.Length; index++)
         {
-            Vector3 vertex = sourceVertices[vertexIndex];
-            vertex.x = -vertex.x;
-            mirroredVertices[vertexIndex] = vertex;
+            tangents[index].x = -tangents[index].x;
+            tangents[index].w = -tangents[index].w;
         }
 
-        Vector3[] sourceNormals = sourceMesh.normals;
-        Vector3[] mirroredNormals = new Vector3[sourceNormals.Length];
+        mirrored.vertices = vertices;
+        mirrored.normals = normals;
+        mirrored.tangents = tangents;
 
-        for (int normalIndex = 0; normalIndex < sourceNormals.Length; normalIndex++)
+        for (int submesh = 0; submesh < mirrored.subMeshCount; submesh++)
         {
-            Vector3 normal = sourceNormals[normalIndex];
-            normal.x = -normal.x;
-            mirroredNormals[normalIndex] = normal;
+            if (mirrored.GetTopology(submesh) != UnityEngine.MeshTopology.Triangles)
+                continue;
+
+            int[] indices = mirrored.GetIndices(submesh);
+
+            for (int index = 0; index < indices.Length; index += 3)
+                (indices[index + 1], indices[index + 2]) = (indices[index + 2], indices[index + 1]);
+
+            mirrored.SetIndices(indices, MeshTopology.Triangles, submesh);
         }
 
-        int[] sourceTriangles = sourceMesh.triangles;
-        int[] mirroredTriangles = new int[sourceTriangles.Length];
-
-        for (int triangleIndex = 0; triangleIndex < sourceTriangles.Length; triangleIndex += 3)
-        {
-            mirroredTriangles[triangleIndex] = sourceTriangles[triangleIndex];
-            mirroredTriangles[triangleIndex + 1] = sourceTriangles[triangleIndex + 2];
-            mirroredTriangles[triangleIndex + 2] = sourceTriangles[triangleIndex + 1];
-        }
-
-        Mesh mirroredMesh = new Mesh();
-        mirroredMesh.vertices = mirroredVertices;
-        mirroredMesh.normals = mirroredNormals;
-        mirroredMesh.uv = sourceMesh.uv;
-        mirroredMesh.triangles = mirroredTriangles;
-
-        return mirroredMesh;
+        mirrored.RecalculateBounds();
+        return mirrored;
     }
 }
