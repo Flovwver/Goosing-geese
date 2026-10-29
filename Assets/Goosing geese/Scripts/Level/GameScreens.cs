@@ -38,6 +38,8 @@ public class GameScreens : MonoBehaviour
     private Text _trophyLabel;
     private GameObject _levelButton;
     private Text _levelLabel;
+    private string _lastStatus;
+    private RaceState _lastStatusState;
 
     private void Awake()
     {
@@ -47,12 +49,14 @@ public class GameScreens : MonoBehaviour
 
     private void OnEnable()
     {
+        _playerNavigator = _player.GetComponent<RoadNavigator>();
         bool rebuilt = _ui == null;
 
         if (rebuilt)
             InitializeUi();
 
         _race.StateChanged += OnStateChanged;
+        _race.Progress.Changed += RefreshChrome;
         _garage.VisibilityChanged += OnGarageVisibilityChanged;
         _campaignView.VisibilityChanged += OnCampaignVisibilityChanged;
 
@@ -68,22 +72,50 @@ public class GameScreens : MonoBehaviour
     private void Update()
     {
         GameUiFactory.UpdateSafeArea(_safeArea);
-        _garageLabel.text = Localize("ГАРАЖ", "GARAGE");
-        _trophyLabel.text = Localize("РЕКОРД", "RECORD");
-        bool showNavigation = _panel == null && _garage.IsVisible == false && _campaignView.IsVisible == false && _race.State != RaceState.Result;
-        _pedal.SetActive(_panel == null && _race.State != RaceState.Result && _garage.IsVisible == false && _campaignView.IsVisible == false);
-        bool showStartMenu = showNavigation && _race.State == RaceState.Waiting;
+        UpdateRaceStatus();
+    }
+
+    private void OnDisable()
+    {
+        _race.StateChanged -= OnStateChanged;
+        _race.Progress.Changed -= RefreshChrome;
+        _garage.VisibilityChanged -= OnGarageVisibilityChanged;
+        _campaignView.VisibilityChanged -= OnCampaignVisibilityChanged;
+        _settingsView.Save();
+        _race.SetInputBlocked(false);
+
+        if (_pedalPrompt != null)
+            _pedalPrompt.SetVisible(false);
+    }
+
+    private void RefreshChrome()
+    {
+        if (_wallet == null || _pedal == null)
+            return;
+
+        bool menusHidden = _garage.IsVisible == false && _campaignView.IsVisible == false;
+        bool showNavigation = _panel == null && menusHidden && _race.State != RaceState.Result;
+        bool waiting = _race.State == RaceState.Waiting;
+        bool showStartMenu = showNavigation && waiting;
+        _garageLabel.text = _race.Session.Text.Choose("ГАРАЖ", "GARAGE");
+        _trophyLabel.text = _race.Session.Text.Choose("РЕКОРД", "RECORD");
+        _pedal.SetActive(showNavigation);
         _pedalPrompt.SetVisible(showStartMenu);
         _menuBackdrop.SetActive(showStartMenu);
         _levelButton.SetActive(showStartMenu);
-        _levelLabel.text = Localize("УРОВЕНЬ ", "LEVEL ") + _race.Progress.Level + " →";
-        _wallet.text = _race.Progress.Wallet + Localize(" ОЧК.", " PTS");
+        _levelLabel.text = _race.Session.Text.Choose("УРОВЕНЬ ", "LEVEL ") + _race.Progress.Level + " →";
+        _wallet.text = _race.Progress.Wallet + _race.Session.Text.Choose(" ОЧК.", " PTS");
         _gear.SetActive(showNavigation);
-        _trophy.SetActive(showNavigation && _race.State == RaceState.Waiting);
-        _garageButton.SetActive(showNavigation && _race.State == RaceState.Waiting);
-        _status.gameObject.SetActive(_garage.IsVisible == false && _campaignView.IsVisible == false && _race.State != RaceState.Waiting);
-        _speedometer.gameObject.SetActive(_garage.IsVisible == false && _campaignView.IsVisible == false);
-        string state = _race.State == RaceState.Waiting ? Localize("Нажми педаль, чтобы начать", "Hold the pedal to start") : _race.State == RaceState.Result ? Localize("Результат", "Result") : _race.State == RaceState.Paused ? Localize("Пауза", "Paused") : Localize("Гонка", "Race");
+        _trophy.SetActive(showNavigation && waiting);
+        _garageButton.SetActive(showNavigation && waiting);
+        _status.gameObject.SetActive(menusHidden && waiting == false);
+        _speedometer.gameObject.SetActive(menusHidden);
+        _lastStatus = null;
+        UpdateRaceStatus();
+    }
+
+    private void UpdateRaceStatus()
+    {
         string lead = "";
 
         if (_race.State == RaceState.Racing && _opponents.Opponent != null)
@@ -94,31 +126,32 @@ public class GameScreens : MonoBehaviour
                 _opponentNavigator = _displayOpponent.GetComponent<RoadNavigator>();
             }
 
-            float playerDistance = _playerNavigator.DistanceAlongPath;
-            float opponentDistance = _opponentNavigator.DistanceAlongPath;
-            lead = playerDistance >= opponentDistance ? Localize("Ты впереди", "You are ahead") : Localize("Соперник впереди", "Rival is ahead");
+            bool ahead = _playerNavigator.DistanceAlongPath >= _opponentNavigator.DistanceAlongPath;
+            lead = ahead ? _race.Session.Text.Choose("Ты впереди", "You are ahead")
+                : _race.Session.Text.Choose("Соперник впереди", "Rival is ahead");
         }
 
-        _status.text = _race.State == RaceState.Waiting
-            ? Localize("УРОВЕНЬ ", "LEVEL ") + _race.Session.LevelNumber
-            : state + "\n" + lead;
+        if (_lastStatus == lead && _lastStatusState == _race.State)
+            return;
+
+        _lastStatus = lead;
+        _lastStatusState = _race.State;
+        _status.text = GetStateText() + "\n" + lead;
     }
 
-    private void OnDisable()
+    private string GetStateText()
     {
-        _race.StateChanged -= OnStateChanged;
-        _garage.VisibilityChanged -= OnGarageVisibilityChanged;
-        _campaignView.VisibilityChanged -= OnCampaignVisibilityChanged;
-        _settingsView.Save();
-        _race.SetInputBlocked(false);
-
-        if (_pedalPrompt != null)
-            _pedalPrompt.SetVisible(false);
-    }
-
-    private string Localize(string russian, string english)
-    {
-        return _race.Progress.English ? english : russian;
+        switch (_race.State)
+        {
+            case RaceState.Waiting:
+                return _race.Session.Text.Choose("УРОВЕНЬ ", "LEVEL ") + _race.Session.LevelNumber;
+            case RaceState.Result:
+                return _race.Session.Text.Choose("Результат", "Result");
+            case RaceState.Paused:
+                return _race.Session.Text.Choose("Пауза", "Paused");
+            default:
+                return _race.Session.Text.Choose("Гонка", "Race");
+        }
     }
 
     private void InitializeUi()
@@ -152,9 +185,9 @@ public class GameScreens : MonoBehaviour
         _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
         _trophy = MakeIconButton("Leaderboard", MenuSymbol.Trophy, ShowLeaderboard, new Vector2(0.81f, 0.045f), new Vector2(0.97f, 0.145f), new Color(1f, 0.77f, 0.28f));
         _garageButton = MakeIconButton("Garage", MenuSymbol.Garage, OpenGarage, new Vector2(0.025f, 0.045f), new Vector2(0.185f, 0.145f), new Color(0.7f, 0.86f, 1f));
-        _garageLabel = _ui.CreateLabel(_garageButton.transform, Localize("ГАРАЖ", "GARAGE"), 18);
+        _garageLabel = _ui.CreateLabel(_garageButton.transform, _race.Session.Text.Choose("ГАРАЖ", "GARAGE"), 18);
         GameUiFactory.Place(_garageLabel.rectTransform, new Vector2(0f, -0.25f), new Vector2(1f, 0.02f));
-        _trophyLabel = _ui.CreateLabel(_trophy.transform, Localize("РЕКОРД", "RECORD"), 18);
+        _trophyLabel = _ui.CreateLabel(_trophy.transform, _race.Session.Text.Choose("РЕКОРД", "RECORD"), 18);
         GameUiFactory.Place(_trophyLabel.rectTransform, new Vector2(-0.1f, -0.25f), new Vector2(1.1f, 0.02f));
         Button levelButton = _ui.CreateButton(_safeArea, "", OpenCampaign);
         _levelButton = levelButton.gameObject;
@@ -276,6 +309,7 @@ public class GameScreens : MonoBehaviour
     private void UpdateInputAvailability()
     {
         _race.SetInputBlocked(_panel != null || _garage.IsVisible || _campaignView.IsVisible);
+        RefreshChrome();
     }
 
     private void OnGarageVisibilityChanged(bool visible)
@@ -320,10 +354,10 @@ public class GameScreens : MonoBehaviour
 
     private void ShowPause()
     {
-        ShowPanel(Localize("Пауза", "Paused"), "pause");
-        _ui.CreateButton(_panel.transform, Localize("Продолжить", "Resume"), _race.Resume);
-        _ui.CreateButton(_panel.transform, Localize("Настройки", "Settings"), OpenSettings);
-        _ui.CreateButton(_panel.transform, Localize("В главное меню", "Main menu"), _race.ReturnToMenu);
+        ShowPanel(_race.Session.Text.Choose("Пауза", "Paused"), "pause");
+        _ui.CreateButton(_panel.transform, _race.Session.Text.Choose("Продолжить", "Resume"), _race.Resume);
+        _ui.CreateButton(_panel.transform, _race.Session.Text.Choose("Настройки", "Settings"), OpenSettings);
+        _ui.CreateButton(_panel.transform, _race.Session.Text.Choose("В главное меню", "Main menu"), _race.ReturnToMenu);
     }
 
     private void OpenSettings()
@@ -334,25 +368,25 @@ public class GameScreens : MonoBehaviour
         if (_race.State == RaceState.Result)
             return;
 
-        ShowPanel(Localize("Настройки", "Settings"), "settings");
+        ShowPanel(_race.Session.Text.Choose("Настройки", "Settings"), "settings");
         _settingsView.Render(_panel.transform, OpenSettings, ShowQuests, ShowScenery, Back);
     }
 
     private void ShowLeaderboard()
     {
-        ShowPanel(Localize("Локальный рекорд", "Local leaderboard"), "leaderboard");
+        ShowPanel(_race.Session.Text.Choose("Локальный рекорд", "Local leaderboard"), "leaderboard");
         _leaderboardView.Render(_panel.transform, _race.Session.ReadLeaderboard(), Back);
     }
 
     private void ShowQuests()
     {
-        ShowPanel(Localize("Задания", "Quests"), "quests");
+        ShowPanel(_race.Session.Text.Choose("Задания", "Quests"), "quests");
         _questsView.Render(_panel.transform, Back, ShowQuests);
     }
 
     private void ShowScenery()
     {
-        ShowPanel(Localize("Окружение", "Scenery"), "appearance");
+        ShowPanel(_race.Session.Text.Choose("Окружение", "Scenery"), "appearance");
         _sceneryView.Render(_panel.transform, Back, GetComponent<WorldPresentation>().Rebuild);
     }
 

@@ -5,12 +5,14 @@ using UnityEngine.UI;
 public sealed class SettingsView
 {
     private readonly PlayerProgress _progress;
+    private readonly Localizer _text;
     private readonly ProfileCommands _commands;
     private readonly GameUiFactory _ui;
 
     public SettingsView(PlayerProgress progress, GameUiFactory ui, ProfileCommands commands)
     {
         _progress = progress;
+        _text = new Localizer(progress);
         _commands = commands;
         _ui = ui;
     }
@@ -23,25 +25,20 @@ public sealed class SettingsView
     public void Render(Transform parent, Action reopen, Action quests, Action scenery, Action back)
     {
         AddNameField(parent);
-        AddVolume(parent, Localize("Музыка", "Music"), _progress.MusicVolume, _commands.SetMusicVolume);
-        AddVolume(parent, Localize("Эффекты", "Effects"), _progress.EffectsVolume, _commands.SetEffectsVolume);
+        AddVolume(parent, _text.Choose("Музыка", "Music"), _progress.MusicVolume, _commands.SetMusicVolume);
+        AddVolume(parent, _text.Choose("Эффекты", "Effects"), _progress.EffectsVolume, _commands.SetEffectsVolume);
         _ui.CreateButton(parent, _progress.English ? "Русский" : "English", () =>
         {
             _commands.ToggleLanguage();
             reopen();
         });
-        _ui.CreateButton(parent, Localize("Задания", "Quests"), quests);
-        _ui.CreateButton(parent, Localize("Окружение", "Scenery"), scenery);
-        _ui.CreateButton(parent, Localize("Назад", "Back"), () =>
+        _ui.CreateButton(parent, _text.Choose("Задания", "Quests"), quests);
+        _ui.CreateButton(parent, _text.Choose("Окружение", "Scenery"), scenery);
+        _ui.CreateButton(parent, _text.Choose("Назад", "Back"), () =>
         {
             _commands.Save();
             back();
         });
-    }
-
-    private string Localize(string russian, string english)
-    {
-        return _progress.English ? english : russian;
     }
 
     private void AddNameField(Transform parent)

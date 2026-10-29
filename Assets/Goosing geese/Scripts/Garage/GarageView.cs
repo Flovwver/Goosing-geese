@@ -75,11 +75,6 @@ public class GarageView : MonoBehaviour
         VisibilityChanged?.Invoke(false);
     }
 
-    private string Localize(string russian, string english)
-    {
-        return _race.Progress.English ? english : russian;
-    }
-
     private void InitializeUi()
     {
         if (_canvasRoot != null)
@@ -105,8 +100,8 @@ public class GarageView : MonoBehaviour
         ClearPanels();
         RectTransform header = CreatePanel("Garage header", new Vector2(0f, 0.69f), Vector2.one);
         _header = header.gameObject;
-        _ui.CreateHeading(header, Localize("ГАРАЖ", "GARAGE"), 38);
-        Text balance = _ui.CreateLabel(header, Localize("Доступно: ", "Available: ") + _garage.AvailablePoints + Localize(" • Всего: ", " • Total: ") + _garage.TotalPoints, 24);
+        _ui.CreateHeading(header, _race.Session.Text.Choose("ГАРАЖ", "GARAGE"), 38);
+        Text balance = _ui.CreateLabel(header, _race.Session.Text.Choose("Доступно: ", "Available: ") + _garage.AvailablePoints + _race.Session.Text.Choose(" • Всего: ", " • Total: ") + _garage.TotalPoints, 24);
         balance.color = GameUiTheme.Accent;
         balance.fontStyle = FontStyle.Bold;
         var balanceOutline = balance.gameObject.AddComponent<Outline>();
@@ -121,7 +116,7 @@ public class GarageView : MonoBehaviour
         foreach (RacerUpgradeKind kind in Enum.GetValues(typeof(RacerUpgradeKind)))
             AddUpgradeButton(footer, kind);
 
-        _ui.CreateButton(footer, Localize("Назад к гонке", "Back to race"), Hide);
+        _ui.CreateButton(footer, _race.Session.Text.Choose("Назад к гонке", "Back to race"), Hide);
     }
 
     private RectTransform CreatePanel(string name, Vector2 min, Vector2 max)
@@ -149,7 +144,7 @@ public class GarageView : MonoBehaviour
         layout.childForceExpandHeight = false;
         Button previous = _ui.CreateButton(row, "<", () => SelectRelative(-1));
         previous.GetComponent<LayoutElement>().preferredWidth = 70f;
-        Text name = _ui.CreateLabel(row, _garage.PreviewEntry.GetModelName(_race.Progress.English) + "\n" + Localize("Скорость ", "Speed ") + _garage.PreviewEntry.Stats.MaxSpeed.ToString("0") + Localize(" • Зел. до ", " • Green cap ") + (_garage.PreviewEntry.MaximumGreenZone * 100f).ToString("0") + "%", 24);
+        Text name = _ui.CreateLabel(row, _garage.PreviewEntry.GetModelName(_race.Progress.English) + "\n" + _race.Session.Text.Choose("Скорость ", "Speed ") + _garage.PreviewEntry.Stats.MaxSpeed.ToString("0") + _race.Session.Text.Choose(" • Зел. до ", " • Green cap ") + (_garage.PreviewEntry.MaximumGreenZone * 100f).ToString("0") + "%", 24);
         name.GetComponent<LayoutElement>().flexibleWidth = 1f;
         Button next = _ui.CreateButton(row, ">", () => SelectRelative(1));
         next.GetComponent<LayoutElement>().preferredWidth = 70f;
@@ -186,10 +181,10 @@ public class GarageView : MonoBehaviour
     {
         bool owned = _garage.IsOwned(_garage.PreviewIndex);
         bool selected = _garage.PreviewIndex == _garage.SelectedIndex;
-        string text = owned ? selected ? Localize("Выбрано", "Selected") : Localize("Выбрать", "Select")
+        string text = owned ? selected ? _race.Session.Text.Choose("Выбрано", "Selected") : _race.Session.Text.Choose("Выбрать", "Select")
             : _garage.HighestCompletedLevel < _garage.PreviewEntry.UnlockLevel
-                ? Localize("После уровня ", "After level ") + _garage.PreviewEntry.UnlockLevel + " • " + _garage.PreviewEntry.PurchasePrice
-                : Localize("Купить: ", "Buy: ") + _garage.PreviewEntry.PurchasePrice + Localize(" очк.", " pts");
+                ? _race.Session.Text.Choose("После уровня ", "After level ") + _garage.PreviewEntry.UnlockLevel + " • " + _garage.PreviewEntry.PurchasePrice
+                : _race.Session.Text.Choose("Купить: ", "Buy: ") + _garage.PreviewEntry.PurchasePrice + _race.Session.Text.Choose(" очк.", " pts");
         Button button = _ui.CreateButton(parent, text, () =>
         {
             if (owned)
@@ -213,11 +208,11 @@ public class GarageView : MonoBehaviour
         bool thermalLock = kind == RacerUpgradeKind.Handling && _garage.IsHandlingThermallyLimited();
         bool unchanged = Mathf.Approximately(_garage.GetUpgradeValue(kind), _garage.GetUpgradeValue(kind, 1));
         bool maximum = level >= _garage.MaximumUpgradeLevel || (unchanged && thermalLock == false);
-        string price = maximum ? Localize("МАКС.", "MAX") : _garage.GetUpgradePrice(kind) + Localize(" очк.", " pts");
-        string preview = unchanged && thermalLock ? Localize("Улучши термостойкость", "Improve heat resistance") : GetPreview(kind, maximum);
+        string price = maximum ? _race.Session.Text.Choose("МАКС.", "MAX") : _garage.GetUpgradePrice(kind) + _race.Session.Text.Choose(" очк.", " pts");
+        string preview = unchanged && thermalLock ? _race.Session.Text.Choose("Улучши термостойкость", "Improve heat resistance") : GetPreview(kind, maximum);
 
         if (_garage.HighestCompletedLevel < _garage.GetUpgradeRequiredStage(kind) && maximum == false)
-            preview = Localize("После уровня ", "After level ") + _garage.GetUpgradeRequiredStage(kind);
+            preview = _race.Session.Text.Choose("После уровня ", "After level ") + _garage.GetUpgradeRequiredStage(kind);
 
         string text = GetUpgradeName(kind) + "  " + level + "/" + _garage.MaximumUpgradeLevel + " • " + price
             + "\n" + preview;
@@ -243,15 +238,15 @@ public class GarageView : MonoBehaviour
         switch (kind)
         {
             case RacerUpgradeKind.Acceleration:
-                return Localize("Разгон", "Acceleration");
+                return _race.Session.Text.Choose("Разгон", "Acceleration");
             case RacerUpgradeKind.TopSpeed:
-                return Localize("Максимальная скорость", "Top speed");
+                return _race.Session.Text.Choose("Максимальная скорость", "Top speed");
             case RacerUpgradeKind.Cooling:
-                return Localize("Охлаждение", "Cooling");
+                return _race.Session.Text.Choose("Охлаждение", "Cooling");
             case RacerUpgradeKind.Handling:
-                return Localize("Управляемость", "Handling");
+                return _race.Session.Text.Choose("Управляемость", "Handling");
             case RacerUpgradeKind.ThermalResistance:
-                return Localize("Термостойкость", "Heat resistance");
+                return _race.Session.Text.Choose("Термостойкость", "Heat resistance");
             default:
                 throw new ArgumentOutOfRangeException(nameof(kind));
         }
@@ -267,8 +262,8 @@ public class GarageView : MonoBehaviour
             current = 1f - current;
             next = 1f - next;
         }
-        string prefix = kind == RacerUpgradeKind.ThermalResistance ? Localize("Красная зона: ", "Red zone: ") : kind == RacerUpgradeKind.Handling ? Localize("Зелёная зона: ", "Green zone: ")
-            : kind == RacerUpgradeKind.Cooling ? Localize("Спад нагрева: ×", "Cooling rate: ×") : "";
+        string prefix = kind == RacerUpgradeKind.ThermalResistance ? _race.Session.Text.Choose("Красная зона: ", "Red zone: ") : kind == RacerUpgradeKind.Handling ? _race.Session.Text.Choose("Зелёная зона: ", "Green zone: ")
+            : kind == RacerUpgradeKind.Cooling ? _race.Session.Text.Choose("Спад нагрева: ×", "Cooling rate: ×") : "";
         float scale = kind == RacerUpgradeKind.Handling || kind == RacerUpgradeKind.ThermalResistance ? 100f : 1f;
         string suffix = kind == RacerUpgradeKind.Handling || kind == RacerUpgradeKind.ThermalResistance ? "%" : "";
         string preview = prefix + (current * scale).ToString("0.##") + suffix;

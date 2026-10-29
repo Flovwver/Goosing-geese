@@ -17,8 +17,10 @@ public sealed class GameSession
         _race = race;
         Progress = _store.Load(Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
         Commands = new ProfileCommands(Progress, _store, _leaderboard);
+        Text = new Localizer(Progress);
     }
 
+    public Localizer Text { get; }
     public PlayerProgress Progress { get; }
     public ProfileCommands Commands { get; }
     public System.Collections.Generic.List<LeaderboardEntry> ReadLeaderboard()

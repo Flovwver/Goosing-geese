@@ -67,11 +67,6 @@ public class CampaignView : MonoBehaviour
         VisibilityChanged?.Invoke(false);
     }
 
-    private string Localize(string russian, string english)
-    {
-        return _race.Progress.English ? english : russian;
-    }
-
     private void InitializeUi()
     {
         if (_canvas != null)
@@ -104,7 +99,7 @@ public class CampaignView : MonoBehaviour
         layout.childControlWidth = true;
         layout.childControlHeight = true;
         layout.childForceExpandHeight = false;
-        _ui.CreateHeading(rect, Localize("УРОВНИ", "LEVELS"), 32);
+        _ui.CreateHeading(rect, _race.Session.Text.Choose("УРОВНИ", "LEVELS"), 32);
 
         for (int index = _page * PageSize; index < Mathf.Min(VisibleStageCount, (_page + 1) * PageSize); index++)
         {
@@ -114,8 +109,8 @@ public class CampaignView : MonoBehaviour
             bool unlocked = number <= _race.Progress.GetUnlockedLevel(VisibleStageCount);
             string reward = stage.Reward + (completed ? "" : " +" + stage.FirstClearBonus);
             string text = number + " • " + stage.GetDifficultyName(_race.Progress.English)
-                + " • " + reward + Localize(" очк.", " pts")
-                + (completed ? Localize(" • Пройден", " • Cleared") : unlocked ? "" : Localize(" • Закрыт", " • Locked"));
+                + " • " + reward + _race.Session.Text.Choose(" очк.", " pts")
+                + (completed ? _race.Session.Text.Choose(" • Пройден", " • Cleared") : unlocked ? "" : _race.Session.Text.Choose(" • Закрыт", " • Locked"));
             Button button = _ui.CreateButton(rect, text, () => Select(number));
             button.GetComponent<LayoutElement>().preferredHeight = 90f;
             button.interactable = unlocked;
@@ -131,7 +126,7 @@ public class CampaignView : MonoBehaviour
         _ui.CreateButton(row, "<", () => ChangePage(-1)).interactable = _page > 0;
         _ui.CreateLabel(row, (_page + 1) + " / " + Mathf.CeilToInt((float)VisibleStageCount / PageSize), 24);
         _ui.CreateButton(row, ">", () => ChangePage(1)).interactable = (_page + 1) * PageSize < VisibleStageCount;
-        _ui.CreateButton(rect, Localize("Назад", "Back"), Hide);
+        _ui.CreateButton(rect, _race.Session.Text.Choose("Назад", "Back"), Hide);
     }
 
     private void Select(int number)

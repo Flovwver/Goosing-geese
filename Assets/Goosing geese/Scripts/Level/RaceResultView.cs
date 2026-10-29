@@ -54,11 +54,6 @@ public class RaceResultView : MonoBehaviour
         _canvasRoot.SetActive(false);
     }
 
-    private string Localize(string russian, string english)
-    {
-        return _race.Progress.English ? english : russian;
-    }
-
     private void InitializeUi()
     {
         if (_canvasRoot != null)
@@ -116,18 +111,18 @@ public class RaceResultView : MonoBehaviour
         layout.childControlHeight = true;
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
-        AddLabel(_race.PlayerWon ? Localize("Победа!", "You won!") : Localize("Попробуем ещё?", "Try again?"), 32);
+        AddLabel(_race.PlayerWon ? _race.Session.Text.Choose("Победа!", "You won!") : _race.Session.Text.Choose("Попробуем ещё?", "Try again?"), 32);
 
         if (_race.PlayerWon == false)
             AddLabel(GetLossReason(), 24);
 
-        AddLabel("+" + _race.LastReward + Localize(" очков", " points"), 30);
+        AddLabel("+" + _race.LastReward + _race.Session.Text.Choose(" очков", " points"), 30);
 
         if (_race.PlayerWon && _race.HasNextLevel)
-            AddButton(Localize("Следующий уровень", "Next level"), _race.NextLevel);
+            AddButton(_race.Session.Text.Choose("Следующий уровень", "Next level"), _race.NextLevel);
 
-        AddButton(Localize("Повторить трассу", "Retry track"), _race.Retry);
-        AddButton(Localize("В главное меню", "Main menu"), _race.ReturnToMenu);
+        AddButton(_race.Session.Text.Choose("Повторить трассу", "Retry track"), _race.Retry);
+        AddButton(_race.Session.Text.Choose("В главное меню", "Main menu"), _race.ReturnToMenu);
     }
 
     private string GetLossReason()
@@ -135,13 +130,13 @@ public class RaceResultView : MonoBehaviour
         switch (_race.Outcome)
         {
             case RaceOutcome.Overheated:
-                return Localize("Перегрев", "Overheated");
+                return _race.Session.Text.Choose("Перегрев", "Overheated");
             case RaceOutcome.OffRoad:
-                return Localize("Вылет с трассы", "Off the road");
+                return _race.Session.Text.Choose("Вылет с трассы", "Off the road");
             case RaceOutcome.OpponentFinished:
-                return Localize("Соперник финишировал первым", "Your rival finished first");
+                return _race.Session.Text.Choose("Соперник финишировал первым", "Your rival finished first");
             default:
-                return Localize("Трасса закончилась до финиша", "Route ended before the finish");
+                return _race.Session.Text.Choose("Трасса закончилась до финиша", "Route ended before the finish");
         }
     }
 

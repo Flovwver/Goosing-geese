@@ -5,11 +5,13 @@ using UnityEngine.UI;
 public sealed class LeaderboardView
 {
     private readonly PlayerProgress _progress;
+    private readonly Localizer _text;
     private readonly GameUiFactory _ui;
 
     public LeaderboardView(PlayerProgress progress, GameUiFactory ui)
     {
         _progress = progress;
+        _text = new Localizer(progress);
         _ui = ui;
     }
 
@@ -29,8 +31,8 @@ public sealed class LeaderboardView
             rows += (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
 
         _ui.CreateLabel(parent, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
-        _ui.CreateLabel(parent, Localize("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
-        _ui.CreateButton(parent, Localize("Назад", "Back"), back);
+        _ui.CreateLabel(parent, _text.Choose("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
+        _ui.CreateButton(parent, _text.Choose("Назад", "Back"), back);
     }
 
     private int GetRank(System.Collections.Generic.List<LeaderboardEntry> entries, int index)
@@ -44,11 +46,6 @@ public sealed class LeaderboardView
         }
 
         return rank;
-    }
-
-    private string Localize(string russian, string english)
-    {
-        return _progress.English ? english : russian;
     }
 
 }

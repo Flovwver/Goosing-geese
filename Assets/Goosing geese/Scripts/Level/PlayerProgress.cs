@@ -4,6 +4,7 @@ using UnityEngine;
 
 public sealed class PlayerProgress
 {
+    private readonly EventPublisher _events = new EventPublisher();
     private PlayerProgressData _data;
 
     public PlayerProgress() : this(new PlayerProgressData())
@@ -14,6 +15,8 @@ public sealed class PlayerProgress
     {
         Restore(data, catalog);
     }
+
+    public event Action Changed;
 
     public string PlayerName => _data.PlayerName;
     public int Points => _data.Points;
@@ -95,26 +98,31 @@ public sealed class PlayerProgress
             throw new ArgumentOutOfRangeException(nameof(index));
 
         _data.Appearance = index;
+        _events.Publish(Changed, null);
     }
 
     public void SetName(string name)
     {
         _data.PlayerName = string.IsNullOrWhiteSpace(name) ? "Player" : name.Trim();
+        _events.Publish(Changed, null);
     }
 
     public void SetMusicVolume(float value)
     {
         _data.MusicVolume = float.IsNaN(value) ? 0f : Mathf.Clamp01(value);
+        _events.Publish(Changed, null);
     }
 
     public void SetEffectsVolume(float value)
     {
         _data.EffectsVolume = float.IsNaN(value) ? 0f : Mathf.Clamp01(value);
+        _events.Publish(Changed, null);
     }
 
     public void ToggleLanguage()
     {
         _data.English = English == false;
+        _events.Publish(Changed, null);
     }
 
     public void NextScenery(int count)
@@ -123,6 +131,7 @@ public sealed class PlayerProgress
             throw new ArgumentOutOfRangeException(nameof(count));
 
         _data.Environment = (int)(((long)Mathf.Max(0, Environment) + 1) % count);
+        _events.Publish(Changed, null);
     }
 
     public void AddReward(int amount)
@@ -132,6 +141,7 @@ public sealed class PlayerProgress
 
         _data.Points = (int)Math.Min(int.MaxValue, (long)Points + amount);
         _data.Wallet = (int)Math.Min(Points, (long)Wallet + amount);
+        _events.Publish(Changed, null);
     }
 
     public int GetUnlockedLevel(int stageCount)
@@ -145,6 +155,7 @@ public sealed class PlayerProgress
             return false;
 
         _data.Level = number;
+        _events.Publish(Changed, null);
         return true;
     }
 
