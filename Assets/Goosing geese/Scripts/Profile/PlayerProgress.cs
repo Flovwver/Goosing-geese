@@ -153,8 +153,7 @@ namespace GoosingGeese.Profile
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount));
 
-            _data.Points = (int)Math.Min(int.MaxValue, (long)Points + amount);
-            _data.Wallet = (int)Math.Min(Points, (long)Balance + amount);
+            ApplyReward(amount);
             _events.Publish(Changed, null);
         }
 
@@ -179,15 +178,24 @@ namespace GoosingGeese.Profile
                 throw new ArgumentOutOfRangeException(nameof(number));
 
             Quests.RecordRace(won, DateTime.Today);
+            int earned = 0;
 
-            if (won == false)
-                return 0;
+            if (won)
+            {
+                bool firstClear = number > HighestCompletedLevel;
+                earned = (int)Math.Min(int.MaxValue, (long)Mathf.Max(0, reward) + (firstClear ? Mathf.Max(0, firstClearBonus) : 0));
+                ApplyReward(earned);
+                _data.HighestCompletedLevel = Mathf.Max(HighestCompletedLevel, number);
+            }
 
-            bool firstClear = number > HighestCompletedLevel;
-            int earned = (int)Math.Min(int.MaxValue, (long)Mathf.Max(0, reward) + (firstClear ? Mathf.Max(0, firstClearBonus) : 0));
-            AddReward(earned);
-            _data.HighestCompletedLevel = Mathf.Max(HighestCompletedLevel, number);
+            _events.Publish(Changed, null);
             return earned;
+        }
+
+        private void ApplyReward(int amount)
+        {
+            _data.Points = (int)Math.Min(int.MaxValue, (long)Points + amount);
+            _data.Wallet = (int)Math.Min(Points, (long)Balance + amount);
         }
 
         private void Restore(PlayerProgressData data, RacerAppearanceCatalog catalog)

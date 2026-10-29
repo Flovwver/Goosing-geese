@@ -14,6 +14,26 @@ public static class ProfileContractsTests
             WalletInitialized = true
         };
         var profile = new PlayerProgress(data);
+        var raceProfile = new PlayerProgress();
+        int notifications = 0;
+        int observedStage = -1;
+        int observedRaces = -1;
+        int observedBalance = -1;
+        raceProfile.Changed += () =>
+        {
+            notifications++;
+            observedStage = raceProfile.HighestCompletedLevel;
+            observedRaces = raceProfile.Races;
+            observedBalance = raceProfile.Balance;
+        };
+        raceProfile.RecordRace(true, 1, 100, 20);
+        Require(notifications == 1
+            && observedStage == 1
+            && observedRaces == 1
+            && observedBalance == 120,
+            "Win observers must receive one notification with the complete result.");
+        raceProfile.RecordRace(false, 1, 100, 20);
+        Require(notifications == 2 && observedRaces == 2 && observedBalance == 120, "Loss observers must receive updated counters without a reward.");
         data.Points = 0;
         Require(profile.Points == int.MaxValue - 1, "Model must own a copy of save data.");
         profile.AddReward(100);
