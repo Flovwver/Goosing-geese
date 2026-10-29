@@ -25,31 +25,6 @@ public class RacerGarage : MonoBehaviour
     public RacerAppearanceDefinition PreviewEntry => _appearances.GetEntry(PreviewIndex);
     public RacerStats BaseStats => SelectedEntry.Stats;
 
-    private void Awake()
-    {
-        PlayerProgress progress = _race.Progress;
-
-        if (progress.OwnedModels == null)
-            progress.OwnedModels = new System.Collections.Generic.List<string>();
-
-        if (progress.OwnedModels.Contains("goose") == false)
-            progress.OwnedModels.Add("goose");
-
-        if (progress.OwnershipInitialized == false)
-        {
-            GrantOwnership(SelectedEntry.UpgradeId);
-
-            foreach (RacerUpgradeProgress upgrades in progress.Upgrades)
-            {
-                if (upgrades != null)
-                    GrantOwnership(upgrades.ModelId);
-            }
-
-            progress.OwnershipInitialized = true;
-            PlayerProgressStore.Save(progress);
-        }
-    }
-
     public int[] GetPreviewColorIndices()
     {
         return _appearances.GetColorIndices(PreviewIndex);
@@ -92,7 +67,7 @@ public class RacerGarage : MonoBehaviour
     public bool IsOwned(int index)
     {
         return index >= 0 && index < AppearanceCount
-            && _race.Progress.OwnedModels.Contains(_appearances.GetEntry(index).UpgradeId);
+            && _race.Progress.OwnsModel(_appearances.GetEntry(index).UpgradeId);
     }
 
     public bool Select(int index)
@@ -100,9 +75,9 @@ public class RacerGarage : MonoBehaviour
         if (_race.State != RaceState.Waiting || IsOwned(index) == false)
             return false;
 
-        _race.Progress.Appearance = index;
+        _race.Progress.SelectAppearance(index);
         _previewIndex = -1;
-        PlayerProgressStore.Save(_race.Progress);
+        _race.Session.Commands.Save();
         SelectionChanged?.Invoke();
         PreviewChanged?.Invoke();
         return true;
@@ -120,7 +95,9 @@ public class RacerGarage : MonoBehaviour
         if (CanPurchase() == false)
             return false;
 
-        _race.Progress.Wallet -= PreviewEntry.PurchasePrice;
+        if (_race.Progress.TrySpend(PreviewEntry.PurchasePrice) == false)
+            return false;
+
         GrantOwnership(PreviewEntry.UpgradeId);
         return Select(PreviewIndex);
     }
@@ -176,17 +153,10 @@ public class RacerGarage : MonoBehaviour
             return false;
 
         int price = GetUpgradePrice(kind);
-        RacerUpgradeProgress progress = FindUpgrades(PreviewEntry);
+        if (_race.Progress.TryBuyUpgrade(PreviewEntry.UpgradeId, kind, GetUpgradeLevel(kind) + 1, price) == false)
+            return false;
 
-        if (progress == null)
-        {
-            progress = new RacerUpgradeProgress { ModelId = PreviewEntry.UpgradeId };
-            _race.Progress.Upgrades.Add(progress);
-        }
-
-        progress.SetLevel(kind, GetUpgradeLevel(kind) + 1);
-        _race.Progress.Wallet -= price;
-        PlayerProgressStore.Save(_race.Progress);
+        _race.Session.Commands.Save();
         UpgradesChanged?.Invoke();
         return true;
     }
@@ -198,12 +168,11 @@ public class RacerGarage : MonoBehaviour
 
     private void GrantOwnership(string id)
     {
-        if (string.IsNullOrEmpty(id) == false && _race.Progress.OwnedModels.Contains(id) == false)
-            _race.Progress.OwnedModels.Add(id);
+        _race.Progress.GrantModel(id);
     }
 
     private RacerUpgradeProgress FindUpgrades(RacerAppearanceDefinition model)
     {
-        return _race.Progress.Upgrades.Find(progress => progress != null && progress.ModelId == model.UpgradeId);
+        return _race.Progress.GetUpgrades(model.UpgradeId);
     }
 }

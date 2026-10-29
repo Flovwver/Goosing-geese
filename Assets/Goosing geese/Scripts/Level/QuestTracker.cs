@@ -1,91 +1,101 @@
 using System;
 
-public static class QuestTracker
+public sealed class QuestTracker
 {
     public const int QuestCount = 3;
-    private const int DailyRaceTarget = 3;
-    private const int DailyWinTarget = 1;
-    private const int GlobalWinTarget = 10;
-    private const int DailyRaceReward = 50;
-    private const int DailyWinReward = 75;
-    private const int GlobalWinReward = 300;
+    private readonly QuestDefinitions _definitions = new QuestDefinitions();
+    private readonly PlayerProgressData _data;
+    private readonly Action<int> _addReward;
 
-    public static void RefreshDay(PlayerProgress progress, DateTime date)
+    internal QuestTracker(PlayerProgressData data, Action<int> addReward)
+    {
+        _data = data;
+        _addReward = addReward;
+    }
+
+    public void RefreshDay(DateTime date)
     {
         string today = date.ToString("yyyy-MM-dd");
 
-        if (progress.DailyDate == today)
+        if (_data.DailyDate == today)
             return;
 
-        progress.DailyDate = today;
-        progress.DailyRaces = 0;
-        progress.DailyWins = 0;
-        progress.DailyRacesClaimed = false;
-        progress.DailyWinsClaimed = false;
+        _data.DailyDate = today;
+        _data.DailyRaces = 0;
+        _data.DailyWins = 0;
+        _data.DailyRacesClaimed = false;
+        _data.DailyWinsClaimed = false;
     }
 
-    public static void RecordRace(PlayerProgress progress, bool won, DateTime date)
+    public void RecordRace(bool won, DateTime date)
     {
-        RefreshDay(progress, date);
-        progress.Races = (int)Math.Min(int.MaxValue, (long)progress.Races + 1);
-        progress.DailyRaces = (int)Math.Min(int.MaxValue, (long)progress.DailyRaces + 1);
+        RefreshDay(date);
+        _data.Races = (int)Math.Min(int.MaxValue, (long)_data.Races + 1);
+        _data.DailyRaces = (int)Math.Min(int.MaxValue, (long)_data.DailyRaces + 1);
 
         if (won)
         {
-            progress.Wins = (int)Math.Min(int.MaxValue, (long)progress.Wins + 1);
-            progress.DailyWins = (int)Math.Min(int.MaxValue, (long)progress.DailyWins + 1);
+            _data.Wins = (int)Math.Min(int.MaxValue, (long)_data.Wins + 1);
+            _data.DailyWins = (int)Math.Min(int.MaxValue, (long)_data.DailyWins + 1);
         }
     }
 
-    public static int GetProgress(PlayerProgress progress, int quest, DateTime date)
+    public int GetProgress(int quest, DateTime date)
     {
         Validate(quest);
-        bool currentDay = progress.DailyDate == date.ToString("yyyy-MM-dd");
-        return quest == 0 ? (currentDay ? progress.DailyRaces : 0)
-            : quest == 1 ? (currentDay ? progress.DailyWins : 0) : progress.Wins;
+        bool currentDay = _data.DailyDate == date.ToString("yyyy-MM-dd");
+        switch ((QuestId)quest)
+        {
+            case QuestId.DailyRaces:
+                return currentDay ? _data.DailyRaces : 0;
+            case QuestId.DailyWin:
+                return currentDay ? _data.DailyWins : 0;
+            default:
+                return _data.Wins;
+        }
     }
 
-    public static int GetTarget(int quest)
+    public int GetTarget(int quest)
     {
         Validate(quest);
-        return quest == 0 ? DailyRaceTarget : quest == 1 ? DailyWinTarget : GlobalWinTarget;
+        return _definitions.GetTarget(quest);
     }
 
-    public static bool IsClaimed(PlayerProgress progress, int quest, DateTime date)
+    public bool IsClaimed(int quest, DateTime date)
     {
         Validate(quest);
 
-        if (quest == 2)
-            return progress.GlobalWinsClaimed;
+        if ((QuestId)quest == QuestId.TotalWins)
+            return _data.GlobalWinsClaimed;
 
-        return progress.DailyDate == date.ToString("yyyy-MM-dd")
-            && (quest == 0 ? progress.DailyRacesClaimed : progress.DailyWinsClaimed);
+        return _data.DailyDate == date.ToString("yyyy-MM-dd")
+            && ((QuestId)quest == QuestId.DailyRaces ? _data.DailyRacesClaimed : _data.DailyWinsClaimed);
     }
 
-    public static bool TryClaim(PlayerProgress progress, int quest, DateTime date)
+    public bool TryClaim(int quest, DateTime date)
     {
         if (quest < 0 || quest >= QuestCount)
             return false;
 
-        RefreshDay(progress, date);
+        RefreshDay(date);
 
-        if (IsClaimed(progress, quest, date) || GetProgress(progress, quest, date) < GetTarget(quest))
+        if (IsClaimed(quest, date) || GetProgress(quest, date) < GetTarget(quest))
             return false;
 
-        int reward = quest == 0 ? DailyRaceReward : quest == 1 ? DailyWinReward : GlobalWinReward;
-        progress.AddReward(reward);
+        int reward = _definitions.Get(quest).Reward;
+        _addReward(reward);
 
-        if (quest == 0)
-            progress.DailyRacesClaimed = true;
-        else if (quest == 1)
-            progress.DailyWinsClaimed = true;
+        if ((QuestId)quest == QuestId.DailyRaces)
+            _data.DailyRacesClaimed = true;
+        else if ((QuestId)quest == QuestId.DailyWin)
+            _data.DailyWinsClaimed = true;
         else
-            progress.GlobalWinsClaimed = true;
+            _data.GlobalWinsClaimed = true;
 
         return true;
     }
 
-    private static void Validate(int quest)
+    private void Validate(int quest)
     {
         if (quest < 0 || quest >= QuestCount)
             throw new ArgumentOutOfRangeException(nameof(quest));

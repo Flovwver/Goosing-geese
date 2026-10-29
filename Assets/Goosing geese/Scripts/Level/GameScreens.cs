@@ -114,10 +114,10 @@ public class GameScreens : MonoBehaviour
     {
         Font font = GameUiTheme.LoadFont();
         _ui = new GameUiFactory(font, GetComponent<GameAudio>().PlayClick);
-        _settingsView = new SettingsView(_race.Progress, _ui);
+        _settingsView = new SettingsView(_race.Progress, _ui, _race.Session.Commands);
         _leaderboardView = new LeaderboardView(_race.Progress, _ui);
-        _questsView = new QuestsView(_race.Progress, _ui);
-        _sceneryView = new ScenerySelectionView(_race.Progress, _ui);
+        _questsView = new QuestsView(_race.Progress, _ui, _race.Session.Commands);
+        _sceneryView = new ScenerySelectionView(_race.Progress, _ui, _race.Session.Commands);
 
         if (_canvasRoot != null)
         {
@@ -330,7 +330,7 @@ public class GameScreens : MonoBehaviour
     private void ShowLeaderboard()
     {
         ShowPanel(Localize("Локальный рекорд", "Local leaderboard"), "leaderboard");
-        _leaderboardView.Render(_panel.transform, Back);
+        _leaderboardView.Render(_panel.transform, _race.Session.ReadLeaderboard(), Back);
     }
 
     private void ShowQuests()

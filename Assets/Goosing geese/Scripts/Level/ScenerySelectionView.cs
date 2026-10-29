@@ -8,10 +8,10 @@ public sealed class ScenerySelectionView
     private readonly ProfileCommands _commands;
     private readonly GameUiFactory _ui;
 
-    public ScenerySelectionView(PlayerProgress progress, GameUiFactory ui)
+    public ScenerySelectionView(PlayerProgress progress, GameUiFactory ui, ProfileCommands commands)
     {
         _progress = progress;
-        _commands = new ProfileCommands(progress);
+        _commands = commands;
         _ui = ui;
     }
 

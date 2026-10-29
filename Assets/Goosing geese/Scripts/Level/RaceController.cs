@@ -41,7 +41,7 @@ public class RaceController : MonoBehaviour
         if (_input == null)
             _input = FindFirstObjectByType<InputSwitch>();
 
-        Session = new GameSession(_level, _campaign, this);
+        Session = new GameSession(_level, _campaign, this, new PlayerProgressStore(), new LocalLeaderboard());
         _level.SetSession(Session);
     }
 
@@ -49,7 +49,7 @@ public class RaceController : MonoBehaviour
     {
         if (Session == null)
         {
-            Session = new GameSession(_level, _campaign, this);
+            Session = new GameSession(_level, _campaign, this, new PlayerProgressStore(), new LocalLeaderboard());
             _level.SetSession(Session);
         }
 

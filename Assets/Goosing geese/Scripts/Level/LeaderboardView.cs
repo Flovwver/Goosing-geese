@@ -13,25 +13,37 @@ public sealed class LeaderboardView
         _ui = ui;
     }
 
-    public void Render(Transform parent, Action back)
+    public void Render(Transform parent, System.Collections.Generic.List<LeaderboardEntry> entries, Action back)
     {
-        var entries = LocalLeaderboard.Read();
         string rows = "";
 
         for (int i = 0; i < entries.Count; i++)
         {
-            bool currentPlayer = entries[i].Name == _progress.PlayerName;
+            bool currentPlayer = entries[i].PlayerId == _progress.PlayerId;
 
             if (i < 5 || currentPlayer)
-                rows += LocalLeaderboard.GetRank(entries, i) + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "") + "\n";
+                rows += GetRank(entries, i) + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "") + "\n";
         }
 
-        if (entries.Find(entry => entry.Name == _progress.PlayerName) == null)
+        if (entries.Find(entry => entry.PlayerId == _progress.PlayerId) == null)
             rows += (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
 
         _ui.CreateLabel(parent, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
         _ui.CreateLabel(parent, Localize("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.", "Device record. Online rankings are not connected."), 23);
         _ui.CreateButton(parent, Localize("Назад", "Back"), back);
+    }
+
+    private int GetRank(System.Collections.Generic.List<LeaderboardEntry> entries, int index)
+    {
+        int rank = 1;
+
+        for (int previous = 0; previous < index; previous++)
+        {
+            if (entries[previous].Score > entries[index].Score)
+                rank++;
+        }
+
+        return rank;
     }
 
     private string Localize(string russian, string english)

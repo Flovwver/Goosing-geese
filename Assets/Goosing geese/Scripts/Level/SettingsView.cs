@@ -8,10 +8,10 @@ public sealed class SettingsView
     private readonly ProfileCommands _commands;
     private readonly GameUiFactory _ui;
 
-    public SettingsView(PlayerProgress progress, GameUiFactory ui)
+    public SettingsView(PlayerProgress progress, GameUiFactory ui, ProfileCommands commands)
     {
         _progress = progress;
-        _commands = new ProfileCommands(progress);
+        _commands = commands;
         _ui = ui;
     }
 

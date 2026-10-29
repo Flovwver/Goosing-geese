@@ -2,20 +2,29 @@ using UnityEngine;
 
 public sealed class GameSession
 {
+    private readonly PlayerProgressStore _store;
+    private readonly LocalLeaderboard _leaderboard;
     private readonly Level _level;
     private readonly CampaignSettings _campaign;
     private readonly RaceController _race;
 
-    public GameSession(Level level, CampaignSettings campaign, RaceController race)
+    public GameSession(Level level, CampaignSettings campaign, RaceController race, PlayerProgressStore store, LocalLeaderboard leaderboard)
     {
+        _store = store;
+        _leaderboard = leaderboard;
         _level = level;
         _campaign = campaign;
         _race = race;
-        Progress = PlayerProgressStore.Load();
-        Progress.Level = Mathf.Clamp(Progress.Level, 1, Progress.GetUnlockedLevel(int.MaxValue));
+        Progress = _store.Load(Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
+        Commands = new ProfileCommands(Progress, _store, _leaderboard);
     }
 
     public PlayerProgress Progress { get; }
+    public ProfileCommands Commands { get; }
+    public System.Collections.Generic.List<LeaderboardEntry> ReadLeaderboard()
+    {
+        return _leaderboard.Read();
+    }
     public CampaignStage CurrentStage => _campaign.GetStage(Progress.Level);
     public bool HasNextLevel => _level.Number < int.MaxValue;
     public bool IsRacing => _race.isActiveAndEnabled && _race.State == RaceState.Racing;
@@ -30,8 +39,8 @@ public sealed class GameSession
     {
         CampaignStage stage = _campaign.GetStage(_level.Number);
         int reward = Progress.RecordRace(won, _level.Number, stage.Reward, stage.FirstClearBonus);
-        PlayerProgressStore.Save(Progress);
-        LocalLeaderboard.Record(Progress.PlayerName, Progress.Points);
+        _store.Save(Progress);
+        _leaderboard.Record(Progress.PlayerName, Progress.Points, Progress.PlayerId);
         return reward;
     }
 
@@ -67,12 +76,12 @@ public sealed class GameSession
 
         if (_level.TryBuildRoad(out string error))
         {
-            PlayerProgressStore.Save(Progress);
+            _store.Save(Progress);
             return true;
         }
 
-        Progress.Level = previous;
-        PlayerProgressStore.Save(Progress);
+        Progress.TrySelectLevel(previous, int.MaxValue);
+        _store.Save(Progress);
         Debug.LogError("Level selection failed: " + error, _level);
         return false;
     }

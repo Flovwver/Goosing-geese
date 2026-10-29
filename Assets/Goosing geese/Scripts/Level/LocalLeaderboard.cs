@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class LocalLeaderboard
+public sealed class LocalLeaderboard
 {
     private const string SaveKey = "GoosingGeese.Leaderboard.v1";
     private const int MaximumEntries = 100;
 
-    public static List<LeaderboardEntry> Read()
+    public List<LeaderboardEntry> Read()
     {
         LeaderboardData table = null;
 
@@ -26,16 +26,20 @@ public static class LocalLeaderboard
         return entries;
     }
 
-    public static void Record(string name, int score)
+    public void Record(string name, int score, string playerId = null)
     {
         name = string.IsNullOrWhiteSpace(name) ? "Player" : name.Trim();
         var entries = Read();
-        LeaderboardEntry entry = entries.Find(item => item.Name == name);
+        LeaderboardEntry entry = entries.Find(item => string.IsNullOrEmpty(playerId) ? item.Name == name : item.PlayerId == playerId || (string.IsNullOrEmpty(item.PlayerId) && item.Name == name));
 
         if (entry == null)
-            entries.Add(new LeaderboardEntry { Name = name, Score = Mathf.Max(0, score) });
+            entries.Add(new LeaderboardEntry { PlayerId = playerId, Name = name, Score = Mathf.Max(0, score) });
         else
+        {
+            entry.PlayerId = playerId;
+            entry.Name = name;
             entry.Score = Mathf.Max(entry.Score, score);
+        }
 
         entries.Sort((first, second) => second.Score.CompareTo(first.Score));
 
@@ -46,7 +50,7 @@ public static class LocalLeaderboard
         PlayerPrefs.Save();
     }
 
-    public static int GetRank(List<LeaderboardEntry> entries, int index)
+    public int GetRank(List<LeaderboardEntry> entries, int index)
     {
         int rank = 1;
 
