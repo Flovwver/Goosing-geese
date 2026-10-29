@@ -1,47 +1,53 @@
+using GoosingGeese.Racing;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "RacerAppearanceCatalog", menuName = "Racer/Appearance Catalog")]
-public class RacerAppearanceCatalog : ScriptableObject
+namespace GoosingGeese.Settings
 {
-    [SerializeField] private RacerAppearanceDefinition[] _entries;
-
-    public int Count => _entries != null ? _entries.Length : 0;
-
-    public int GetRelativeModelIndex(int index, int direction)
+    [CreateAssetMenu(fileName = "RacerAppearanceCatalog", menuName = "Racer/Appearance Catalog")]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerAppearanceCatalog")]
+    public class RacerAppearanceCatalog : ScriptableObject
     {
-        string currentId = GetEntry(index).UpgradeId;
-        int next = index;
+        [SerializeField]
+        private RacerAppearanceDefinition[] _entries;
 
-        for (int count = 0; count < Count; count++)
+        public int Count => _entries != null ? _entries.Length : 0;
+
+        public int GetRelativeModelIndex(int index, int direction)
         {
-            next = (next + direction + Count) % Count;
+            string currentId = GetEntry(index).ModelId;
+            int next = index;
 
-            if (GetEntry(next).UpgradeId != currentId)
-                return next;
+            for (int count = 0; count < Count; count++)
+            {
+                next = (next + direction + Count) % Count;
+
+                if (GetEntry(next).ModelId != currentId)
+                    return next;
+            }
+
+            return index;
         }
 
-        return index;
-    }
-
-    public int[] GetColorIndices(int index)
-    {
-        var colors = new System.Collections.Generic.List<int>();
-        string modelId = GetEntry(index).UpgradeId;
-
-        for (int candidate = 0; candidate < Count; candidate++)
+        public int[] GetColorIndices(int index)
         {
-            if (GetEntry(candidate).UpgradeId == modelId)
-                colors.Add(candidate);
+            var colors = new System.Collections.Generic.List<int>();
+            string modelId = GetEntry(index).ModelId;
+
+            for (int candidate = 0; candidate < Count; candidate++)
+            {
+                if (GetEntry(candidate).ModelId == modelId)
+                    colors.Add(candidate);
+            }
+
+            return colors.ToArray();
         }
 
-        return colors.ToArray();
-    }
+        public RacerAppearanceDefinition GetEntry(int index)
+        {
+            if (Count == 0)
+                return null;
 
-    public RacerAppearanceDefinition GetEntry(int index)
-    {
-        if (Count == 0)
-            return null;
-
-        return _entries[Mathf.Clamp(index, 0, Count - 1)];
+            return _entries[Mathf.Clamp(index, 0, Count - 1)];
+        }
     }
 }

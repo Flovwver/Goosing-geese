@@ -1,48 +1,55 @@
+using GoosingGeese.Racing;
+using GoosingGeese.Settings;
 using UnityEngine;
 
-[DefaultExecutionOrder(100)]
-public class RacerLoadout : MonoBehaviour
+namespace GoosingGeese.Garage
 {
-    [SerializeField] private Racer _racer;
-    [SerializeField] private RacerGarage _garage;
-
-    private RacerStats _runtimeStats;
-
-    private void OnEnable()
+    [DefaultExecutionOrder(100)]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerLoadout")]
+    public class RacerLoadout : MonoBehaviour
     {
-        _garage.SelectionChanged += Apply;
-        _garage.UpgradesChanged += Apply;
-        Apply();
-    }
+        [SerializeField]
+        private Racer _racer;
+        [SerializeField]
+        private RacerGarage _garage;
+        private RacerStats _runtimeStats;
 
-    private void OnDisable()
-    {
-        _garage.SelectionChanged -= Apply;
-        _garage.UpgradesChanged -= Apply;
-    }
-
-    private void OnDestroy()
-    {
-        if (_racer != null && Application.isPlaying)
-            _racer.ConfigureStats(_racer.BaseStats);
-
-        if (_runtimeStats != null)
-            Destroy(_runtimeStats);
-    }
-
-    private void Apply()
-    {
-        RacerStats source = _garage.BaseStats;
-
-        if (_runtimeStats == null)
+        private void OnEnable()
         {
-            _runtimeStats = Instantiate(source);
-            _runtimeStats.name = "Selected racer stats";
-            _runtimeStats.hideFlags = HideFlags.DontSave;
+            _garage.SelectionChanged += Apply;
+            _garage.UpgradesChanged += Apply;
+            Apply();
         }
 
-        JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(source), _runtimeStats);
-        _garage.ApplyStats(_runtimeStats);
-        _racer.ConfigureStats(_runtimeStats);
+        private void OnDisable()
+        {
+            _garage.SelectionChanged -= Apply;
+            _garage.UpgradesChanged -= Apply;
+        }
+
+        private void OnDestroy()
+        {
+            if (_racer != null && Application.isPlaying)
+                _racer.ConfigureStats(_racer.BaseStats);
+
+            if (_runtimeStats != null)
+                Destroy(_runtimeStats);
+        }
+
+        private void Apply()
+        {
+            RacerStats source = _garage.BaseStats;
+
+            if (_runtimeStats == null)
+            {
+                _runtimeStats = Instantiate(source);
+                _runtimeStats.name = "Selected racer stats";
+                _runtimeStats.hideFlags = HideFlags.DontSave;
+            }
+
+            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(source), _runtimeStats);
+            _garage.ApplyStats(_runtimeStats);
+            _racer.ConfigureStats(_runtimeStats);
+        }
     }
 }

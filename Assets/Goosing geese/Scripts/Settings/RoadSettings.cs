@@ -1,34 +1,41 @@
 using System.Collections.Generic;
+using GoosingGeese.Roads;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "RoadSettings", menuName = "Settings/RoadSettings")]
-public class RoadSettings : ScriptableObject
+namespace GoosingGeese.Settings
 {
-    [Min(1)] public int RoadPieceCount = 20;
-    [Min(1)] public int MaxGenerationAttempts = 100;
-    [Min(1)] public int FinishRunoutPieces = 3;
-    [Header("Path")]
-    [Min(1)] public int CurveSamplesPerSegment = 24;
-    public bool ShowPathLine = true;
-    public Color PathLineColor = Color.cyan;
-    [Min(0f)] public float PathLineWidth = 0.25f;
-    public float PathLineHeight = 2.1f;
-    public bool DrawPathGizmos = true;
-    [Min(0f)] public float WaypointGizmoRadius = 0.3f;
-
-    [Header("Speed hints")]
-    public bool ShowSpeedHints = true;
-
-    [Header("Generation")]
-    [SerializeField] private RoadPieceType[] _availablePieceTypes =
+    [CreateAssetMenu(fileName = "RoadSettings", menuName = "Settings/RoadSettings")]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RoadSettings")]
+    public class RoadSettings : ScriptableObject
     {
-        RoadPieceType.Straight,
-        RoadPieceType.LeftTurn,
-        RoadPieceType.RightTurn
-    };
+        [Min(1)]
+        public int RoadPieceCount = 20;
+        [Min(1)]
+        public int MaxGenerationAttempts = 100;
+        [Min(1)]
+        public int FinishRunoutPieces = 3;
+        [Header("Path")]
+        [Min(1)]
+        public int CurveSamplesPerSegment = 24;
+        public bool ShowPathLine = true;
+        [Min(0f)]
+        public float PathLineWidth = 0.25f;
+        public float PathLineHeight = 2.1f;
+        public bool DrawPathGizmos = true;
+        [Min(0f)]
+        public float WaypointGizmoRadius = 0.3f;
+        [Header("Generation")]
+        [SerializeField]
+        private RoadPieceType[] _availablePieceTypes =
+        {
+            RoadPieceType.Straight,
+            RoadPieceType.LeftTurn,
+            RoadPieceType.RightTurn
+        };
+        [SerializeField]
+        private RoadPiecePrefabEntry[] _piecePrefabs;
 
-    [SerializeField] private RoadPiecePrefabEntry[] _piecePrefabs;
-
-    public RoadPieceType[] AvailablePieceTypes => _availablePieceTypes;
-    public IReadOnlyList<RoadPiecePrefabEntry> PiecePrefabs => _piecePrefabs;
+        public RoadPieceType[] AvailablePieceTypes => _availablePieceTypes;
+        public IReadOnlyList<RoadPiecePrefabEntry> PiecePrefabs => _piecePrefabs;
+    }
 }

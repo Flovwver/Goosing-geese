@@ -129,7 +129,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e25260ec76ef297498e66c3e18c217da, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Racer
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.Racer
 --- !u!1 &280129366
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,7 +159,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 32bb4f54472e1b64dbfd5c1f5229781c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InputSwitch
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Input.ThrottleInput
 --- !u!114 &280129368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,9 +171,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2834fb0627f82ff43b090618a2f2f84b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KeyboardAccelerator
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Input.KeyboardAccelerator
   _accelerateAction: {fileID: -581002323506522608, guid: 4435d59c301fbb0459215351a00e0876, type: 3}
-  _inputSwitch: {fileID: 280129367}
+  _input: {fileID: 280129367}
 --- !u!4 &280129369
 Transform:
   m_ObjectHideFlags: 0
@@ -322,7 +322,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 482f8217cf8c45e49e18b29443d0e9e5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RestartRaceButton
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RestartRaceButton
   _level: {fileID: 1081964704}
 --- !u!1 &310000011
 GameObject:
@@ -514,7 +514,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 221a508631da49a408c0de6f9c447896, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpeedometerDialGraphic
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.SpeedometerDialGraphic
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
@@ -562,7 +562,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3c63f89f9b12a414f9a0e3d251e146c1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpeedometerScaleView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.SpeedometerScaleView
   _labels:
   - {fileID: 1208900209}
   - {fileID: 2090795739}
@@ -908,7 +908,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f8e304e20e1413f4b9974b4bfa03afba, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFollower
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.CameraFollower
   _target: {fileID: 543450651709855089}
   _settings: {fileID: 11400000, guid: ddaaa218710e4b57b58001fd38020a38, type: 2}
   _menuFocusHeight: 3
@@ -1237,7 +1237,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 48c8eb3418ac3164c87e677aa8fca3c8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Level
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Levels.Level
   _roadStartPoint: {fileID: 1242738828}
   _settings: {fileID: 11400000, guid: a89aed623746447b9df737176ec8f8ff, type: 2}
   _racer: {fileID: 265920761}
@@ -1271,7 +1271,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1038e44d300176a4fb396d2732521bbb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RoadPathView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RoadPathView
   _level: {fileID: 1081964704}
   _material: {fileID: 2100000, guid: 77dd07f8738af9b40bed9c8d9c417255, type: 2}
   _transitionLength: 12
@@ -1289,7 +1289,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03ea05a7c24fbb74999d080cb485088a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RaceController
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.RaceController
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _input: {fileID: 280129367}
@@ -1305,7 +1305,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58c2230148366c94ebcc9de9a6c1c89d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OpponentSpawner
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.OpponentSpawner
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _opponentPrefab: {fileID: 5334310155782183356, guid: e7400662bbc0e40429d30d03231ca0b9, type: 3}
@@ -1328,7 +1328,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9cff748b533317f4899a610a48b93b0b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameScreens
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.GameScreens
   _race: {fileID: 1081964708}
   _player: {fileID: 265920761}
   _opponents: {fileID: 1081964709}
@@ -1347,7 +1347,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3faf9caaf0e432c49aea2091ec16c977, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WorldPresentation
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.WorldPresentation
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _race: {fileID: 1081964708}
@@ -1355,11 +1355,16 @@ MonoBehaviour:
   - {fileID: 4811954470448506791, guid: c1e243c93572b0146bb09bf02d78ff6d, type: 3}
   - {fileID: 2370815033398676697, guid: 17b1ab29f037ed440aa481a1fc8cd4d9, type: 3}
   - {fileID: 1164899596817984, guid: ba33f5f0a254c9443956b40146028648, type: 3}
-  _appearances: {fileID: 11400000, guid: 3e3286f7c977296498d1d131a5672028, type: 2}
   _garage: {fileID: 1081964717}
   _decorationSpacing: 45
   _roadClearance: 20
   _groundSize: 10000
+  _builder:
+    _materials:
+      _sources: []
+      _copies: []
+    _root: {fileID: 0}
+    _groundMaterial: {fileID: 0}
 --- !u!114 &1081964712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1371,7 +1376,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ef6693e62586224290158dd2186e30a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RoadSafety
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Roads.RoadSafety
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _race: {fileID: 1081964708}
@@ -1388,7 +1393,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07c997c642c154b438cc7a57b8860e02, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameAudio
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.GameAudio
   _race: {fileID: 1081964708}
   _player: {fileID: 265920761}
 --- !u!114 &1081964714
@@ -1402,7 +1407,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cce9b33399fe20e458b7caebfa66f22c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RaceResultView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RaceResultView
   _race: {fileID: 1081964708}
   _overheatView: {fileID: 1861684951}
   _audio: {fileID: 1081964713}
@@ -1417,7 +1422,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e4599c0983a1f8d4789f310d08b2019e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RacerLoadout
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Garage.RacerLoadout
   _racer: {fileID: 265920761}
   _garage: {fileID: 1081964717}
 --- !u!114 &1081964716
@@ -1431,7 +1436,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cebe99961976e34280c55ab67c86010, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GarageView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.GarageView
   _race: {fileID: 1081964708}
   _garage: {fileID: 1081964717}
   _audio: {fileID: 1081964713}
@@ -1446,7 +1451,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5302a52395909964c8d4fedd1a3a4af5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RacerGarage
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Garage.RacerGarage
   _race: {fileID: 1081964708}
   _appearances: {fileID: 11400000, guid: 3e3286f7c977296498d1d131a5672028, type: 2}
   _rules: {fileID: 11400000, guid: e5e965a100704eb4fbdb852423030c72, type: 2}
@@ -1461,7 +1466,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff78409a98581574fa10af554089a8c9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CampaignView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.CampaignView
   _race: {fileID: 1081964708}
   _audio: {fileID: 1081964713}
 --- !u!1 &1208900206
@@ -1652,8 +1657,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c50cfe6c97e06e4cba6dcc666462918, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PedalButton
-  _inputSwitch: {fileID: 280129367}
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Input.PedalButton
+  _input: {fileID: 280129367}
 --- !u!114 &1311169246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1773,7 +1778,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e8a253d42ef4ce4c8223b5fc177044c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PedalPromptView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.PedalPromptView
   _race: {fileID: 1081964708}
   _halo: {fileID: 1466587191}
   _caption: {fileID: 1332132332}
@@ -1939,7 +1944,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03e1e00e7e74d8648bb53a2cb8ee2047, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PedalHaloGraphic
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.PedalHaloGraphic
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.76, b: 0.18, a: 0.65}
   m_RaycastTarget: 0
@@ -1968,7 +1973,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ad7666a070390645902644a0fb655c7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FinishLine
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.FinishLine
 --- !u!1 &1828235865
 GameObject:
   m_ObjectHideFlags: 0
@@ -2083,7 +2088,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e7f1faaa031fef449b14224739991fb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RacerOverheatView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RacerOverheatView
 --- !u!1 &1978502867
 GameObject:
   m_ObjectHideFlags: 0
@@ -2211,7 +2216,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 553d4bc9e5a359f4e94f0be2fcab83a3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Speedometer
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.Speedometer
   _racer: {fileID: 265920761}
   _dial: {fileID: 371784477}
   _scale: {fileID: 371784479}
@@ -2451,7 +2456,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a1dcfe6392902e4cb209839b1c9ee7c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HeatFeedback
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.HeatFeedback
   _particleMaterial: {fileID: 2100000, guid: adeafb5b76314aa479789bb417f3a452, type: 2}
 --- !u!114 &543450651709855099
 MonoBehaviour:
@@ -2464,7 +2469,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e051dd3e62aa91344ad52be6b1399865, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RacerAppearance
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RacerAppearance
   _modelLength: 5
 --- !u!1001 &1464469445466606345
 PrefabInstance:

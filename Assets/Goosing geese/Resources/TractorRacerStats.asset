@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b621f69611bb6f34785e0495194aa1b0, type: 3}
   m_Name: TractorRacerStats
-  m_EditorClassIdentifier: Assembly-CSharp::RacerStats
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Settings.RacerStats
   MaxSpeed: 130
   Acceleration: 145
   Drag: 0.05

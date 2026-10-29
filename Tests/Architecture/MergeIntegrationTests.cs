@@ -2,6 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GoosingGeese.Garage;
+using GoosingGeese.Levels;
+using GoosingGeese.Presentation;
+using GoosingGeese.Racing;
+using GoosingGeese.Roads;
+using GoosingGeese.Settings;
 using UnityEditor;
 using UnityEngine;
 
@@ -26,7 +32,15 @@ public static class MergeIntegrationTests
         {
             Require(catalog.GetRelativeModelIndex(0, 1) == 3 && catalog.GetRelativeModelIndex(5, 1) == 0, "Model arrows must skip goose colors.");
 
-            foreach (int color in new[] { 0, 1, 2, 0 })
+            foreach (int color in new[]
+            {
+                0,
+                1,
+                2,
+                0
+            }
+
+            )
             {
                 garage.Browse(color);
 
@@ -67,7 +81,13 @@ public static class MergeIntegrationTests
             var definition = level.CurrentDefinition.Racer;
             var body = racer.GetComponent<Rigidbody>();
 
-            foreach (float height in new[] { 1f, 100f })
+            foreach (float height in new[]
+            {
+                1f,
+                100f
+            }
+
+            )
             {
                 racer.Prepare(path, definition);
                 race.Prepare();
@@ -75,11 +95,14 @@ public static class MergeIntegrationTests
                 body.position = new Vector3(0f, height, 19f);
                 racer.transform.position = body.position;
                 racer.Tick(false, 0f);
-                Require(!racer.IsFinished && race.State == RaceState.Racing, "Finish was counted early.");
+                Require((racer.IsFinished == false) && race.State == RaceState.Racing, "Finish was counted early.");
                 body.position = new Vector3(0f, height, 30f);
                 racer.transform.position = body.position;
                 racer.Tick(false, 0f);
-                Require(racer.IsFinished && race.PlayerWon && race.Outcome == RaceOutcome.FinishedFirst, "Crossing finish and runout in one step must win, including in the air.");
+                Require(racer.IsFinished
+                    && race.PlayerWon
+                    && race.Outcome == RaceOutcome.FinishedFirst,
+                    "Crossing finish and runout in one step must win, including in the air.");
             }
 
             racer.Prepare(path, definition);
@@ -88,7 +111,7 @@ public static class MergeIntegrationTests
             body.position = new Vector3(12.01f, 100f, 26f);
             racer.transform.position = body.position;
             racer.Tick(false, 0f);
-            Require(!racer.IsFinished, "Passing outside the finish width must not win.");
+            Require((racer.IsFinished == false), "Passing outside the finish width must not win.");
             Require(results == 2, "Each completed crossing must report exactly one result.");
             Require((body.constraints & RigidbodyConstraints.FreezePositionY) != 0, "Flat-road movement must constrain vertical launches.");
             return "PASS: grouped colors survive animation; finish/runout crossing at ground and height 100; no off-road finish; exactly one result; vertical lock retained.";
@@ -102,7 +125,7 @@ public static class MergeIntegrationTests
 
     private static void Require(bool condition, string message)
     {
-        if (!condition)
+        if (condition == false)
             throw new Exception(message);
     }
 }

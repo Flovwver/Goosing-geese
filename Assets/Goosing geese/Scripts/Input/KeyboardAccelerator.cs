@@ -1,33 +1,48 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class KeyboardAccelerator : MonoBehaviour
+namespace GoosingGeese.Input
 {
-    [SerializeField] private InputActionReference _accelerateAction;
-    [SerializeField] private InputSwitch _inputSwitch;
-
-    private void OnEnable()
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "KeyboardAccelerator")]
+    public class KeyboardAccelerator : MonoBehaviour
     {
-        _accelerateAction.action.performed += HandleAccelerationPerformed;
-        _accelerateAction.action.canceled += HandleAccelerationCanceled;
-        _accelerateAction.action.Enable();
-    }
+        [SerializeField]
+        private InputActionReference _accelerateAction;
+        [SerializeField]
+        [UnityEngine.Serialization.FormerlySerializedAs("_inputSwitch")]
+        private ThrottleInput _input;
 
-    private void OnDisable()
-    {
-        _accelerateAction.action.performed -= HandleAccelerationPerformed;
-        _accelerateAction.action.canceled -= HandleAccelerationCanceled;
-        _accelerateAction.action.Disable();
-        _inputSwitch.SetKeyboardPressed(false);
-    }
+        private void OnEnable()
+        {
+            if (_input == null || _accelerateAction == null || _accelerateAction.action == null)
+                throw new System.InvalidOperationException("Assign the keyboard action and throttle input in the Inspector.");
 
-    private void HandleAccelerationPerformed(InputAction.CallbackContext context)
-    {
-        _inputSwitch.SetKeyboardPressed(true);
-    }
+            _accelerateAction.action.performed += HandleAccelerationPerformed;
+            _accelerateAction.action.canceled += HandleAccelerationCanceled;
+            _accelerateAction.action.Enable();
+        }
 
-    private void HandleAccelerationCanceled(InputAction.CallbackContext context)
-    {
-        _inputSwitch.SetKeyboardPressed(false);
+        private void OnDisable()
+        {
+            if (_accelerateAction != null && _accelerateAction.action != null)
+            {
+                _accelerateAction.action.performed -= HandleAccelerationPerformed;
+                _accelerateAction.action.canceled -= HandleAccelerationCanceled;
+                _accelerateAction.action.Disable();
+            }
+
+            if (_input != null)
+                _input.SetKeyboardPressed(false);
+        }
+
+        private void HandleAccelerationPerformed(InputAction.CallbackContext context)
+        {
+            _input.SetKeyboardPressed(true);
+        }
+
+        private void HandleAccelerationCanceled(InputAction.CallbackContext context)
+        {
+            _input.SetKeyboardPressed(false);
+        }
     }
 }

@@ -2,84 +2,116 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Campaign", menuName = "Settings/Campaign")]
-public class CampaignSettings : ScriptableObject
+namespace GoosingGeese.Settings
 {
-    private const int GroupSize = 5;
-    private const int SeedStride = 7919;
-
-    private readonly Dictionary<int, CampaignStage> _generatedStages = new Dictionary<int, CampaignStage>();
-
-    [SerializeField] private CampaignStage[] _stages;
-    [Header("After fixed stages")]
-    [SerializeField] private int _proceduralSeed = 2601026;
-    [SerializeField, Min(1)] private int _maximumPieces = 60;
-    [SerializeField, Min(0f)] private float _speedPerLevel = 1.5f;
-    [SerializeField, Min(1f)] private float _maximumOpponentSpeed = 220f;
-
-    public int Count => _stages != null ? _stages.Length : 0;
-
-    private void OnValidate()
+    [CreateAssetMenu(fileName = "Campaign", menuName = "Settings/Campaign")]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "CampaignSettings")]
+    public class CampaignSettings : ScriptableObject
     {
-        _generatedStages.Clear();
-    }
+        private const int GroupSize = 5;
+        private const int SeedStride = 7919;
+        private readonly Dictionary<int, CampaignStage> _generatedStages = new Dictionary<int, CampaignStage>();
+        [SerializeField]
+        private CampaignStage[] _stages;
+        [Header("After fixed stages")]
+        [SerializeField]
+        private int _proceduralSeed = 2601026;
+        [SerializeField, Min(1)]
+        private int _maximumPieces = 60;
+        [SerializeField, Min(0f)]
+        private float _speedPerLevel = 1.5f;
+        [SerializeField, Min(1f)]
+        private float _maximumOpponentSpeed = 220f;
 
-    public CampaignStage GetStage(int number)
-    {
-        if (Count == 0)
-            throw new InvalidOperationException("Campaign has no stages.");
+        public int Count => _stages != null ? _stages.Length : 0;
 
-        number = Mathf.Max(1, number);
-
-        if (number <= Count)
-            return CloneStage(_stages[number - 1]);
-
-        if (_generatedStages.TryGetValue(number, out CampaignStage generated) == false)
+        private void OnValidate()
         {
-            generated = GenerateStage(number);
-            _generatedStages.Add(number, generated);
+            _generatedStages.Clear();
         }
 
-        return CloneStage(generated);
-    }
-
-    private CampaignStage CloneStage(CampaignStage stage)
-    {
-        return JsonUtility.FromJson<CampaignStage>(JsonUtility.ToJson(stage));
-    }
-
-    private CampaignStage GenerateStage(int number)
-    {
-        int offset = number - Count - 1;
-        int group = offset / GroupSize;
-        var bag = new[] { LevelDifficulty.Easy, LevelDifficulty.Easy, LevelDifficulty.Medium, LevelDifficulty.Medium, LevelDifficulty.Hard };
-        var random = new System.Random(unchecked(_proceduralSeed + group * SeedStride));
-
-        for (int index = bag.Length - 1; index > 0; index--)
+        public CampaignStage GetStage(int number)
         {
-            int next = random.Next(index + 1);
-            LevelDifficulty swap = bag[index];
-            bag[index] = bag[next];
-            bag[next] = swap;
+            if (Count == 0)
+                throw new InvalidOperationException("Campaign has no stages.");
+
+            number = Mathf.Max(1, number);
+
+            if (number <= Count)
+                return CloneStage(_stages[number - 1]);
+
+            if (_generatedStages.TryGetValue(number, out CampaignStage generated) == false)
+            {
+                generated = GenerateStage(number);
+                _generatedStages.Add(number, generated);
+            }
+
+            return CloneStage(generated);
         }
 
-        LevelDifficulty difficulty = bag[offset % GroupSize];
-        CampaignStage last = _stages[Count - 1];
-        float multiplier = difficulty == LevelDifficulty.Easy ? 0.92f : difficulty == LevelDifficulty.Hard ? 1.08f : 1f;
-        int baseReward = difficulty == LevelDifficulty.Easy ? 60 : difficulty == LevelDifficulty.Medium ? 100 : 160;
-        float rewardFactor = Mathf.Min(5f, 1f + ((number - 4) / GroupSize) * 0.25f);
-        return new CampaignStage
+        private CampaignStage CloneStage(CampaignStage stage)
         {
-            Seed = unchecked(_proceduralSeed + number * SeedStride),
-            PieceCount = Mathf.Min(_maximumPieces, last.PieceCount + (group + 1) * 2),
-            Difficulty = difficulty,
-            Reward = Mathf.RoundToInt(baseReward * rewardFactor),
-            FirstClearBonus = last.FirstClearBonus,
-            OpponentMaxSpeed = Mathf.Min(_maximumOpponentSpeed, (last.OpponentMaxSpeed + (offset + 1) * _speedPerLevel) * multiplier),
-            OpponentAcceleration = Mathf.Min(200f, last.OpponentAcceleration + offset + 1),
-            CruiseSpeed = last.CruiseSpeed,
-            CornerSpeed = last.CornerSpeed,
-            Layout = null
-        };
+            return JsonUtility.FromJson<CampaignStage>(JsonUtility.ToJson(stage));
+        }
+
+        private void GetDifficultyParameters(LevelDifficulty difficulty, out float multiplier, out int reward)
+        {
+            switch (difficulty)
+            {
+                case LevelDifficulty.Easy:
+                    multiplier = 0.92f;
+                    reward = 60;
+                    break;
+                case LevelDifficulty.Medium:
+                    multiplier = 1f;
+                    reward = 100;
+                    break;
+                default:
+                    multiplier = 1.08f;
+                    reward = 160;
+                    break;
+            }
+        }
+
+        private CampaignStage GenerateStage(int number)
+        {
+            int offset = number - Count - 1;
+            int group = offset / GroupSize;
+            var bag = new[]
+            {
+                LevelDifficulty.Easy,
+                LevelDifficulty.Easy,
+                LevelDifficulty.Medium,
+                LevelDifficulty.Medium,
+                LevelDifficulty.Hard
+            };
+            var random = new System.Random(unchecked(_proceduralSeed + group * SeedStride));
+
+            for (int index = bag.Length - 1; index > 0; index--)
+            {
+                int next = random.Next(index + 1);
+                LevelDifficulty swap = bag[index];
+                bag[index] = bag[next];
+                bag[next] = swap;
+            }
+
+            LevelDifficulty difficulty = bag[offset % GroupSize];
+            CampaignStage last = _stages[Count - 1];
+            GetDifficultyParameters(difficulty, out float multiplier, out int baseReward);
+            float rewardFactor = Mathf.Min(5f, 1f + ((number - 4) / GroupSize) * 0.25f);
+            return new CampaignStage
+            {
+                Seed = unchecked(_proceduralSeed + number * SeedStride),
+                PieceCount = Mathf.Min(_maximumPieces, last.PieceCount + (group + 1) * 2),
+                Difficulty = difficulty,
+                Reward = Mathf.RoundToInt(baseReward * rewardFactor),
+                FirstClearBonus = last.FirstClearBonus,
+                OpponentMaxSpeed = Mathf.Min(_maximumOpponentSpeed, (last.OpponentMaxSpeed + (offset + 1) * _speedPerLevel) * multiplier),
+                OpponentAcceleration = Mathf.Min(200f, last.OpponentAcceleration + offset + 1),
+                CruiseSpeed = last.CruiseSpeed,
+                CornerSpeed = last.CornerSpeed,
+                Layout = null
+            };
+        }
     }
 }

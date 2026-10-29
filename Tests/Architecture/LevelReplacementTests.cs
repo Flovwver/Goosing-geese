@@ -2,6 +2,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using GoosingGeese.Levels;
+using GoosingGeese.Roads;
+using GoosingGeese.Settings;
 using UnityEngine;
 
 public static class LevelReplacementTests
@@ -41,11 +44,16 @@ public static class LevelReplacementTests
             typeof(RoadSettings).GetField("_availablePieceTypes", Flags).SetValue(bad, new[] { RoadPieceType.Straight });
             RequireFailure(level, definition, path, originalPieces, "Geometry failure after candidate objects exist");
             await Task.Delay(150);
-            Require(UnityEngine.Object.FindObjectsByType<RoadPiece>(FindObjectsSortMode.None).Select(p => p.GetInstanceID()).OrderBy(x => x).SequenceEqual(originalPieces), "Failed build must not leave active candidate pieces.");
+            Require(UnityEngine.Object.FindObjectsByType<RoadPiece>(FindObjectsSortMode.None).Select(p => p.GetInstanceID()).OrderBy(x => x).SequenceEqual(originalPieces),
+                "Failed build must not leave active candidate pieces.");
             field.SetValue(level, source);
             Require(level.TryBuildRoad(out var error), "Valid replacement failed: " + error);
-            Require(!ReferenceEquals(definition, level.CurrentDefinition), "A successful replacement must commit the candidate definition.");
-            Require(level.TryGetBuiltPath(out var next, out _) && next.Curve.Length > 0 && next.FinishPoint != null, "A successful replacement must have a complete path and finish.");
+            Require((ReferenceEquals(definition, level.CurrentDefinition) == false), "A successful replacement must commit the candidate definition.");
+            Require(level.TryGetBuiltPath(out var next,
+                out _)
+                && next.Curve.Length > 0
+                && next.FinishPoint != null,
+                "A successful replacement must have a complete path and finish.");
             return "PASS: invalid length, duplicate/missing prefabs and post-build geometry failure preserve the old level; failed candidate objects are cleaned; valid replacement succeeds.";
         }
         finally
@@ -60,15 +68,17 @@ public static class LevelReplacementTests
 
     private static void RequireFailure(Level level, LevelDefinition definition, RoadPath path, int[] pieces, string scenario)
     {
-        Require(!level.TryBuildRoad(out string error) && !string.IsNullOrWhiteSpace(error), scenario + " must return a diagnostic.");
+        Require((level.TryBuildRoad(out string error) == false) && (string.IsNullOrWhiteSpace(error) == false), scenario + " must return a diagnostic.");
         Require(ReferenceEquals(definition, level.CurrentDefinition), scenario + " replaced the current definition.");
         Require(level.TryGetBuiltPath(out var current, out _) && ReferenceEquals(path, current), scenario + " replaced the working path.");
-        Require(UnityEngine.Object.FindObjectsByType<RoadPiece>(FindObjectsSortMode.None).Select(p => p.GetInstanceID()).OrderBy(x => x).SequenceEqual(pieces), scenario + " changed active road objects.");
+        Require(UnityEngine.Object.FindObjectsByType<RoadPiece>(FindObjectsSortMode.None).Select(p => p.GetInstanceID()).OrderBy(x => x).SequenceEqual(pieces),
+            scenario
+            + " changed active road objects.");
     }
 
     private static void Require(bool condition, string message)
     {
-        if (!condition)
+        if (condition == false)
             throw new Exception(message);
     }
 }

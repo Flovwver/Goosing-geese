@@ -1,5 +1,9 @@
 using System;
 using System.Reflection;
+using GoosingGeese.Levels;
+using GoosingGeese.Presentation;
+using GoosingGeese.Racing;
+using GoosingGeese.Settings;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,6 +33,9 @@ public static class PresentationContractsTests
             object builder = typeof(WorldPresentation).GetField("_builder", Flags).GetValue(world);
             var root = (GameObject)typeof(SceneryBuilder).GetField("_root", Flags).GetValue(builder);
             Require(root != null && root.activeSelf, "Re-enabled world must rebuild the current level.");
+            race.Progress.NextScenery(3);
+            var changedRoot = (GameObject)typeof(SceneryBuilder).GetField("_root", Flags).GetValue(builder);
+            Require(changedRoot != root && changedRoot.activeSelf, "Scenery must observe the model without a UI rebuild command.");
             Require(typeof(WorldPresentation).GetField("_path", Flags).GetValue(world) != null, "World must synchronize its current path.");
             return "PASS: immediate localization refresh; reversible language; late world path recovery.";
         }

@@ -1,0 +1,16 @@
+root = true
+
+[*.{cs,py,ps1,md,yml,csproj}]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[{Assets/Goosing geese,Tests/Architecture}/**.cs]
+indent_style = space
+indent_size = 4
+max_line_length = 160
+dotnet_sort_system_directives_first = true
+csharp_style_namespace_declarations = block_scoped:suggestion
+
+# The repository's Roslyn checker enforces member ordering and flow spacing,
+# including the Unity callback ordering exception. Stock SA1202 is insufficient.

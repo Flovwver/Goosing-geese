@@ -131,7 +131,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef672a5d702dae74e99a6a04acd9b5e4, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OverheatTracker
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.OverheatTracker
 --- !u!114 &2133777799489664667
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +143,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46689fe0c99a16a47a9818141843383c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mover
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.Mover
 --- !u!114 &7797843709781225429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 296f40328c6792f4f9577fe7886b45cb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RoadNavigator
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Roads.RoadNavigator
   _settings: {fileID: 11400000, guid: 4d62e05d4a4240c8a1741403e5eed75b, type: 2}
 --- !u!114 &8610405145371556678
 MonoBehaviour:
@@ -168,7 +168,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e25260ec76ef297498e66c3e18c217da, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Racer
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.Racer
   _stats: {fileID: 11400000, guid: b953bdf1f7389d8419ebf881b4bd2657, type: 2}
 --- !u!1 &5655064139228030018
 GameObject:
@@ -274,7 +274,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e7f1faaa031fef449b14224739991fb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RacerOverheatView
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RacerOverheatView
   _racer: {fileID: 8610405145371556678}
 --- !u!95 &4077712167740900888
 Animator:

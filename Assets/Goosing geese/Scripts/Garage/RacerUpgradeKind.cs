@@ -1,8 +1,11 @@
-public enum RacerUpgradeKind
+namespace GoosingGeese.Garage
 {
-    Acceleration,
-    TopSpeed,
-    Cooling,
-    Handling,
-    ThermalResistance
+    public enum RacerUpgradeKind
+    {
+        Acceleration,
+        TopSpeed,
+        Cooling,
+        Handling,
+        ThermalResistance
+    }
 }

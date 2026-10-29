@@ -1,6 +1,11 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using GoosingGeese.EditorTools;
+using GoosingGeese.Levels;
+using GoosingGeese.Presentation;
+using GoosingGeese.Roads;
+using GoosingGeese.Settings;
 using UnityEngine;
 
 public static class SpeedProfileTests
@@ -12,7 +17,19 @@ public static class SpeedProfileTests
         source.YellowZoneThreshold = 0.5f;
         source.RedZoneThreshold = 0.75f;
         source.CoastingDrag = 0.1f;
-        var approach = MakeCurve(new[] { new Vector3(0, 0, 0), new Vector3(0, 0, 30), new Vector3(0, 0, 60), new Vector3(0, 0, 90), new Vector3(20, 0, 110), new Vector3(50, 0, 110) });
+        var approach = MakeCurve(new[] { new Vector3(0,
+            0,
+            0), new Vector3(0,
+            0,
+            30), new Vector3(0,
+            0,
+            60), new Vector3(0,
+            0,
+            90), new Vector3(20,
+            0,
+            110), new Vector3(50,
+            0,
+            110) });
 
         try
         {
@@ -33,8 +50,13 @@ public static class SpeedProfileTests
             for (int i = 0; i < weakBrake.Limits.Count - 1; i++)
             {
                 float distance = Vector3.Distance(approach.Points[i], approach.Points[i + 1]);
-                Require(weakBrake.Limits[i] <= weakBrake.Limits[i + 1] + weakBrake.Stats.CoastingDrag * distance + 0.001f, "Braking envelope must obey the movement drag model.");
-                Require(SpeedZones.GetColor(weakBrake.Limits[i], weakBrake.Stats) != SpeedZones.Red, "Guidance must not recommend the overheat zone.");
+                Require(weakBrake.Limits[i] <= weakBrake.Limits[i + 1]
+                    + weakBrake.Stats.CoastingDrag * distance
+                    + 0.001f,
+                    "Braking envelope must obey the movement drag model.");
+                Require(new SpeedZones().GetColor(weakBrake.Limits[i],
+                    weakBrake.Stats) != new SpeedZones().Red,
+                    "Guidance must not recommend the overheat zone.");
             }
 
             VerifyView();
@@ -53,7 +75,7 @@ public static class SpeedProfileTests
 
     private static void Require(bool condition, string message)
     {
-        if (!condition)
+        if (condition == false)
             throw new Exception(message);
     }
 
@@ -69,8 +91,14 @@ public static class SpeedProfileTests
         {
             float start = index == 0 ? 0f : path.Curve.GetSegmentEndDistance(index - 1);
             float end = path.Curve.GetSegmentEndDistance(index);
-            Require(Vector3.Distance(lines[index].GetPosition(0), path.Curve.GetPointAtDistance(start) + Vector3.up * settings.PathLineHeight) < 0.001f, "Section start mismatch.");
-            Require(Vector3.Distance(lines[index].GetPosition(lines[index].positionCount - 1), path.Curve.GetPointAtDistance(end) + Vector3.up * settings.PathLineHeight) < 0.001f, "Section end mismatch.");
+            Require(Vector3.Distance(lines[index].GetPosition(0),
+                path.Curve.GetPointAtDistance(start)
+                + Vector3.up * settings.PathLineHeight) < 0.001f,
+                "Section start mismatch.");
+            Require(Vector3.Distance(lines[index].GetPosition(lines[index].positionCount - 1),
+                path.Curve.GetPointAtDistance(end)
+                + Vector3.up * settings.PathLineHeight) < 0.001f,
+                "Section end mismatch.");
 
             if (index > 0)
                 Require(lines[index - 1].colorGradient.Evaluate(1f) == lines[index].colorGradient.Evaluate(0f), "Color transitions must join without a seam.");

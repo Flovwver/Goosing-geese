@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7230f34fb3abe9841bf0cbaa3da6aaaa, type: 3}
   m_Name: Campaign
-  m_EditorClassIdentifier: Assembly-CSharp::CampaignSettings
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Settings.CampaignSettings
   _stages:
   - Seed: 2608945
     PieceCount: 20

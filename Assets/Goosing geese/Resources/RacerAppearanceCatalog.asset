@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7224ca75390c6ce4b8c25173fdfe790e, type: 3}
   m_Name: RacerAppearanceCatalog
-  m_EditorClassIdentifier: Assembly-CSharp::RacerAppearanceCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Settings.RacerAppearanceCatalog
   _entries:
   - _upgradeId: goose
     _russianName: "\u0411\u0435\u043B\u044B\u0439 \u0433\u0443\u0441\u044C"

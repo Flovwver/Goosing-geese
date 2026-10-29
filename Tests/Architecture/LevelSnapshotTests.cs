@@ -1,6 +1,10 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using GoosingGeese.Levels;
+using GoosingGeese.Racing;
+using GoosingGeese.Roads;
+using GoosingGeese.Settings;
 using UnityEngine;
 
 public static class LevelSnapshotTests
@@ -40,18 +44,42 @@ public static class LevelSnapshotTests
             Require(ReferenceEquals(level.CurrentDefinition, definition), "Repeat must keep the captured definition.");
             Require(ReferenceEquals(racer.Configuration, definition.Racer.Stats), "Movement must use the captured racer configuration.");
             Require(ReferenceEquals(navigator.Configuration, definition.Racer.Navigation), "Navigation must use the captured configuration.");
-            Require(racer.Configuration.MaxSpeed != stats.MaxSpeed && navigator.Configuration.LookAheadDistance != navigation.LookAheadDistance, "Source edits must not mutate the captured conditions.");
+            Require(racer.Configuration.MaxSpeed != stats.MaxSpeed
+                && navigator.Configuration.LookAheadDistance != navigation.LookAheadDistance,
+                "Source edits must not mutate the captured conditions.");
             racer.ConfigureStats(stats);
             Require(level.TryBuildRoad(out var error), "Creating a new configuration failed: " + error);
-            Require(level.CurrentDefinition.Settings.RoadPieceCount == UnityEngine.Object.FindFirstObjectByType<RaceController>().CurrentStage.PieceCount && racer.Configuration.MaxSpeed == stats.MaxSpeed && navigator.Configuration.LookAheadDistance == navigation.LookAheadDistance, "New levels must capture current source settings.");
+            Require(level.CurrentDefinition.Settings.RoadPieceCount == UnityEngine.Object.FindFirstObjectByType<RaceController>().CurrentStage.PieceCount
+                && racer.Configuration.MaxSpeed == stats.MaxSpeed
+                && navigator.Configuration.LookAheadDistance == navigation.LookAheadDistance,
+                "New levels must capture current source settings.");
             Require(level.TryRestoreLevel(definition, out error), "Restoring a definition failed: " + error);
             level.TryGetBuiltPath(out var restored, out _);
-            Require(definition.Seed == seed && restored.Curve.Points.SequenceEqual(points), "Restoration must reproduce the original geometry without random generation.");
-            Require(ReferenceEquals(racer.Configuration, definition.Racer.Stats) && ReferenceEquals(navigator.Configuration, definition.Racer.Navigation), "Restoration must reproduce captured racer and navigation conditions.");
-            Require(Vector3.Distance(racer.transform.position, definition.Racer.Position) < 0.001f && Quaternion.Angle(racer.transform.rotation, definition.Racer.Rotation) < 0.001f, "Restoration must use the captured racer start pose.");
+            Require(definition.Seed == seed
+                && restored.Curve.Points.SequenceEqual(points),
+                "Restoration must reproduce the original geometry without random generation.");
+            Require(ReferenceEquals(racer.Configuration,
+                definition.Racer.Stats)
+                && ReferenceEquals(navigator.Configuration,
+                definition.Racer.Navigation),
+                "Restoration must reproduce captured racer and navigation conditions.");
+            Require(Vector3.Distance(racer.transform.position,
+                definition.Racer.Position) < 0.001f
+                && Quaternion.Angle(racer.transform.rotation,
+                definition.Racer.Rotation) < 0.001f,
+                "Restoration must use the captured racer start pose.");
 
-            foreach (Type type in new[] { typeof(LevelDefinition), typeof(RoadConfiguration), typeof(RacerDefinition), typeof(RacerConfiguration), typeof(NavigationConfiguration) })
-                Require(type.IsSealed && type.GetProperties().All(p => !p.CanWrite), type.Name + " must not expose mutable snapshot properties.");
+            foreach (Type type in new[]
+            {
+                typeof(LevelDefinition),
+                typeof(RoadConfiguration),
+                typeof(RacerDefinition),
+                typeof(RacerConfiguration),
+                typeof(NavigationConfiguration)
+            }
+
+            )
+                Require(type.IsSealed && type.GetProperties().All(p => (p.CanWrite == false)), type.Name + " must not expose mutable snapshot properties.");
 
             return "PASS: source settings edits cannot alter repeats; new levels capture edits; restoration reproduces seed, geometry, racer/nav settings and start pose; snapshots expose no mutable properties.";
         }
@@ -69,7 +97,7 @@ public static class LevelSnapshotTests
 
     private static void Require(bool condition, string message)
     {
-        if (!condition)
+        if (condition == false)
             throw new Exception(message);
     }
 }

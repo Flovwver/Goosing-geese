@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 59b3fce28c9632449a8294714c2f0a5b, type: 3}
   m_Name: RacerUpgradeRules
-  m_EditorClassIdentifier: Assembly-CSharp::RacerUpgradeRules
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Settings.RacerUpgradeRules
   _maximumLevel: 5
   _basePrice: 100
   _pricePerLevel: 100

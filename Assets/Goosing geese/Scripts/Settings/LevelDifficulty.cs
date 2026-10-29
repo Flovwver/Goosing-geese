@@ -1,6 +1,9 @@
-public enum LevelDifficulty
+namespace GoosingGeese.Settings
 {
-    Easy,
-    Medium,
-    Hard
+    public enum LevelDifficulty
+    {
+        Easy,
+        Medium,
+        Hard
+    }
 }

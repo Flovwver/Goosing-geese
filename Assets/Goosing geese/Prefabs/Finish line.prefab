@@ -2529,7 +2529,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ad7666a070390645902644a0fb655c7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FinishLine
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Racing.FinishLine
 --- !u!1 &5983261560760991159
 GameObject:
   m_ObjectHideFlags: 0

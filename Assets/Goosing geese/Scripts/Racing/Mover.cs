@@ -1,0 +1,118 @@
+using GoosingGeese.Settings;
+using UnityEngine;
+
+namespace GoosingGeese.Racing
+{
+    [RequireComponent(typeof(Rigidbody))]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "Mover")]
+    public class Mover : MonoBehaviour
+    {
+        [SerializeField]
+        private bool _lockVerticalPosition = true;
+        private Steering _steering;
+        private Rigidbody _rigidbody;
+        private Movement _movement;
+        private BodyRotation _bodyRotation;
+        private RacerConfiguration _stats;
+        private float? _dragOverride;
+        private Vector3 _targetPosition;
+        private float _slipFactor;
+        private bool _hasMovementTarget;
+        private bool _isAccelerate;
+
+        private void Awake()
+        {
+            InitializeComponents();
+        }
+
+        private void OnEnable()
+        {
+            InitializeComponents();
+        }
+
+        private void FixedUpdate()
+        {
+            if (_stats == null)
+                return;
+
+            float drag = _dragOverride ?? (_isAccelerate ? _stats.Drag : _stats.CoastingDrag);
+            _movement.ApplyDrag(drag);
+
+            if (_hasMovementTarget == false)
+                return;
+
+            _steering.UpdateDirection(_rigidbody.position, _rigidbody.rotation, _targetPosition, _stats.MaxSteeringAngle);
+            Vector3 movementDirection = _steering.GetMovementDirection(_rigidbody.rotation);
+            float currentSpeed = _movement.GetCurrentSpeed();
+            _movement.Apply(movementDirection, currentSpeed, _isAccelerate, _slipFactor, _stats, Time.fixedDeltaTime);
+            _bodyRotation.Apply(movementDirection, _steering.LocalWheelDirection, _steering.AngleLimit, currentSpeed, _stats, Time.fixedDeltaTime);
+        }
+
+        public float GetCurrentSpeed()
+        {
+            if (_movement == null)
+                InitializeComponents();
+
+            return _movement.GetCurrentSpeed();
+        }
+
+        public void Configure(RacerConfiguration stats)
+        {
+            InitializeComponents();
+            _stats = stats;
+        }
+
+        public void MoveTowards(Vector3 targetPosition, bool isAccelerate, float slipFactor)
+        {
+            _slipFactor = Mathf.Clamp01(slipFactor);
+            _targetPosition = targetPosition;
+            _hasMovementTarget = true;
+            _isAccelerate = isAccelerate;
+        }
+
+        public void ReleaseThrottle()
+        {
+            _isAccelerate = false;
+        }
+
+        public void SetDrag(float drag)
+        {
+            _dragOverride = Mathf.Max(0f, drag);
+        }
+
+        public void Stop()
+        {
+            _dragOverride = null;
+            _slipFactor = 0f;
+            _steering?.Reset();
+            _hasMovementTarget = false;
+            _isAccelerate = false;
+            _movement?.Stop();
+            _bodyRotation?.Stop();
+        }
+
+        public void TeleportTo(Vector3 position, Quaternion rotation)
+        {
+            Stop();
+            _rigidbody.position = position;
+            _rigidbody.rotation = rotation;
+            transform.SetPositionAndRotation(position, rotation);
+        }
+
+        private void InitializeComponents()
+        {
+            if (_movement != null)
+                return;
+
+            _rigidbody = GetComponent<Rigidbody>();
+            // The track is flat; seam contacts must not launch the racer vertically.
+
+            if (_lockVerticalPosition)
+                _rigidbody.constraints |= RigidbodyConstraints.FreezePositionY;
+
+            _steering = new Steering();
+            _movement = new Movement(_rigidbody);
+            _bodyRotation = new BodyRotation(_rigidbody);
+        }
+    }
+}

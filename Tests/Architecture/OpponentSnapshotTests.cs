@@ -1,5 +1,8 @@
 using System;
 using System.Reflection;
+using GoosingGeese.Levels;
+using GoosingGeese.Racing;
+using GoosingGeese.Roads;
 using UnityEngine;
 
 public static class OpponentSnapshotTests
@@ -30,11 +33,11 @@ public static class OpponentSnapshotTests
             spawner.enabled = true;
             var driver = spawner.Opponent.GetComponent<OpponentDriver>();
             level.TryGetBuiltPath(out RoadPath path, out _);
-            Require(typeof(OpponentDriver).GetField("_path", Flags).GetValue(driver) == path,
-                "Re-enabled spawner must synchronize the current path.");
+            Require(typeof(OpponentDriver).GetField("_path", Flags).GetValue(driver) == path, "Re-enabled spawner must synchronize the current path.");
             spawner.Opponent.Tick(true, 0.1f);
             driver.enabled = false;
-            Require((bool)typeof(Mover).GetField("_isAccelerate", Flags).GetValue(spawner.Opponent.GetComponent<Mover>()) == false,
+            Require((bool)typeof(Mover).GetField("_isAccelerate",
+                Flags).GetValue(spawner.Opponent.GetComponent<Mover>()) == false,
                 "Disabling the driver must clear movement commands.");
             driver.enabled = true;
             return "PASS: captured opponent retry; reload round trip; missed path recovery; driver disable.";

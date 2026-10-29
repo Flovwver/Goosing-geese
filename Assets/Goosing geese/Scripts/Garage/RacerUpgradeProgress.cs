@@ -1,58 +1,62 @@
 using System;
 using UnityEngine;
 
-[Serializable]
-public class RacerUpgradeProgress
+namespace GoosingGeese.Garage
 {
-    public string ModelId;
-    public int Acceleration;
-    public int TopSpeed;
-    public int Cooling;
-    public int Handling;
-    public int ThermalResistance;
-
-    public int GetLevel(RacerUpgradeKind kind)
+    [Serializable]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerUpgradeProgress")]
+    public class RacerUpgradeProgress
     {
-        switch (kind)
+        public string ModelId;
+        public int Acceleration;
+        public int TopSpeed;
+        public int Cooling;
+        public int Handling;
+        public int ThermalResistance;
+
+        public int GetLevel(RacerUpgradeKind kind)
         {
-            case RacerUpgradeKind.Acceleration:
-                return Mathf.Max(0, Acceleration);
-            case RacerUpgradeKind.TopSpeed:
-                return Mathf.Max(0, TopSpeed);
-            case RacerUpgradeKind.Cooling:
-                return Mathf.Max(0, Cooling);
-            case RacerUpgradeKind.Handling:
-                return Mathf.Max(0, Handling);
-            case RacerUpgradeKind.ThermalResistance:
-                return Mathf.Max(0, ThermalResistance);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(kind));
+            switch (kind)
+            {
+                case RacerUpgradeKind.Acceleration:
+                    return Mathf.Max(0, Acceleration);
+                case RacerUpgradeKind.TopSpeed:
+                    return Mathf.Max(0, TopSpeed);
+                case RacerUpgradeKind.Cooling:
+                    return Mathf.Max(0, Cooling);
+                case RacerUpgradeKind.Handling:
+                    return Mathf.Max(0, Handling);
+                case RacerUpgradeKind.ThermalResistance:
+                    return Mathf.Max(0, ThermalResistance);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(kind));
+            }
         }
-    }
 
-    public void SetLevel(RacerUpgradeKind kind, int level)
-    {
-        level = Mathf.Max(0, level);
-
-        switch (kind)
+        public void SetLevel(RacerUpgradeKind kind, int level)
         {
-            case RacerUpgradeKind.Acceleration:
-                Acceleration = level;
-                break;
-            case RacerUpgradeKind.TopSpeed:
-                TopSpeed = level;
-                break;
-            case RacerUpgradeKind.Cooling:
-                Cooling = level;
-                break;
-            case RacerUpgradeKind.Handling:
-                Handling = level;
-                break;
-            case RacerUpgradeKind.ThermalResistance:
-                ThermalResistance = level;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(kind));
+            level = Mathf.Max(0, level);
+
+            switch (kind)
+            {
+                case RacerUpgradeKind.Acceleration:
+                    Acceleration = level;
+                    break;
+                case RacerUpgradeKind.TopSpeed:
+                    TopSpeed = level;
+                    break;
+                case RacerUpgradeKind.Cooling:
+                    Cooling = level;
+                    break;
+                case RacerUpgradeKind.Handling:
+                    Handling = level;
+                    break;
+                case RacerUpgradeKind.ThermalResistance:
+                    ThermalResistance = level;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(kind));
+            }
         }
     }
 }
