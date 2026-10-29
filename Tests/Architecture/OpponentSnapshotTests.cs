@@ -28,7 +28,16 @@ public static class OpponentSnapshotTests
                 && restored.Racer.Position == captured.Racer.Position
                 && restored.BrakingPreviewDistance == captured.BrakingPreviewDistance,
                 "Reload snapshot must restore physics, pose and behaviour.");
+            var mover = spawner.Opponent.GetComponent<Mover>();
+            spawner.Opponent.Tick(true, 0.1f);
+            spawner.Opponent.GetComponent<Rigidbody>().linearVelocity = Vector3.forward * 10f;
             spawner.enabled = false;
+            Require(spawner.Opponent.GetCurrentSpeed() == 0f
+                && (bool)typeof(Mover).GetField("_isAccelerate",
+                Flags).GetValue(mover) == false
+                && (bool)typeof(Mover).GetField("_hasMovementTarget",
+                Flags).GetValue(mover) == false,
+                "Disabling the spawner must stop its actor and clear queued movement.");
             level.CreateLevel(unchecked(definition.Seed + 1));
             spawner.enabled = true;
             var driver = spawner.Opponent.GetComponent<OpponentDriver>();

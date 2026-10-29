@@ -79,6 +79,7 @@ namespace GoosingGeese.Racing
 
         private void OnDisable()
         {
+            OnControllerDisabled();
             _level.PathBuilt -= OnPathBuilt;
             _player.RaceRestarted -= OnRestarted;
             _race.RaceEnded -= OnRaceEnded;
