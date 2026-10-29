@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class RoadNavigator : MonoBehaviour
 {
+    private readonly EventPublisher _events = new EventPublisher();
+
     [SerializeField] private NavigationSettings _settings;
 
     private RoadPath _path;
@@ -116,7 +118,7 @@ public class RoadNavigator : MonoBehaviour
             IsPathCompleted = offset.sqrMagnitude <= _configuration.ArrivalDistance * _configuration.ArrivalDistance;
 
             if (IsPathCompleted)
-                PathCompleted?.Invoke();
+                _events.Publish(PathCompleted, this);
         }
     }
 

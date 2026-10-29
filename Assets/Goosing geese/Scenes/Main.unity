@@ -912,6 +912,8 @@ MonoBehaviour:
   _target: {fileID: 543450651709855089}
   _settings: {fileID: 11400000, guid: ddaaa218710e4b57b58001fd38020a38, type: 2}
   _menuFocusHeight: 3
+  _race: {fileID: 1081964708}
+  _opponents: {fileID: 1081964709}
 --- !u!1 &831626781
 GameObject:
   m_ObjectHideFlags: 0
@@ -1240,7 +1242,6 @@ MonoBehaviour:
   _settings: {fileID: 11400000, guid: a89aed623746447b9df737176ec8f8ff, type: 2}
   _racer: {fileID: 265920761}
   _finishLine: {fileID: 1657735648}
-  _race: {fileID: 1081964708}
   _minimumRoadSpacing: 24
   _layoutValidationAttempts: 20
 --- !u!4 &1081964705
@@ -1313,6 +1314,8 @@ MonoBehaviour:
   - {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
   - {fileID: 172936, guid: bdad8bf555bf147508f695d9b026e205, type: 3}
   - {fileID: 3791262560391127436, guid: 515a296395b52b3419a053dc468bbd0c, type: 3}
+  _laneOffset: 4
+  _brakingPreviewDistance: 45
   _turnRateMultiplier: 2
 --- !u!114 &1081964710
 MonoBehaviour:
@@ -1327,11 +1330,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameScreens
   _race: {fileID: 1081964708}
-  _input: {fileID: 280129367}
   _player: {fileID: 265920761}
   _opponents: {fileID: 1081964709}
   _garage: {fileID: 1081964716}
   _campaignView: {fileID: 1081964718}
+  _speedometer: {fileID: 2049348019}
+  _pedalButton: {fileID: 1311169245}
 --- !u!114 &1081964711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2138,7 +2142,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
   m_SendPointerHoverToParent: 1
   m_MoveRepeatDelay: 0.5

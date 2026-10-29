@@ -4,6 +4,8 @@ using UnityEngine;
 [DefaultExecutionOrder(-100)]
 public class RaceController : MonoBehaviour
 {
+    private readonly EventPublisher _events = new EventPublisher();
+
     [SerializeField] private Level _level;
     [SerializeField] private Racer _player;
     [SerializeField] private InputSwitch _input;
@@ -36,11 +38,7 @@ public class RaceController : MonoBehaviour
         if (_level == null)
             _level = GetComponent<Level>();
 
-        if (_player == null)
-            _player = FindFirstObjectByType<Racer>();
-
-        if (_input == null)
-            _input = FindFirstObjectByType<InputSwitch>();
+        ValidatePreparation();
 
         Session = new GameSession(_level, _campaign, this, new PlayerProgressStore(), new LocalLeaderboard());
         _level.SetSession(Session);
@@ -103,7 +101,13 @@ public class RaceController : MonoBehaviour
         _input.SetInputEnabled(false);
         _input.Cleared -= _player.ReleaseThrottle;
         RestoreTimeScale();
-        Disabled?.Invoke();
+        _events.Publish(Disabled, this);
+    }
+
+    public void ValidatePreparation()
+    {
+        if (_player == null || _input == null || _campaign == null || _level == null)
+            throw new InvalidOperationException("Assign the race player, input, campaign and level in the Inspector.");
     }
 
     public void SetInputBlocked(bool blocked)
@@ -148,7 +152,7 @@ public class RaceController : MonoBehaviour
         LastReward = 0;
         _input.ResetInput();
         SetState(RaceState.Waiting);
-        Prepared?.Invoke();
+        _events.Publish(Prepared, this);
     }
 
     public void Retry()
@@ -185,7 +189,7 @@ public class RaceController : MonoBehaviour
         if (playerWon == false)
             _player.StopMovement();
 
-        RaceEnded?.Invoke(playerWon);
+        _events.Publish(RaceEnded, playerWon, this);
     }
 
     
@@ -200,7 +204,7 @@ public class RaceController : MonoBehaviour
 
         State = state;
         UpdateInputAvailability();
-        StateChanged?.Invoke(state);
+        _events.Publish(StateChanged, state, this);
     }
 
     private void UpdateInputAvailability()

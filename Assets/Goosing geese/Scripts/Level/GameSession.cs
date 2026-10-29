@@ -26,9 +26,15 @@ public sealed class GameSession
         return _leaderboard.Read();
     }
     public CampaignStage CurrentStage => _campaign.GetStage(Progress.Level);
+    public int LevelNumber => _level.Number;
     public bool HasNextLevel => _level.Number < int.MaxValue;
     public bool IsRacing => _race.isActiveAndEnabled && _race.State == RaceState.Racing;
     public bool IsWaiting => _race.State == RaceState.Waiting;
+
+    public void ValidatePreparation()
+    {
+        _race.ValidatePreparation();
+    }
 
     public void PrepareAttempt()
     {

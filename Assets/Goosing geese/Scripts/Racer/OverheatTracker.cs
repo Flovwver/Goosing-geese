@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class OverheatTracker : MonoBehaviour
 {
+    private readonly EventPublisher _events = new EventPublisher();
+
     private float _redZoneTimer;
 
     public event Action<float> ProgressChanged;
@@ -16,7 +18,7 @@ public class OverheatTracker : MonoBehaviour
         _redZoneTimer = 0f;
         IsExploded = false;
         Progress = 0f;
-        ProgressChanged?.Invoke(Progress);
+        _events.Publish(ProgressChanged, Progress, this);
     }
 
     public void Tick(float currentSpeed, RacerConfiguration stats, float deltaTime)
@@ -47,12 +49,12 @@ public class OverheatTracker : MonoBehaviour
             return;
 
         Progress = newProgress;
-        ProgressChanged?.Invoke(Progress);
+        _events.Publish(ProgressChanged, Progress, this);
 
         if (Progress >= 1f)
         {
             IsExploded = true;
-            Exploded?.Invoke();
+            _events.Publish(Exploded, this);
         }
     }
 }

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
+    private readonly EventPublisher _events = new EventPublisher();
+
     [SerializeField] private Transform _roadStartPoint;
     [SerializeField] private RoadSettings _settings;
     [SerializeField] private Racer _racer;
@@ -130,6 +132,9 @@ public class Level : MonoBehaviour
             if (definition == null)
                 throw new ArgumentNullException(nameof(definition));
 
+            if (_racer == null || _finishLine == null || _session == null)
+                throw new InvalidOperationException("Level requires a racer, finish line and session.");
+
             RoadConfiguration settings = definition.Settings;
             builder = new RoadBuilder(settings.PiecePrefabs);
             path = builder.Build(definition.Layout, definition.StartPosition, definition.StartRotation);
@@ -139,6 +144,8 @@ public class Level : MonoBehaviour
             if (path.FinishPoint == null || path.Curve.Length <= 0f || float.IsNaN(path.Curve.Length) || float.IsInfinity(path.Curve.Length))
                 throw new InvalidOperationException("The built road has invalid geometry or no finish.");
 
+            _racer.ValidatePreparation(path, definition.Racer);
+            _session.ValidatePreparation();
             profile = new RoadSpeedProfile(path.Curve, definition.Racer.Stats);
         }
         catch (Exception exception)
@@ -170,7 +177,7 @@ public class Level : MonoBehaviour
         builder.Activate();
         PlaceFinishLine();
         PrepareRace();
-        PathBuilt?.Invoke(path, definition.Settings);
+        _events.Publish(PathBuilt, path, definition.Settings, this);
         error = null;
         return true;
     }
@@ -260,8 +267,8 @@ public class Level : MonoBehaviour
         if (_builtPieces == null)
             _builtPieces = new List<RoadPiece>();
 
-        if (_finishLine == null)
-            _finishLine = FindFirstObjectByType<FinishLine>();
+        if (_finishLine == null || _racer == null)
+            throw new InvalidOperationException("Assign the level racer and finish line in the Inspector.");
     }
 
     private void ClearBuiltRoad()

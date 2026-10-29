@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(RoadNavigator))]
 public class Racer : MonoBehaviour
 {
+    private readonly EventPublisher _events = new EventPublisher();
+
     [SerializeField] private RacerStats _stats;
 
     private GripModel _gripModel;
@@ -60,11 +62,21 @@ public class Racer : MonoBehaviour
     {
         _configuration = new RacerConfiguration(stats);
         _mover.Configure(_configuration);
-        ConfigurationChanged?.Invoke();
+        _events.Publish(ConfigurationChanged, this);
+    }
+
+    public void ValidatePreparation(RoadPath path, RacerDefinition definition)
+    {
+        if (path == null || path.Curve == null || definition == null)
+            throw new ArgumentException("A complete path and racer definition are required.");
+
+        if (_mover == null || _roadNavigator == null || _overheatTracker == null)
+            throw new InvalidOperationException("Racer components must be initialized before preparation.");
     }
 
     public void Prepare(RoadPath path, RacerDefinition definition)
     {
+        ValidatePreparation(path, definition);
         IsFinished = false;
         _configuration = definition.Stats;
         _mover.Configure(_configuration);
@@ -72,7 +84,7 @@ public class Racer : MonoBehaviour
         _mover.TeleportTo(definition.Position, definition.Rotation);
         _roadNavigator.SetPath(path);
         _overheatTracker.ResetOverheat();
-        RaceRestarted?.Invoke();
+        _events.Publish(RaceRestarted, this);
     }
 
     public RacerDefinition CaptureDefinition(Vector3 position, Quaternion rotation)
@@ -109,7 +121,7 @@ public class Racer : MonoBehaviour
         _overheatTracker.ResetOverheat();
         _mover.SetDrag(_configuration.FinishDrag);
         _mover.MoveTowards(_roadNavigator.TargetPosition, false, 0f);
-        Finished?.Invoke();
+        _events.Publish(Finished, this);
     }
 
     public void Tick(bool isAccelerate, float deltaTime)
@@ -158,17 +170,17 @@ public class Racer : MonoBehaviour
             FinishRace();
 
         _mover.Stop();
-        PathCompleted?.Invoke();
+        _events.Publish(PathCompleted, this);
     }
 
     private void OnOverheatProgressChanged(float progress)
     {
-        OverheatProgressChanged?.Invoke(progress);
+        _events.Publish(OverheatProgressChanged, progress, this);
     }
 
     private void OnExploded()
     {
         _mover.Stop();
-        Exploded?.Invoke();
+        _events.Publish(Exploded, this);
     }
 }

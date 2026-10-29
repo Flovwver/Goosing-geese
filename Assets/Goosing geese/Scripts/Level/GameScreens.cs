@@ -24,7 +24,11 @@ public class GameScreens : MonoBehaviour
     private ScenerySelectionView _sceneryView;
     private GameUiFactory _ui;
     private GameObject _canvasRoot;
-    private Speedometer _speedometer;
+    [SerializeField] private Speedometer _speedometer;
+    [SerializeField] private PedalButton _pedalButton;
+    private RoadNavigator _playerNavigator;
+    private Racer _displayOpponent;
+    private RoadNavigator _opponentNavigator;
     private GameObject _gear;
     private GameObject _trophy;
     private GameObject _garageButton;
@@ -37,6 +41,7 @@ public class GameScreens : MonoBehaviour
 
     private void Awake()
     {
+        _playerNavigator = _player.GetComponent<RoadNavigator>();
         InitializeUi();
     }
 
@@ -83,13 +88,19 @@ public class GameScreens : MonoBehaviour
 
         if (_race.State == RaceState.Racing && _opponents.Opponent != null)
         {
-            float playerDistance = _player.GetComponent<RoadNavigator>().DistanceAlongPath;
-            float opponentDistance = _opponents.Opponent.GetComponent<RoadNavigator>().DistanceAlongPath;
+            if (_displayOpponent != _opponents.Opponent)
+            {
+                _displayOpponent = _opponents.Opponent;
+                _opponentNavigator = _displayOpponent.GetComponent<RoadNavigator>();
+            }
+
+            float playerDistance = _playerNavigator.DistanceAlongPath;
+            float opponentDistance = _opponentNavigator.DistanceAlongPath;
             lead = playerDistance >= opponentDistance ? Localize("Ты впереди", "You are ahead") : Localize("Соперник впереди", "Rival is ahead");
         }
 
         _status.text = _race.State == RaceState.Waiting
-            ? Localize("УРОВЕНЬ ", "LEVEL ") + _race.GetComponent<Level>().Number
+            ? Localize("УРОВЕНЬ ", "LEVEL ") + _race.Session.LevelNumber
             : state + "\n" + lead;
     }
 
@@ -198,14 +209,14 @@ public class GameScreens : MonoBehaviour
 
     private void ConfigureRaceHud()
     {
-        if (_speedometer == null)
-            _speedometer = FindFirstObjectByType<Speedometer>(FindObjectsInactive.Include);
+        if (_speedometer == null || _pedalButton == null)
+            throw new InvalidOperationException("Assign the speedometer and pedal in the Inspector.");
 
         RectTransform bar = _speedometer.GetComponent<RectTransform>();
         bar.SetParent(_safeArea, false);
         bar.localScale = Vector3.one;
         GameUiFactory.Place(bar, new Vector2(0.27f, 0.875f), new Vector2(0.83f, 0.995f));
-        PedalButton pedal = _pedal != null ? _pedal.GetComponent<PedalButton>() : FindFirstObjectByType<PedalButton>(FindObjectsInactive.Include);
+        PedalButton pedal = _pedalButton;
         _pedal = pedal.gameObject;
         _pedalPrompt = pedal.GetComponent<PedalPromptView>();
         RectTransform pedalRect = pedal.GetComponent<RectTransform>();

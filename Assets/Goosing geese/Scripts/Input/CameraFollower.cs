@@ -10,15 +10,15 @@ public class CameraFollower : MonoBehaviour
     private Vector3 _velocity;
     private Racer _racer;
     private bool _followEnabled = true;
-    private RaceController _race;
-    private OpponentSpawner _opponents;
+    [SerializeField] private RaceController _race;
+    [SerializeField] private OpponentSpawner _opponents;
     private Quaternion _followingRotation;
 
     private void Awake()
     {
         _racer = _target.GetComponent<Racer>();
-        _race = FindFirstObjectByType<RaceController>();
-        _opponents = FindFirstObjectByType<OpponentSpawner>();
+        if (_race == null || _opponents == null)
+            throw new System.InvalidOperationException("Assign the camera race and opponents in the Inspector.");
         _followingRotation = transform.rotation;
     }
 
