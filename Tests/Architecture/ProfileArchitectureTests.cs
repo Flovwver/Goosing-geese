@@ -19,6 +19,26 @@ public static class ProfileArchitectureTests
             var yesterday = new DateTime(2026, 10, 26);
             var today = yesterday.AddDays(1);
             var progress = new PlayerProgress();
+            var reentrant = new PlayerProgress();
+            reentrant.Quests.RecordRace(true, today);
+            bool nestedClaim = true;
+            bool claimedDuringNotification = false;
+            bool attemptedNestedClaim = false;
+            reentrant.Changed += () =>
+            {
+                claimedDuringNotification = reentrant.Quests.IsClaimed((int)QuestId.DailyWin, today);
+
+                if (attemptedNestedClaim == false)
+                {
+                    attemptedNestedClaim = true;
+                    nestedClaim = reentrant.Quests.TryClaim((int)QuestId.DailyWin, today);
+                }
+            };
+            Require(reentrant.Quests.TryClaim((int)QuestId.DailyWin, today), "First claim must succeed.");
+            Require(claimedDuringNotification
+                && nestedClaim == false
+                && reentrant.Balance == 75,
+                "Observers must see the committed claim and cannot collect its reward twice.");
             progress.Quests.RecordRace(true, yesterday);
             Require(progress.Quests.TryClaim(1, yesterday), "Completed daily win must pay.");
             Require((progress.Quests.TryClaim(1, yesterday) == false), "Daily win must pay once.");

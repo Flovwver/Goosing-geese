@@ -84,7 +84,6 @@ namespace GoosingGeese.Profile
                 return false;
 
             int reward = _definitions.Get(quest).Reward;
-            _addReward(reward);
 
             if ((QuestId)quest == QuestId.DailyRaces)
                 _data.DailyRacesClaimed = true;
@@ -93,6 +92,7 @@ namespace GoosingGeese.Profile
             else
                 _data.GlobalWinsClaimed = true;
 
+            _addReward(reward);
             return true;
         }
 
