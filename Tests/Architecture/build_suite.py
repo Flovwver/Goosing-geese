@@ -4,7 +4,13 @@ import re
 import sys
 
 root = Path(__file__).resolve().parents[2]
-usings, bodies, calls = set(), [], []
+usings = {
+    'using GoosingGeese.Racing;',
+    'using GoosingGeese.Levels;',
+    'using GoosingGeese.Garage;',
+    'using GoosingGeese.Settings;',
+}
+bodies, calls = [], []
 for source in sorted(Path(__file__).parent.glob('*Tests.cs')):
     if len(sys.argv) > 1 and source.stem not in sys.argv[1:]:
         continue
@@ -27,14 +33,26 @@ public static class ArchitectureSuite
         string profile = race.Progress.ToJson();
         float timeScale = UnityEngine.Time.timeScale;
         var reports = new System.Collections.Generic.List<string>();
+        var errors = new System.Collections.Generic.List<string>();
+        UnityEngine.Application.LogCallback onLog = (message, stack, type) =>
+        {
+            if ((type == UnityEngine.LogType.Error || type == UnityEngine.LogType.Exception)
+                && message.Contains("Expected audit observer failure") == false)
+                errors.Add(message);
+        };
+        UnityEngine.Application.logMessageReceived += onLog;
 
         try
         {
 CALLS
+            if (errors.Count > 0)
+                throw new System.Exception("Unexpected Unity errors: " + string.Join("\n", errors));
+
             return string.Join("\n", reports);
         }
         finally
         {
+            UnityEngine.Application.logMessageReceived -= onLog;
             race.enabled = true;
             race.Progress.RestoreJson(profile, UnityEngine.Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
             UnityEngine.Object.FindFirstObjectByType<RacerGarage>().EndPreview();
