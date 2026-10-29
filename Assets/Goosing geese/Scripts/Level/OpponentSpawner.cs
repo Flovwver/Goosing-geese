@@ -9,16 +9,18 @@ public class OpponentSpawner : MonoBehaviour
     [SerializeField] private Racer _opponentPrefab;
     [SerializeField] private GameObject[] _vehiclePrefabs;
 
+    [SerializeField, Min(0f)] private float _laneOffset = 4f;
+    [SerializeField, Min(0f)] private float _brakingPreviewDistance = 45f;
+
     private OpponentDriver _driver;
     private Racer _opponent;
     private RaceController _race;
     private RacerAppearance _appearance;
-    private RacerStats _runtimeStats;
-    private RoadConfiguration _capturedRoad;
-    private CampaignStage _capturedStage;
+
     [SerializeField, Min(1f)] private float _turnRateMultiplier = 2f;
 
     public Racer Opponent => _opponent;
+    public float LaneOffset => _laneOffset;
 
     private void Awake()
     {
@@ -61,7 +63,7 @@ public class OpponentSpawner : MonoBehaviour
         {
             UpdateVehicle();
             _driver.SetPath(path);
-            _level.PrepareOpponent(_opponent, path, _driver.LaneOffset);
+            _level.PrepareOpponent(_opponent, path);
         }
     }
 
@@ -81,40 +83,55 @@ public class OpponentSpawner : MonoBehaviour
         if (_opponent != null)
             Destroy(_opponent.gameObject);
 
-        if (_runtimeStats != null)
-            Destroy(_runtimeStats);
+
+    }
+
+    public void Tick(float deltaTime)
+    {
+        if (isActiveAndEnabled && _driver != null)
+            _driver.Tick(deltaTime);
+    }
+
+    public OpponentDefinition CaptureDefinition(CampaignStage stage, int seed, Vector3 position, Quaternion rotation)
+    {
+        RacerStats source = _opponentPrefab.BaseStats;
+        RacerStats stats = Instantiate(source);
+
+        try
+        {
+            stats.MaxSpeed = stage.OpponentMaxSpeed;
+            stats.Acceleration = stage.OpponentAcceleration;
+            stats.TurnSpeed = source.TurnSpeed * _turnRateMultiplier * stage.OpponentMaxSpeed / Mathf.Max(1f, source.MaxSpeed);
+            stats.YellowZoneThreshold = Mathf.Min(stats.RedZoneThreshold,
+                Mathf.Max(source.YellowZoneThreshold, Mathf.Max(stage.CruiseSpeed, stage.CornerSpeed) + CornerGripMargin));
+            var racer = new RacerDefinition(new RacerConfiguration(stats),
+                _opponentPrefab.GetComponent<RoadNavigator>().CaptureConfiguration(), position, rotation);
+            GameObject vehicle = null;
+
+            if (_vehiclePrefabs != null && _vehiclePrefabs.Length > 0)
+                vehicle = _vehiclePrefabs[(int)((uint)seed % (uint)_vehiclePrefabs.Length)];
+
+            return new OpponentDefinition(racer, stage.CruiseSpeed, stage.CornerSpeed, LaneOffset, _brakingPreviewDistance, vehicle);
+        }
+        finally
+        {
+            Destroy(stats);
+        }
     }
 
     private void UpdateVehicle()
     {
-        if (_runtimeStats == null)
-        {
-            _runtimeStats = Instantiate(_opponent.BaseStats);
-            _runtimeStats.name = "Opponent stage stats";
-            _runtimeStats.hideFlags = HideFlags.DontSave;
-        }
+        OpponentDefinition definition = _level.CurrentDefinition.Opponent;
 
-        if (_capturedRoad != _level.CurrentDefinition.Settings)
-        {
-            _capturedRoad = _level.CurrentDefinition.Settings;
-            _capturedStage = _race.Campaign.GetStage(_level.Number);
-        }
+        _opponent.gameObject.SetActive(definition != null);
 
-        CampaignStage stage = _capturedStage;
-        _runtimeStats.MaxSpeed = stage.OpponentMaxSpeed;
-        _runtimeStats.Acceleration = stage.OpponentAcceleration;
-        float speedRatio = stage.OpponentMaxSpeed / Mathf.Max(1f, _opponent.BaseStats.MaxSpeed);
-        _runtimeStats.TurnSpeed = _opponent.BaseStats.TurnSpeed * _turnRateMultiplier * speedRatio;
-        _runtimeStats.YellowZoneThreshold = Mathf.Min(_runtimeStats.RedZoneThreshold,
-            Mathf.Max(_opponent.BaseStats.YellowZoneThreshold, Mathf.Max(stage.CruiseSpeed, stage.CornerSpeed) + CornerGripMargin));
-        _opponent.ConfigureStats(_runtimeStats);
-        _driver.Configure(_race, stage.CruiseSpeed, stage.CornerSpeed);
-
-        if (_vehiclePrefabs == null || _vehiclePrefabs.Length == 0)
+        if (definition == null)
             return;
 
-        int index = (int)((uint)_level.Seed % (uint)_vehiclePrefabs.Length);
-        _appearance.ShowModel(_vehiclePrefabs[index]);
+        _driver.Configure(_race, definition);
+
+        if (definition.Vehicle != null)
+            _appearance.ShowModel(definition.Vehicle);
     }
 
     private void OnPathBuilt(RoadPath path, RoadConfiguration settings)
@@ -123,7 +140,7 @@ public class OpponentSpawner : MonoBehaviour
         {
             UpdateVehicle();
             _driver.SetPath(path);
-            _level.PrepareOpponent(_opponent, path, _driver.LaneOffset);
+            _level.PrepareOpponent(_opponent, path);
         }
     }
 

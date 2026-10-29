@@ -9,6 +9,8 @@ public class Level : MonoBehaviour
     [SerializeField] private Racer _racer;
     [SerializeField] private FinishLine _finishLine;
     private GameSession _session;
+    private OpponentSpawner _opponents;
+    private string _opponentSnapshot;
     [SerializeField, Min(0f)] private float _minimumRoadSpacing = 24f;
     [SerializeField, Min(1)] private int _layoutValidationAttempts = 20;
 
@@ -89,12 +91,10 @@ public class Level : MonoBehaviour
         ClearBuiltRoad();
     }
 
-    public void PrepareOpponent(Racer opponent, RoadPath path, float laneOffset)
+    public void PrepareOpponent(Racer opponent, RoadPath path)
     {
-        RacerDefinition player = CurrentDefinition.Racer;
-        Vector3 position = player.Position + player.Rotation * Vector3.right * laneOffset;
-        RacerDefinition definition = opponent.CaptureDefinition(position, player.Rotation);
-        opponent.Prepare(path, definition);
+        if (CurrentDefinition.Opponent != null)
+            opponent.Prepare(path, CurrentDefinition.Opponent.Racer);
     }
 
     public void SetSession(GameSession session)
@@ -201,7 +201,7 @@ public class Level : MonoBehaviour
             var settings = new RoadConfiguration(_settings, stage.PieceCount);
             RoadPieceType[] layout = GenerateLayout(seed, stage, settings);
             RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
-            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation, racer, _session.Progress.Level);
+            definition = new LevelDefinition(seed, layout, settings, _roadStartPoint.position, _roadStartPoint.rotation, racer, _session.Progress.Level, CaptureOpponent(stage, seed, racer));
         }
         catch (Exception exception)
         {
@@ -210,6 +210,15 @@ public class Level : MonoBehaviour
         }
 
         return TryRestoreLevel(definition, out error);
+    }
+
+    private OpponentDefinition CaptureOpponent(CampaignStage stage, int seed, RacerDefinition player)
+    {
+        if (_opponents == null)
+            return null;
+
+        Vector3 position = player.Position + player.Rotation * Vector3.right * _opponents.LaneOffset;
+        return _opponents.CaptureDefinition(stage, seed, position, player.Rotation);
     }
 
     private RoadPieceType[] GenerateLayout(int seed, CampaignStage stage, RoadConfiguration settings)
@@ -246,6 +255,8 @@ public class Level : MonoBehaviour
 
     private void InitializeReferences()
     {
+        _opponents = GetComponent<OpponentSpawner>();
+
         if (_builtPieces == null)
             _builtPieces = new List<RoadPiece>();
 
@@ -300,13 +311,14 @@ public class Level : MonoBehaviour
             return;
 
         RacerDefinition racer = _racer.CaptureDefinition(_racerStartPosition, _racerStartRotation);
-        CurrentDefinition = new LevelDefinition(Seed, _currentLayout, CurrentDefinition.Settings, _roadStartPosition, _roadStartRotation, racer, Number);
+        CurrentDefinition = new LevelDefinition(Seed, _currentLayout, CurrentDefinition.Settings, _roadStartPosition, _roadStartRotation, racer, Number, CurrentDefinition.Opponent);
         SpeedProfile = new RoadSpeedProfile(_roadPath.Curve, racer.Stats);
         CaptureReloadSnapshot();
     }
 
     private void CaptureReloadSnapshot()
     {
+        _opponentSnapshot = CurrentDefinition.Opponent == null ? null : JsonUtility.ToJson(new OpponentSnapshot(CurrentDefinition.Opponent));
         _roadSnapshot = CurrentDefinition.Settings.ToJson();
         _racerSnapshot = CurrentDefinition.Racer.Stats.ToJson();
         _navigationSnapshot = CurrentDefinition.Racer.Navigation.ToJson();
@@ -325,7 +337,7 @@ public class Level : MonoBehaviour
             JsonUtility.FromJsonOverwrite(_navigationSnapshot, navigation);
             var settings = new RoadConfiguration(road, _mainPieceCount);
             var start = new RacerDefinition(new RacerConfiguration(racer), new NavigationConfiguration(navigation), _racerStartPosition, _racerStartRotation);
-            var definition = new LevelDefinition(Seed, _currentLayout, settings, _roadStartPosition, _roadStartRotation, start, Number);
+            var definition = new LevelDefinition(Seed, _currentLayout, settings, _roadStartPosition, _roadStartRotation, start, Number, string.IsNullOrEmpty(_opponentSnapshot) ? null : JsonUtility.FromJson<OpponentSnapshot>(_opponentSnapshot).Restore());
 
             if (TryRestoreLevel(definition, out string error) == false)
                 Debug.LogError("Level reload recovery failed: " + error, this);

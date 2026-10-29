@@ -1,10 +1,13 @@
 """Generate one in-memory Unity test entry point without importing tests into Assets."""
 from pathlib import Path
 import re
+import sys
 
 root = Path(__file__).resolve().parents[2]
 usings, bodies, calls = set(), [], []
 for source in sorted(Path(__file__).parent.glob('*Tests.cs')):
+    if len(sys.argv) > 1 and source.stem not in sys.argv[1:]:
+        continue
     text = source.read_text(encoding='utf-8-sig')
     lines = text.splitlines()
     usings.update(line for line in lines if line.startswith('using '))

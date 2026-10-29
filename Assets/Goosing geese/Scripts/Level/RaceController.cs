@@ -9,6 +9,7 @@ public class RaceController : MonoBehaviour
     [SerializeField] private InputSwitch _input;
     [SerializeField] private CampaignSettings _campaign;
 
+    private OpponentSpawner _opponents;
     private RaceState _stateBeforePause;
     private float _resumeTimeScale = 1f;
     private bool _ownsPause;
@@ -47,6 +48,8 @@ public class RaceController : MonoBehaviour
 
     private void OnEnable()
     {
+        _opponents = GetComponent<OpponentSpawner>();
+
         if (Session == null)
         {
             Session = new GameSession(_level, _campaign, this, new PlayerProgressStore(), new LocalLeaderboard());
@@ -74,6 +77,9 @@ public class RaceController : MonoBehaviour
             _player.Tick(_input.IsThrottlePressed, Time.deltaTime);
         else if (State == RaceState.Result && PlayerWon)
             _player.Tick(false, Time.deltaTime);
+
+        if (State == RaceState.Racing && _opponents != null)
+            _opponents.Tick(Time.deltaTime);
     }
 
     private void OnApplicationFocus(bool hasFocus)

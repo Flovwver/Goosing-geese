@@ -24,9 +24,14 @@ public class OpponentDriver : MonoBehaviour
         _navigator.SetLaneOffset(_laneOffset);
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        if (_race.isActiveAndEnabled == false || _race.State != RaceState.Racing || _racer.IsFinished || _path == null)
+        _racer.StopMovement();
+    }
+
+    public void Tick(float deltaTime)
+    {
+        if (isActiveAndEnabled == false || _race == null || _race.isActiveAndEnabled == false || _race.State != RaceState.Racing || _racer.IsFinished || _path == null)
             return;
 
         int segment = Mathf.Min(_navigator.CurrentSegment, _path.Pieces.Count - 1);
@@ -37,19 +42,17 @@ public class OpponentDriver : MonoBehaviour
 
         float targetSpeed = corner ? _cornerSpeed : _cruiseSpeed;
 
-        _racer.Tick(_racer.NormalizedSpeed < targetSpeed, Time.deltaTime);
+        _racer.Tick(_racer.NormalizedSpeed < targetSpeed, deltaTime);
     }
 
-    private void OnDisable()
-    {
-        _racer.StopMovement();
-    }
-
-    public void Configure(RaceController race, float cruiseSpeed, float cornerSpeed)
+    public void Configure(RaceController race, OpponentDefinition definition)
     {
         _race = race;
-        _cruiseSpeed = Mathf.Clamp01(cruiseSpeed);
-        _cornerSpeed = Mathf.Clamp01(cornerSpeed);
+        _cruiseSpeed = definition.CruiseSpeed;
+        _cornerSpeed = definition.CornerSpeed;
+        _laneOffset = definition.LaneOffset;
+        _brakingPreviewDistance = definition.BrakingPreviewDistance;
+        _navigator.SetLaneOffset(_laneOffset);
     }
 
     public void SetPath(RoadPath path)
