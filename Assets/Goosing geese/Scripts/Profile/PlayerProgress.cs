@@ -209,9 +209,9 @@ namespace GoosingGeese.Profile
             _data.CampaignInitialized = true;
             _data.Level = Mathf.Min(_data.Level, GetUnlockedLevel(int.MaxValue));
             _data.PlayerId = string.IsNullOrWhiteSpace(_data.PlayerId) ? Guid.NewGuid().ToString("N") : _data.PlayerId;
-            SetName(_data.PlayerName);
-            SetMusicVolume(_data.MusicVolume);
-            SetEffectsVolume(_data.EffectsVolume);
+            _data.PlayerName = string.IsNullOrWhiteSpace(_data.PlayerName) ? "Player" : _data.PlayerName.Trim();
+            _data.MusicVolume = float.IsNaN(_data.MusicVolume) ? 0f : Mathf.Clamp01(_data.MusicVolume);
+            _data.EffectsVolume = float.IsNaN(_data.EffectsVolume) ? 0f : Mathf.Clamp01(_data.EffectsVolume);
             _data.Appearance = catalog != null ? Mathf.Clamp(_data.Appearance, 0, Mathf.Max(0, catalog.Count - 1)) : Mathf.Max(0, _data.Appearance);
             _data.Environment = Mathf.Max(0, _data.Environment);
             _data.Upgrades = (_data.Upgrades ?? new System.Collections.Generic.List<RacerUpgradeProgress>()).Where(item => item != null
@@ -244,6 +244,7 @@ namespace GoosingGeese.Profile
 
             Quests = new QuestTracker(_data, AddReward);
             Quests.RefreshDay(DateTime.Today);
+            _events.Publish(Changed, null);
         }
     }
 }

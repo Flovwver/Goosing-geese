@@ -14,6 +14,19 @@ public static class ProfileContractsTests
             WalletInitialized = true
         };
         var profile = new PlayerProgress(data);
+        var restored = new PlayerProgress();
+        restored.Quests.RecordRace(false, DateTime.Today);
+        int restoreEvents = 0;
+        int observedQuest = -1;
+        bool normalized = false;
+        restored.Changed += () =>
+        {
+            restoreEvents++;
+            observedQuest = restored.Quests.GetProgress(0, DateTime.Today);
+            normalized = restored.PlayerName == "Loaded" && restored.MusicVolume == 1f && restored.SelectedSceneryIndex == 0;
+        };
+        restored.RestoreJson(JsonUtility.ToJson(new PlayerProgressData { PlayerName = " Loaded ", MusicVolume = 2f, Environment = -1, DailyDate = DateTime.Today.ToString("yyyy-MM-dd"), DailyRaces = 3, Races = 3 }));
+        Require(restoreEvents == 1 && observedQuest == 3 && normalized, "Restore must notify once after normalization and quest replacement.");
         var raceProfile = new PlayerProgress();
         int notifications = 0;
         int observedStage = -1;
