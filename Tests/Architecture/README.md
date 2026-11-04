@@ -20,6 +20,7 @@ Never delete an existing `Temp/ArchitecturePreferences.json` instead of restorin
 
 | Entry point | Coverage |
 |---|---|
+| AppearanceMaterialTests.Main | Isolated tint, repeated material reuse and cleanup after appearance destruction. |
 | AuditLifecycleTests.Main | Disabled racer command rejection, zero off-road grace, partial/missing gauge labels. |
 | GripAndOverheatTests.Main | Independent grip thresholds, explicit-time heat/cooling, paused step, one explosion and reset. |
 | LevelReplacementTests.Main | Invalid settings/prefabs/geometry retain the existing road and clean up candidates. |

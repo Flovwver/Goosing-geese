@@ -14,6 +14,8 @@ namespace GoosingGeese.Presentation
         private Renderer[] _originalRenderers;
         private GameObject _replacement;
         private OverheatTracker _overheat;
+        [SerializeField, HideInInspector]
+        private List<Material> _ownedMaterials = new List<Material>();
 
         public event Action AppearanceChanged;
 
@@ -42,13 +44,31 @@ namespace GoosingGeese.Presentation
                 _replacement.SetActive(visible);
         }
 
+        private void OnDestroy()
+        {
+            foreach (Material material in _ownedMaterials)
+            {
+                if (material != null)
+                    Destroy(material);
+            }
+
+            _ownedMaterials.Clear();
+        }
+
         public void ShowOriginal(Color tint)
         {
             ClearReplacement();
             SetOriginalVisibility(true);
 
             foreach (Renderer renderer in _originalRenderers)
-                renderer.material.color = tint;
+            {
+                Material material = renderer.material;
+
+                if (_ownedMaterials.Contains(material) == false)
+                    _ownedMaterials.Add(material);
+
+                material.color = tint;
+            }
 
             AppearanceChanged?.Invoke();
         }
