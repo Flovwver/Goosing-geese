@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using GoosingGeese.Garage;
 using GoosingGeese.Levels;
 using GoosingGeese.Presentation;
 using GoosingGeese.Racing;
@@ -27,6 +28,27 @@ public static class PresentationContractsTests
             Require(label.text != before, "Language change must refresh existing labels through model notification.");
             race.Progress.ToggleLanguage();
             Require(label.text == before, "Language toggle must be reversible.");
+            var garage = race.GetComponent<RacerGarage>();
+            var player = (Racer)typeof(WorldPresentation).GetField("_player", Flags).GetValue(world);
+            var appearance = player.GetComponent<RacerAppearance>();
+            int appearanceUpdates = 0;
+            Action observeAppearance = () => appearanceUpdates++;
+            appearance.AppearanceChanged += observeAppearance;
+
+            try
+            {
+                world.enabled = false;
+                Require(garage.Browse((garage.SelectedIndex + 1) % garage.AppearanceCount), "Preview must change while presentation is disabled.");
+                world.enabled = true;
+                Require(appearanceUpdates == 1, "Re-enabling presentation must synchronize the missed appearance selection.");
+            }
+            finally
+            {
+                world.enabled = true;
+                garage.EndPreview();
+                appearance.AppearanceChanged -= observeAppearance;
+            }
+
             world.enabled = false;
             level.CreateLevel(unchecked(level.Seed + 1));
             world.enabled = true;

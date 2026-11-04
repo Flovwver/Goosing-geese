@@ -40,6 +40,9 @@ namespace GoosingGeese.Presentation
 
             if (_level.TryGetBuiltPath(out RoadPath path, out RoadConfiguration settings))
                 OnPathBuilt(path, settings);
+
+            if (didStart)
+                ApplyAppearance();
         }
 
         private void Start()
