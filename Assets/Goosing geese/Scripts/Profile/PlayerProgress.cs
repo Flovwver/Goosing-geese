@@ -206,6 +206,12 @@ namespace GoosingGeese.Profile
             return earned;
         }
 
+        internal string CreateSaveSnapshot()
+        {
+            _data.SavedAtUnixMs = Math.Max(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), _data.SavedAtUnixMs + 1);
+            return ToJson();
+        }
+
         private void ApplyReward(int amount)
         {
             _data.Points = (int)Math.Min(int.MaxValue, (long)Points + amount);

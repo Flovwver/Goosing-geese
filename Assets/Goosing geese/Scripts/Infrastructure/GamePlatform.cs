@@ -23,6 +23,12 @@ namespace GoosingGeese.Infrastructure
         private sealed class LocalGamePlatform : IGamePlatform
         {
             public string Language => null;
+            public string ProfileScope => null;
+
+            public string ReadCloudProfile()
+            {
+                return null;
+            }
 
             public void ReportGameplay(bool isReady, bool isActive)
             {
@@ -33,6 +39,10 @@ namespace GoosingGeese.Infrastructure
             }
 
             public void SubmitScore(int score)
+            {
+            }
+
+            public void WriteCloudProfile(string json)
             {
             }
         }
