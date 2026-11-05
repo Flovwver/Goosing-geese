@@ -31,12 +31,33 @@ namespace GoosingGeese.Platforms
             }
         }
 
+        public string ProfileScope
+        {
+            get
+            {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                return GoosingGeese_YandexReadProfile(0);
+#else
+                return null;
+#endif
+            }
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Register()
         {
             var receiver = new GameObject(ReceiverName);
             DontDestroyOnLoad(receiver);
             GamePlatform.Register(receiver.AddComponent<YandexGamePlatform>());
+        }
+
+        public string ReadCloudProfile()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return GoosingGeese_YandexReadProfile(1);
+#else
+            return null;
+#endif
         }
 
         public void ReportGameplay(bool isReady, bool isActive)
@@ -73,6 +94,13 @@ namespace GoosingGeese.Platforms
 #endif
         }
 
+        public void WriteCloudProfile(string json)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            GoosingGeese_YandexWriteProfile(json);
+#endif
+        }
+
         [Preserve]
         public void ReceiveLeaderboard(string json)
         {
@@ -89,6 +117,12 @@ namespace GoosingGeese.Platforms
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport("__Internal")]
+        private static extern string GoosingGeese_YandexReadProfile(int readSnapshot);
+
+        [DllImport("__Internal")]
+        private static extern void GoosingGeese_YandexWriteProfile(string json);
+
         [DllImport("__Internal")]
         private static extern int GoosingGeese_YandexLanguage();
 

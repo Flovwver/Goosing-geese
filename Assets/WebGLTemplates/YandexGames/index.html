@@ -107,6 +107,8 @@
         let StartUnityInstance;
         let ygGameInstance = null;
         let ysdk = null;
+        const goosingGeeseProfileKey = 'GoosingGeeseProfileV1';
+        let goosingGeeseProfile = null;
         let initYSDK = false;
         let initSDKMessageSent = false;
         let initGame = false;
@@ -235,7 +237,7 @@
             InstallBlurFocusBlocker();
             InitYSDK();
             
-            if (IsLocalHost() || syncInit)
+            if (IsLocalHost())
                 StartUnityInstance_IfUnloaded();
         };
 
@@ -324,11 +326,44 @@
             console.log('%c' + message, style);
         }
 
+        async function LoadGoosingGeeseProfile() {
+            let account = null;
+            let timer;
+            const load = (async () => {
+                const player = await ysdk.getPlayer();
+
+                if (!player.isAuthorized())
+                    return null;
+
+                const id = player.getUniqueID();
+
+                if (!id)
+                    return null;
+
+                account = { scope: 'yandex.' + id, player: null, snapshot: null };
+                const data = await player.getData([goosingGeeseProfileKey]);
+                const snapshot = data && data[goosingGeeseProfileKey];
+                return { scope: account.scope, player, snapshot: typeof snapshot === 'string' ? snapshot : null };
+            })();
+
+            try {
+                return await Promise.race([
+                    load,
+                    new Promise(resolve => { timer = setTimeout(() => resolve(account), 3000); })
+                ]);
+            } catch (error) {
+                return account;
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
         async function InitYSDK() {
             try {
                 if (IsLocalHost()) return;
 
                 ysdk = await YaGames.init();
+                goosingGeeseProfile = await LoadGoosingGeeseProfile();
                 ysdk.on('game_api_pause', PauseCallback);
                 ysdk.on('game_api_resume', ResumeCallback);
 
@@ -349,7 +384,7 @@
                 console.error('CRASH Initialization SDK: ', e);
             }
 
-            if (!IsLocalHost() && !syncInit)
+            if (!IsLocalHost())
                 StartUnityInstance_IfUnloaded();
         }
 
