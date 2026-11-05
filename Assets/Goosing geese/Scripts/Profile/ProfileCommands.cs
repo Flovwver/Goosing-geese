@@ -1,4 +1,5 @@
 using System;
+using GoosingGeese.Infrastructure;
 using UnityEngine;
 
 namespace GoosingGeese.Profile
@@ -53,8 +54,14 @@ namespace GoosingGeese.Profile
                 return false;
 
             Save();
-            _leaderboard.Record(_progress.PlayerName, _progress.Points, _progress.PlayerId);
+            RecordScore();
             return true;
+        }
+
+        public void RecordScore()
+        {
+            _leaderboard.Record(_progress.PlayerName, _progress.Points, _progress.PlayerId);
+            GamePlatform.Current.SubmitScore(_progress.Points);
         }
 
         public void Save()

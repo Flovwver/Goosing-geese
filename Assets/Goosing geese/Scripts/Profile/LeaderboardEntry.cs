@@ -9,5 +9,6 @@ namespace GoosingGeese.Profile
         public string PlayerId;
         public string Name;
         public int Score;
+        public int Rank;
     }
 }
