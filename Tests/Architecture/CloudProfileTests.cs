@@ -66,6 +66,10 @@ public static class CloudProfileTests
         {
         }
 
+        public void SetLanguage(string language)
+        {
+        }
+
         public void SubmitScore(int score)
         {
         }

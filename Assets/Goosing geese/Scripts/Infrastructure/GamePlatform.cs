@@ -38,6 +38,10 @@ namespace GoosingGeese.Infrastructure
             {
             }
 
+            public void SetLanguage(string language)
+            {
+            }
+
             public void SubmitScore(int score)
             {
             }

@@ -36,6 +36,7 @@ namespace GoosingGeese.Profile
         public void ToggleLanguage()
         {
             _progress.ToggleLanguage();
+            GamePlatform.Current.SetLanguage(_progress.UseEnglish ? "en" : "ru");
             Save();
         }
 
