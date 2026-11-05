@@ -19,6 +19,8 @@ namespace GoosingGeese.Presentation
 
         public event Action ExplosionCompleted;
 
+        public bool HasExploded { get; private set; }
+
         private void Awake()
         {
             _animator = GetComponent<Animator>();
@@ -34,7 +36,7 @@ namespace GoosingGeese.Presentation
         private void OnEnable()
         {
             _racer.OverheatProgressChanged += OnOverheatProgressChanged;
-            _racer.Exploded += OnExploded;
+            _racer.Exploded += PlayExplosion;
             _racer.RaceRestarted += OnRaceRestarted;
         }
 
@@ -55,8 +57,26 @@ namespace GoosingGeese.Presentation
         private void OnDisable()
         {
             _racer.OverheatProgressChanged -= OnOverheatProgressChanged;
-            _racer.Exploded -= OnExploded;
+            _racer.Exploded -= PlayExplosion;
             _racer.RaceRestarted -= OnRaceRestarted;
+        }
+
+        public void PlayExplosion()
+        {
+            if (HasExploded)
+                return;
+
+            HasExploded = true;
+            ResetExplosionParticles();
+            _explosionActive = true;
+            _animator.Play(ExplosionState, 0, 0f);
+            _animator.Update(0f);
+
+            foreach (ParticleSystem particles in _explosionParticles)
+            {
+                if (particles.gameObject.activeInHierarchy)
+                    particles.Play(false);
+            }
         }
 
         private void OnOverheatProgressChanged(float progress)
@@ -64,15 +84,9 @@ namespace GoosingGeese.Presentation
             _animator.SetFloat(OverheatProgressParameter, progress);
         }
 
-        private void OnExploded()
-        {
-            ResetExplosionParticles();
-            _explosionActive = true;
-            _animator.SetTrigger(ExplodedParameter);
-        }
-
         private void OnRaceRestarted()
         {
+            HasExploded = false;
             _explosionActive = false;
             ResetExplosionParticles();
             _animator.Rebind();
