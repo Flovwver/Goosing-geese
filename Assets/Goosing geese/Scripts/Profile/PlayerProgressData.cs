@@ -37,5 +37,6 @@ namespace GoosingGeese.Profile
         public int Appearance;
         public int Environment;
         public string PlayerId;
+        public long SavedAtUnixMs;
     }
 }
