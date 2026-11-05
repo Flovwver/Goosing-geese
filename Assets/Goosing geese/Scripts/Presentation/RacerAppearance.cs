@@ -14,6 +14,7 @@ namespace GoosingGeese.Presentation
         private Renderer[] _originalRenderers;
         private GameObject _replacement;
         private OverheatTracker _overheat;
+        private RacerOverheatView _explosionView;
         [SerializeField, HideInInspector]
         private List<Material> _ownedMaterials = new List<Material>();
 
@@ -33,11 +34,12 @@ namespace GoosingGeese.Presentation
 
             _originalRenderers = originals.ToArray();
             _overheat = GetComponent<OverheatTracker>();
+            _explosionView = GetComponent<RacerOverheatView>();
         }
 
         private void LateUpdate()
         {
-            bool visible = _overheat == null || _overheat.IsExploded == false;
+            bool visible = (_overheat == null || _overheat.IsExploded == false) && (_explosionView == null || _explosionView.HasExploded == false);
             SetOriginalVisibility(_replacement == null && visible);
 
             if (_replacement != null)

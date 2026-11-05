@@ -36,6 +36,7 @@ namespace GoosingGeese.Infrastructure
 
             public void RequestLeaderboard(string localPlayerId, Action<List<LeaderboardEntry>> onLoaded)
             {
+                onLoaded?.Invoke(null);
             }
 
             public void SetLanguage(string language)

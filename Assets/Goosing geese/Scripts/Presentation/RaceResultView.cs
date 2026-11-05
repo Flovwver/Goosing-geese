@@ -9,6 +9,8 @@ namespace GoosingGeese.Presentation
     public class RaceResultView : MonoBehaviour
     {
         private const int CanvasSortingOrder = 30;
+        private const float MinimumExplosionSeconds = 0.65f;
+        private const float ExplosionTimeoutSeconds = 5f;
         private static readonly Color ButtonColor = new Color(1f, 0.79f, 0.28f);
         private static readonly Color TextColor = new Color(0.05f, 0.09f, 0.12f);
         [SerializeField]
@@ -23,6 +25,7 @@ namespace GoosingGeese.Presentation
         private GameObject _panel;
         private GameObject _skipButton;
         private bool _waitingForExplosion;
+        private float _explosionStartedAt;
 
         private void Awake()
         {
@@ -46,6 +49,16 @@ namespace GoosingGeese.Presentation
         private void Update()
         {
             GameUiFactory.UpdateSafeArea(_safeArea);
+
+            if (_waitingForExplosion == false)
+                return;
+
+            float elapsed = Time.unscaledTime - _explosionStartedAt;
+
+            if (elapsed >= ExplosionTimeoutSeconds)
+                RevealResult();
+            else if (elapsed >= MinimumExplosionSeconds)
+                _skipButton.SetActive(true);
         }
 
         private void OnDisable()
@@ -87,10 +100,13 @@ namespace GoosingGeese.Presentation
             if (state != RaceState.Result)
                 return;
 
-            if (_race.Outcome == RaceOutcome.Overheated && _overheatView != null && _overheatView.isActiveAndEnabled)
+            bool hasExplosion = _race.Outcome == RaceOutcome.Overheated || _race.Outcome == RaceOutcome.OffRoad;
+
+            if (hasExplosion && _overheatView != null && _overheatView.isActiveAndEnabled)
             {
                 _waitingForExplosion = true;
-                _skipButton.SetActive(true);
+                _explosionStartedAt = Time.unscaledTime;
+                _overheatView.PlayExplosion();
             }
             else
                 ShowResult();

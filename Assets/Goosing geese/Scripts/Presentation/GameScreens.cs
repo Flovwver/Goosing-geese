@@ -401,10 +401,26 @@ namespace GoosingGeese.Presentation
 
         private void ShowLeaderboard()
         {
+            ShowLeaderboard(false);
+        }
+
+        private void ShowLeaderboard(bool online)
+        {
             ShowPanel(_race.Session.Text.Choose("Рекорды", "Leaderboard"), "leaderboard");
             GameObject panel = _panel;
+            string switchLabel = online ? _race.Session.Text.Choose("Рекорды устройства",
+                "Device records") : _race.Session.Text.Choose("Глобальный рейтинг",
+                "Global leaderboard");
+            _ui.CreateButton(panel.transform, switchLabel, () => ShowLeaderboard(online == false));
             Transform content = CreateLeaderboardContent(panel.transform);
-            _leaderboardView.Render(content, _race.Session.ReadLeaderboard(), Back);
+
+            if (online == false)
+            {
+                _leaderboardView.Render(content, _race.Session.ReadLeaderboard(), Back);
+                return;
+            }
+
+            ShowLeaderboardStatus(content, _race.Session.Text.Choose("Загружаем глобальный рейтинг…", "Loading global leaderboard…"));
             GoosingGeese.Infrastructure.GamePlatform.Current.RequestLeaderboard(_race.Progress.PlayerId, entries =>
             {
                 if (isActiveAndEnabled == false || panel == null || _panel != panel)
@@ -413,8 +429,20 @@ namespace GoosingGeese.Presentation
                 content.gameObject.SetActive(false);
                 Destroy(content.gameObject);
                 content = CreateLeaderboardContent(panel.transform);
-                _leaderboardView.Render(content, entries, Back, true);
+
+                if (entries == null)
+                    ShowLeaderboardStatus(content, _race.Session.Text.Choose("Глобальный рейтинг недоступен", "Global leaderboard unavailable"));
+                else if (entries.Count == 0)
+                    ShowLeaderboardStatus(content, _race.Session.Text.Choose("В глобальном рейтинге пока нет результатов", "No global records yet"));
+                else
+                    _leaderboardView.Render(content, entries, Back, true);
             });
+        }
+
+        private void ShowLeaderboardStatus(Transform content, string message)
+        {
+            _ui.CreateLabel(content, message, 24).GetComponent<LayoutElement>().preferredHeight = 130f;
+            _ui.CreateButton(content, _race.Session.Text.Choose("Назад", "Back"), Back);
         }
 
         private Transform CreateLeaderboardContent(Transform parent)
