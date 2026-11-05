@@ -326,13 +326,11 @@
             console.log('%c' + message, style);
         }
 
-        async function LoadGoosingGeeseProfile() {
+        async function LoadGoosingGeeseProfile(player) {
             let account = null;
             let timer;
             const load = (async () => {
-                const player = await ysdk.getPlayer();
-
-                if (!player.isAuthorized())
+                if (!player || !player.isAuthorized())
                     return null;
 
                 const id = player.getUniqueID();
@@ -363,7 +361,6 @@
                 if (IsLocalHost()) return;
 
                 ysdk = await YaGames.init();
-                goosingGeeseProfile = await LoadGoosingGeeseProfile();
                 ysdk.on('game_api_pause', PauseCallback);
                 ysdk.on('game_api_resume', ResumeCallback);
 
@@ -372,6 +369,8 @@
                 // Additional init1 modules
 
                 // Additional init2 modules
+
+                goosingGeeseProfile = await LoadGoosingGeeseProfile(typeof player === 'undefined' ? null : player);
 
                 // Additional init modules
 

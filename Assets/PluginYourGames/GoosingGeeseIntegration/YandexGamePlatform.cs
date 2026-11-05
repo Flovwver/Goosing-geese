@@ -5,8 +5,10 @@ using System.Runtime.InteropServices;
 using GoosingGeese.Infrastructure;
 using GoosingGeese.Profile;
 using UnityEngine;
-using UnityEngine.Scripting;
 using YG;
+#if Leaderboards_yg && Authorization_yg
+using YG.Utils.LB;
+#endif
 
 namespace GoosingGeese.Platforms
 {
@@ -15,16 +17,26 @@ namespace GoosingGeese.Platforms
         private const string LeaderboardName = "goosing_geese_points";
         private const string ReceiverName = "GoosingGeese.YandexPlatform";
         private bool _isReadyReported;
-        private int _requestId;
+#if Leaderboards_yg && Authorization_yg
+        private const float LeaderboardReadInterval = 16f;
+        private string _localPlayerId;
+        private string _requestedAccountId;
+        private string _pendingScoreAccountId;
+        private int _pendingScore;
+        private float _nextLeaderboardRead;
+        private bool _needsLeaderboard;
         private Action<List<LeaderboardEntry>> _onLeaderboardLoaded;
+#endif
 
         public string Language
         {
             get
             {
-#if UNITY_WEBGL && !UNITY_EDITOR
-                int language = GoosingGeese_YandexLanguage();
-                return language == 0 ? null : language == 1 ? "ru" : "en";
+#if Localization_yg
+                if (YG2.isSDKEnabled && string.IsNullOrEmpty(YG2.lang) == false)
+                    return YG2.lang == "ru" ? "ru" : "en";
+
+                return null;
 #else
                 return null;
 #endif
@@ -51,6 +63,13 @@ namespace GoosingGeese.Platforms
             GamePlatform.Register(receiver.AddComponent<YandexGamePlatform>());
         }
 
+        private void OnDestroy()
+        {
+#if Leaderboards_yg && Authorization_yg
+            YG2.onGetLeaderboard -= OnLeaderboardLoaded;
+#endif
+        }
+
         public string ReadCloudProfile()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -64,6 +83,10 @@ namespace GoosingGeese.Platforms
         {
             if (YG2.isSDKEnabled == false)
                 return;
+
+#if Leaderboards_yg && Authorization_yg
+            TryRequestLeaderboard();
+#endif
 
             if (isReady && _isReadyReported == false)
             {
@@ -81,16 +104,32 @@ namespace GoosingGeese.Platforms
 
         public void RequestLeaderboard(string localPlayerId, Action<List<LeaderboardEntry>> onLoaded)
         {
-#if UNITY_WEBGL && !UNITY_EDITOR
+#if Leaderboards_yg && Authorization_yg
+            _localPlayerId = localPlayerId;
             _onLeaderboardLoaded = onLoaded;
-            GoosingGeese_YandexReadLeaderboard(LeaderboardName, localPlayerId, ReceiverName, ++_requestId);
+            _needsLeaderboard = true;
+            TryRequestLeaderboard();
+#endif
+        }
+
+        public void SetLanguage(string language)
+        {
+#if Localization_yg
+            if (YG2.isSDKEnabled)
+                YG2.SwitchLanguage(language);
 #endif
         }
 
         public void SubmitScore(int score)
         {
-#if UNITY_WEBGL && !UNITY_EDITOR
-            GoosingGeese_YandexSubmitScore(LeaderboardName, score);
+#if Leaderboards_yg && Authorization_yg
+            if (YG2.isSDKEnabled == false || YG2.player.auth == false || score <= 0)
+                return;
+
+            _pendingScore = _pendingScoreAccountId == YG2.player.id ? Math.Max(_pendingScore, score) : score;
+            _pendingScoreAccountId = YG2.player.id;
+            _needsLeaderboard = true;
+            TryRequestLeaderboard();
 #endif
         }
 
@@ -101,20 +140,60 @@ namespace GoosingGeese.Platforms
 #endif
         }
 
-        [Preserve]
-        public void ReceiveLeaderboard(string json)
+#if Leaderboards_yg && Authorization_yg
+        private void TryRequestLeaderboard()
         {
-            var response = JsonUtility.FromJson<LeaderboardResponse>(json);
-
-            if (response == null || response.RequestId != _requestId)
+            if (_needsLeaderboard == false || YG2.isSDKEnabled == false || Time.realtimeSinceStartup < _nextLeaderboardRead)
                 return;
 
+            _needsLeaderboard = false;
+            _nextLeaderboardRead = Time.realtimeSinceStartup + LeaderboardReadInterval;
+            _requestedAccountId = YG2.player.id;
+            YG2.onGetLeaderboard -= OnLeaderboardLoaded;
+            YG2.onGetLeaderboard += OnLeaderboardLoaded;
+            YG2.GetLeaderboard(LeaderboardName, 5, 1);
+        }
+
+        private void OnLeaderboardLoaded(LBData data)
+        {
+            if (data == null || data.technoName != LeaderboardName || YG2.player.id != _requestedAccountId)
+                return;
+
+            YG2.onGetLeaderboard -= OnLeaderboardLoaded;
             Action<List<LeaderboardEntry>> onLoaded = _onLeaderboardLoaded;
             _onLeaderboardLoaded = null;
 
-            if (response.Entries != null && response.Entries.Count > 0)
-                onLoaded?.Invoke(response.Entries);
+            if (data.players == null || (data.players.Length == 1 && data.players[0].rank <= 0))
+                return;
+
+            int previousScore = data.currentPlayer?.score ?? 0;
+            var entries = new List<LeaderboardEntry>();
+
+            foreach (LBPlayerData player in data.players)
+            {
+                bool isCurrentPlayer = YG2.player.auth && player.uniqueID == _requestedAccountId;
+
+                if (isCurrentPlayer)
+                    previousScore = Math.Max(previousScore, player.score);
+
+                entries.Add(new LeaderboardEntry
+                {
+                    PlayerId = isCurrentPlayer ? _localPlayerId : "",
+                    Name = string.IsNullOrWhiteSpace(player.name) ? "—" : player.name,
+                    Score = player.score,
+                    Rank = player.rank
+                });
+            }
+
+            if (YG2.player.auth && _pendingScoreAccountId == _requestedAccountId && _pendingScore > previousScore)
+                YG2.SetLeaderboard(LeaderboardName, _pendingScore);
+
+            _pendingScore = 0;
+
+            if (entries.Count > 0)
+                onLoaded?.Invoke(entries);
         }
+#endif
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
@@ -123,22 +202,7 @@ namespace GoosingGeese.Platforms
         [DllImport("__Internal")]
         private static extern void GoosingGeese_YandexWriteProfile(string json);
 
-        [DllImport("__Internal")]
-        private static extern int GoosingGeese_YandexLanguage();
-
-        [DllImport("__Internal")]
-        private static extern void GoosingGeese_YandexReadLeaderboard(string board, string localPlayerId, string receiver, int requestId);
-
-        [DllImport("__Internal")]
-        private static extern void GoosingGeese_YandexSubmitScore(string board, int score);
 #endif
-
-        [Serializable]
-        private sealed class LeaderboardResponse
-        {
-            public int RequestId;
-            public List<LeaderboardEntry> Entries;
-        }
     }
 }
 #endif
