@@ -89,6 +89,11 @@ namespace GoosingGeese.Racing
                 _opponents.Tick(Time.deltaTime);
         }
 
+        private void LateUpdate()
+        {
+            GamePlatform.Current.ReportGameplay(_level.CurrentDefinition != null, State == RaceState.Racing);
+        }
+
         private void OnApplicationFocus(bool hasFocus)
         {
             if (hasFocus == false)
@@ -110,6 +115,7 @@ namespace GoosingGeese.Racing
             _input.SetInputEnabled(false);
             _input.Cleared -= _player.ReleaseThrottle;
             RestoreTimeScale();
+            GamePlatform.Current.ReportGameplay(false, false);
             _events.Publish(Disabled, this);
         }
 
