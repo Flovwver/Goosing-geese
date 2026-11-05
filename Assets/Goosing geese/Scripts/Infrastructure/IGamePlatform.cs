@@ -16,6 +16,8 @@ namespace GoosingGeese.Infrastructure
 
         void RequestLeaderboard(string localPlayerId, Action<List<LeaderboardEntry>> onLoaded);
 
+        void SetLanguage(string language);
+
         void SubmitScore(int score);
 
         void WriteCloudProfile(string json);
