@@ -59,7 +59,7 @@ namespace GoosingGeese.Levels
             try
             {
                 _store.Save(Progress);
-                _leaderboard.Record(Progress.PlayerName, Progress.Points, Progress.PlayerId);
+                Commands.RecordScore();
             }
             catch (System.Exception exception)
             {

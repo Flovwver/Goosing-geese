@@ -401,8 +401,32 @@ namespace GoosingGeese.Presentation
 
         private void ShowLeaderboard()
         {
-            ShowPanel(_race.Session.Text.Choose("Локальный рекорд", "Local leaderboard"), "leaderboard");
-            _leaderboardView.Render(_panel.transform, _race.Session.ReadLeaderboard(), Back);
+            ShowPanel(_race.Session.Text.Choose("Рекорды", "Leaderboard"), "leaderboard");
+            GameObject panel = _panel;
+            Transform content = CreateLeaderboardContent(panel.transform);
+            _leaderboardView.Render(content, _race.Session.ReadLeaderboard(), Back);
+            GoosingGeese.Infrastructure.GamePlatform.Current.RequestLeaderboard(_race.Progress.PlayerId, entries =>
+            {
+                if (isActiveAndEnabled == false || panel == null || _panel != panel)
+                    return;
+
+                content.gameObject.SetActive(false);
+                Destroy(content.gameObject);
+                content = CreateLeaderboardContent(panel.transform);
+                _leaderboardView.Render(content, entries, Back, true);
+            });
+        }
+
+        private Transform CreateLeaderboardContent(Transform parent)
+        {
+            var content = new GameObject("Leaderboard content", typeof(RectTransform), typeof(VerticalLayoutGroup));
+            content.transform.SetParent(parent, false);
+            var layout = content.GetComponent<VerticalLayoutGroup>();
+            layout.spacing = 12f;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandHeight = false;
+            return content.transform;
         }
 
         private void ShowQuests()

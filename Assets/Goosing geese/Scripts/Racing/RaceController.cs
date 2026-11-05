@@ -92,6 +92,7 @@ namespace GoosingGeese.Racing
         private void LateUpdate()
         {
             GamePlatform.Current.ReportGameplay(_level.CurrentDefinition != null, State == RaceState.Racing);
+            Progress.ApplyPlatformLanguage(GamePlatform.Current.Language);
         }
 
         private void OnApplicationFocus(bool hasFocus)

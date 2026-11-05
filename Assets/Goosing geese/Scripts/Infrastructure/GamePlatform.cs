@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using GoosingGeese.Profile;
 using UnityEngine;
 
 namespace GoosingGeese.Infrastructure
@@ -20,7 +22,17 @@ namespace GoosingGeese.Infrastructure
 
         private sealed class LocalGamePlatform : IGamePlatform
         {
+            public string Language => null;
+
             public void ReportGameplay(bool isReady, bool isActive)
+            {
+            }
+
+            public void RequestLeaderboard(string localPlayerId, Action<List<LeaderboardEntry>> onLoaded)
+            {
+            }
+
+            public void SubmitScore(int score)
             {
             }
         }

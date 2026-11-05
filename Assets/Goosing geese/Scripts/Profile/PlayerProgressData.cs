@@ -33,6 +33,7 @@ namespace GoosingGeese.Profile
         public float MusicVolume = 0.3f;
         public float EffectsVolume = 0.7f;
         public bool English;
+        public bool LanguageSelected;
         public int Appearance;
         public int Environment;
         public string PlayerId;

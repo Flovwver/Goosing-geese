@@ -18,7 +18,7 @@ namespace GoosingGeese.Presentation
             _ui = ui;
         }
 
-        public void Render(Transform parent, System.Collections.Generic.List<LeaderboardEntry> entries, Action back)
+        public void Render(Transform parent, System.Collections.Generic.List<LeaderboardEntry> entries, Action back, bool isOnline = false)
         {
             string rows = "";
 
@@ -27,16 +27,26 @@ namespace GoosingGeese.Presentation
                 bool currentPlayer = entries[i].PlayerId == _progress.PlayerId;
 
                 if (i < 5 || currentPlayer)
-                    rows += GetRank(entries, i) + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "") + "\n";
+                    rows += (isOnline ? entries[i].Rank : GetRank(entries,
+                        i))
+                        + ". "
+                        + entries[i].Name
+                        + " — "
+                        + entries[i].Score
+                        + (currentPlayer ? " •" : "")
+                        + "\n";
             }
 
-            if (entries.Find(entry => entry.PlayerId == _progress.PlayerId) == null)
+            if (isOnline == false && entries.Find(entry => entry.PlayerId == _progress.PlayerId) == null)
                 rows += (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
 
-            _ui.CreateLabel(parent, rows, 24).GetComponent<LayoutElement>().preferredHeight = 170f;
+            Text rowsLabel = _ui.CreateLabel(parent, rows, 24);
+            rowsLabel.supportRichText = false;
+            rowsLabel.GetComponent<LayoutElement>().preferredHeight = 170f;
             _ui.CreateLabel(parent,
-                _text.Choose("Рекорд этого устройства. Онлайн-рейтинг пока не подключён.",
-                "Device record. Online rankings are not connected."),
+                isOnline ? _text.Choose("Онлайн-рейтинг",
+                "Online leaderboard") : _text.Choose("Рекорд этого устройства",
+                "Device record"),
                 23);
             _ui.CreateButton(parent, _text.Choose("Назад", "Back"), back);
         }

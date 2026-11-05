@@ -12,6 +12,7 @@ namespace GoosingGeese.Profile
     {
         private readonly EventPublisher _events = new EventPublisher();
         private PlayerProgressData _data;
+        private bool _platformEnglish;
 
         public PlayerProgress() : this(new PlayerProgressData())
         {
@@ -39,7 +40,7 @@ namespace GoosingGeese.Profile
         public bool GlobalWinsClaimed => _data.GlobalWinsClaimed;
         public float MusicVolume => _data.MusicVolume;
         public float EffectsVolume => _data.EffectsVolume;
-        public bool UseEnglish => _data.English;
+        public bool UseEnglish => _data.LanguageSelected ? _data.English : _data.English || _platformEnglish;
         public int SelectedAppearanceIndex => _data.Appearance;
         public int SelectedSceneryIndex => _data.Environment;
         public string PlayerId => _data.PlayerId;
@@ -136,7 +137,20 @@ namespace GoosingGeese.Profile
         public void ToggleLanguage()
         {
             _data.English = UseEnglish == false;
+            _data.LanguageSelected = true;
             _events.Publish(Changed, null);
+        }
+
+        public void ApplyPlatformLanguage(string language)
+        {
+            if (_data.LanguageSelected || (language != "ru" && language != "en"))
+                return;
+
+            bool wasEnglish = UseEnglish;
+            _platformEnglish = language == "en";
+
+            if (UseEnglish != wasEnglish)
+                _events.Publish(Changed, null);
         }
 
         public void NextScenery(int count)
