@@ -2,18 +2,30 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
-public class PedalButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+namespace GoosingGeese.Input
 {
-    [SerializeField] private InputSwitch _inputSwitch;
-
-    public void OnPointerDown(PointerEventData eventData)
+    [RequireComponent(typeof(Button))]
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "PedalButton")]
+    public class PedalButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
-        _inputSwitch.SetPedalPressed(true);
-    }
+        [SerializeField]
+        [UnityEngine.Serialization.FormerlySerializedAs("_inputSwitch")]
+        private ThrottleInput _input;
 
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        _inputSwitch.SetPedalPressed(false);
+        private void OnDisable()
+        {
+            if (_input != null)
+                _input.SetPedalPressed(false);
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            _input.SetPedalPressed(true);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            _input.SetPedalPressed(false);
+        }
     }
 }

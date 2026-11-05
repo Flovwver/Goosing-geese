@@ -107,3 +107,8 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local code-style tool output
+/Tools/CodeStyle/bin/
+/Tools/CodeStyle/obj/
+!/Tools/CodeStyle/CodeStyle.csproj

@@ -1,0 +1,7 @@
+# Road guidance and editor recovery check
+
+RoadPathView colors each road piece by its type: straight sections are yellow, left/right turns are green. The previous 45-metre turn preview is removed. A color blend is centered on each straight/turn boundary; Transition Length defaults to 12 metres and zero disables blending. The blend is shortened on short pieces to retain their own color at the center. Consecutive pieces of the same type remain solid. Sample Spacing defaults to 2 metres. Width, material and height retain RoadSettings values.
+
+Each piece uses one LineRenderer with at most four gradient keys. Verified all piece centers and matching colors at shared boundaries on a 63-piece generated path, with zero, default and oversized transition lengths.
+
+After the reported editor exit, Editor-prev.log contained "The file 'MemoryStream' is corrupted" immediately after assembly reload, with serialization errors naming RoadPathView. This places the failure during editor state restoration; the exact root cause was not established. Before saving the new line settings, Main.unity matched its committed version. The scene had no missing scripts, all four project prefabs loaded without missing scripts, and Git connectivity checks found no corrupt objects. A subsequent Play/Stop cycle generated the route and showed no compiler/runtime errors or repeated MemoryStream corruption in the current editor log. No cache or project assets were deleted.

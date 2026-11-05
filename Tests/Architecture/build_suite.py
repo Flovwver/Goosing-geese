@@ -1,0 +1,78 @@
+"""Generate one in-memory Unity test entry point without importing tests into Assets."""
+from pathlib import Path
+import re
+import sys
+
+root = Path(__file__).resolve().parents[2]
+usings = {
+    'using GoosingGeese.Racing;',
+    'using GoosingGeese.Levels;',
+    'using GoosingGeese.Garage;',
+    'using GoosingGeese.Settings;',
+}
+bodies, calls = [], []
+for source in sorted(Path(__file__).parent.glob('*Tests.cs')):
+    if len(sys.argv) > 1 and source.stem not in sys.argv[1:]:
+        continue
+    text = source.read_text(encoding='utf-8-sig')
+    lines = text.splitlines()
+    usings.update(line for line in lines if line.startswith('using '))
+    bodies.append('\n'.join(line for line in lines if not line.startswith('using ')))
+    prefix = 'await ' if re.search(r'async\s+Task<string>\s+Main', text) else ''
+    calls.append(f'            reports.Add({prefix}{source.stem}.Main());')
+
+runner = r'''
+public static class ArchitectureSuite
+{
+    public static async System.Threading.Tasks.Task<string> Main()
+    {
+        string[] keys = { "GoosingGeese.Profile.v1", "GoosingGeese.Leaderboard.v1" };
+        bool[] exists = System.Array.ConvertAll(keys, UnityEngine.PlayerPrefs.HasKey);
+        string[] values = System.Array.ConvertAll(keys, key => UnityEngine.PlayerPrefs.GetString(key));
+        var race = UnityEngine.Object.FindFirstObjectByType<RaceController>();
+        string profile = race.Progress.ToJson();
+        float timeScale = UnityEngine.Time.timeScale;
+        var reports = new System.Collections.Generic.List<string>();
+        var errors = new System.Collections.Generic.List<string>();
+        UnityEngine.Application.LogCallback onLog = (message, stack, type) =>
+        {
+            if ((type == UnityEngine.LogType.Error || type == UnityEngine.LogType.Exception)
+                && message.Contains("Expected audit observer failure") == false)
+                errors.Add(message);
+        };
+        UnityEngine.Application.logMessageReceived += onLog;
+
+        try
+        {
+CALLS
+            if (errors.Count > 0)
+                throw new System.Exception("Unexpected Unity errors: " + string.Join("\n", errors));
+
+            return string.Join("\n", reports);
+        }
+        finally
+        {
+            UnityEngine.Application.logMessageReceived -= onLog;
+            race.enabled = true;
+            race.Progress.RestoreJson(profile, UnityEngine.Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
+            UnityEngine.Object.FindFirstObjectByType<RacerGarage>().EndPreview();
+            UnityEngine.Object.FindFirstObjectByType<Level>().RestartRace();
+            UnityEngine.Time.timeScale = timeScale;
+
+            for (int index = 0; index < keys.Length; index++)
+            {
+                if (exists[index])
+                    UnityEngine.PlayerPrefs.SetString(keys[index], values[index]);
+                else
+                    UnityEngine.PlayerPrefs.DeleteKey(keys[index]);
+            }
+
+            UnityEngine.PlayerPrefs.Save();
+        }
+    }
+}
+'''.replace('CALLS', '\n'.join(calls))
+output = root / 'Temp' / 'ArchitectureSuite.cs'
+output.parent.mkdir(exist_ok=True)
+output.write_text('\n'.join(sorted(usings)) + '\n' + '\n'.join(bodies) + runner, encoding='utf-8')
+print(output)

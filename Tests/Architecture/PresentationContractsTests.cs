@@ -1,0 +1,77 @@
+using System;
+using System.Reflection;
+using GoosingGeese.Garage;
+using GoosingGeese.Levels;
+using GoosingGeese.Presentation;
+using GoosingGeese.Racing;
+using GoosingGeese.Settings;
+using UnityEngine;
+using UnityEngine.UI;
+
+public static class PresentationContractsTests
+{
+    public static string Main()
+    {
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var race = UnityEngine.Object.FindFirstObjectByType<RaceController>();
+        var screens = race.GetComponent<GameScreens>();
+        var world = race.GetComponent<WorldPresentation>();
+        var level = race.GetComponent<Level>();
+        var definition = level.CurrentDefinition;
+        string profile = race.Progress.ToJson();
+
+        try
+        {
+            var label = (Text)typeof(GameScreens).GetField("_garageLabel", Flags).GetValue(screens);
+            string before = label.text;
+            race.Progress.ToggleLanguage();
+            Require(label.text != before, "Language change must refresh existing labels through model notification.");
+            race.Progress.ToggleLanguage();
+            Require(label.text == before, "Language toggle must be reversible.");
+            var garage = race.GetComponent<RacerGarage>();
+            var player = (Racer)typeof(WorldPresentation).GetField("_player", Flags).GetValue(world);
+            var appearance = player.GetComponent<RacerAppearance>();
+            int appearanceUpdates = 0;
+            Action observeAppearance = () => appearanceUpdates++;
+            appearance.AppearanceChanged += observeAppearance;
+
+            try
+            {
+                world.enabled = false;
+                Require(garage.Browse((garage.SelectedIndex + 1) % garage.AppearanceCount), "Preview must change while presentation is disabled.");
+                world.enabled = true;
+                Require(appearanceUpdates == 1, "Re-enabling presentation must synchronize the missed appearance selection.");
+            }
+            finally
+            {
+                world.enabled = true;
+                garage.EndPreview();
+                appearance.AppearanceChanged -= observeAppearance;
+            }
+
+            world.enabled = false;
+            level.CreateLevel(unchecked(level.Seed + 1));
+            world.enabled = true;
+            object builder = typeof(WorldPresentation).GetField("_builder", Flags).GetValue(world);
+            var root = (GameObject)typeof(SceneryBuilder).GetField("_root", Flags).GetValue(builder);
+            Require(root != null && root.activeSelf, "Re-enabled world must rebuild the current level.");
+            race.Progress.NextScenery(3);
+            var changedRoot = (GameObject)typeof(SceneryBuilder).GetField("_root", Flags).GetValue(builder);
+            Require(changedRoot != root && changedRoot.activeSelf, "Scenery must observe the model without a UI rebuild command.");
+            Require(typeof(WorldPresentation).GetField("_path", Flags).GetValue(world) != null, "World must synchronize its current path.");
+            return "PASS: immediate localization refresh; reversible language; late world path recovery.";
+        }
+        finally
+        {
+            world.enabled = true;
+            race.Progress.RestoreJson(profile, Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
+            level.TryRestoreLevel(definition, out _);
+        }
+    }
+
+    private static void Require(bool condition, string message)
+    {
+        if (condition == false)
+            throw new Exception(message);
+    }
+}

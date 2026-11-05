@@ -11,5 +11,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60de8ebace3348178709257d7789af6e, type: 3}
   m_Name: NavigationSettings
-  m_EditorClassIdentifier: Assembly-CSharp::NavigationSettings
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Settings.NavigationSettings
   ArrivalDistance: 10
