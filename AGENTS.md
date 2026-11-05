@@ -4,6 +4,12 @@ The user's C# formatting and member-ordering rules, including the Unity lifecycl
 
 Commit each completed and verified task separately, as authorized in the global instructions. Keep temporary captures and installation backups out of project commits.
 
+## Yandex Games branch boundary
+
+- Develop all platform-neutral adapter contracts, gameplay integration through those contracts, and stubs or local implementations on `main`. The project must compile and run with those implementations independently of the Yandex Games SDK.
+- Keep the Yandex Games SDK, its configuration, build templates, and SDK-specific adapter implementations and wiring exclusively on `codex/yandex-plugin`. Keep SDK references out of shared gameplay code.
+- Land shared adapter changes on `main` first, then merge `main` into `codex/yandex-plugin`. Keep Yandex-specific commits out of `main`.
+
 # Unity builds
 
 Do not create player builds unless the user explicitly requests a build. Validate changes in the Unity Editor by default. This rule also applies to smoke-test and development builds.
