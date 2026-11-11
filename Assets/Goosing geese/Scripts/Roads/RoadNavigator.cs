@@ -57,6 +57,23 @@ namespace GoosingGeese.Roads
             return new NavigationConfiguration(_settings);
         }
 
+        public bool HasBendWithin(float lookAhead)
+        {
+            if (_path?.Curve == null || _currentSegment >= _path.FinishWaypointIndex)
+                return false;
+
+            for (int segment = _currentSegment; segment < _path.FinishWaypointIndex; segment++)
+            {
+                if (segment > _currentSegment && _path.Curve.GetSegmentEndDistance(segment - 1) - _distanceAlongPath > lookAhead)
+                    return false;
+
+                if (_path.Pieces[segment].Type != RoadPieceType.Straight)
+                    return true;
+            }
+
+            return false;
+        }
+
         public void Configure(NavigationConfiguration configuration)
         {
             _configuration = configuration;

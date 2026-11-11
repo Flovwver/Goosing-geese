@@ -12,6 +12,7 @@ namespace GoosingGeese.Presentation
     public class GameScreens : MonoBehaviour
     {
         private const int CanvasSortingOrder = 20;
+        private const float BendNoticeDistance = 55f;
         private static readonly Color PanelColor = GameUiTheme.Panel;
         [SerializeField]
         private RaceController _race;
@@ -28,6 +29,7 @@ namespace GoosingGeese.Presentation
         private RectTransform _safeArea;
         private GameObject _panel;
         private Text _status;
+        private Text _bendNotice;
         private SettingsView _settingsView;
         private LeaderboardView _leaderboardView;
         private QuestsView _questsView;
@@ -85,6 +87,7 @@ namespace GoosingGeese.Presentation
         {
             GameUiFactory.UpdateSafeArea(_safeArea);
             UpdateRaceStatus();
+            UpdateBendNotice();
         }
 
         private void OnDisable()
@@ -174,6 +177,23 @@ namespace GoosingGeese.Presentation
             }
         }
 
+        private void UpdateBendNotice()
+        {
+            bool visible = _status.gameObject.activeSelf && _race.State == RaceState.Racing && _playerNavigator.HasBendWithin(BendNoticeDistance);
+            _bendNotice.gameObject.SetActive(visible);
+
+            if (visible == false)
+                return;
+
+            bool shouldCoast = _player.NormalizedSpeed >= _player.YellowZoneThreshold;
+            string message = shouldCoast ? _race.Session.Text.Choose("Поворот • отпусти газ",
+                "Bend • release throttle") : _race.Session.Text.Choose("Поворот • держись в зелёной зоне",
+                "Bend • stay in the green zone");
+
+            if (_bendNotice.text != message)
+                _bendNotice.text = message;
+        }
+
         private void InitializeUi()
         {
             Font font = GameUiTheme.LoadFont();
@@ -202,6 +222,11 @@ namespace GoosingGeese.Presentation
             _safeArea = GameUiFactory.CreateRect("Safe area", root.transform, Vector2.zero, Vector2.one);
             _status = _ui.CreateLabel(_safeArea, "", 23);
             GameUiFactory.Place(_status.rectTransform, new Vector2(0.22f, 0.81f), new Vector2(0.9f, 0.88f));
+            _bendNotice = _ui.CreateLabel(_safeArea, "", 22);
+            _bendNotice.color = new Color(0.25f, 0.84f, 0.25f, 1f);
+            _bendNotice.gameObject.AddComponent<Outline>().effectColor = Color.black;
+            GameUiFactory.Place(_bendNotice.rectTransform, new Vector2(0.1f, 0.755f), new Vector2(0.9f, 0.81f));
+            _bendNotice.gameObject.SetActive(false);
             _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
             _trophy = MakeIconButton("Leaderboard",
                 MenuSymbol.Trophy,
