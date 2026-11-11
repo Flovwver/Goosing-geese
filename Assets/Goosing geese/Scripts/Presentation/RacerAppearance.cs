@@ -34,7 +34,7 @@ namespace GoosingGeese.Presentation
 
             _originalRenderers = originals.ToArray();
             _overheat = GetComponent<OverheatTracker>();
-            _explosionView = GetComponent<RacerOverheatView>();
+            _explosionView = GetComponentInChildren<RacerOverheatView>(true);
         }
 
         private void LateUpdate()
