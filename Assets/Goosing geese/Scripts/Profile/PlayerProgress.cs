@@ -186,12 +186,12 @@ namespace GoosingGeese.Profile
             return true;
         }
 
-        public int RecordRace(bool won, int number, int reward, int firstClearBonus)
+        public int RecordRace(bool won, int number, int reward, int firstClearBonus, bool overheated = false)
         {
             if (number < 1 || (long)number > (long)HighestCompletedLevel + 1L)
                 throw new ArgumentOutOfRangeException(nameof(number));
 
-            Quests.RecordRace(won, DateTime.Today);
+            Quests.RecordRace(won, DateTime.Today, overheated);
             int earned = 0;
 
             if (won)

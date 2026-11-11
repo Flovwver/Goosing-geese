@@ -204,7 +204,7 @@ namespace GoosingGeese.Racing
             bool playerWon = outcome == RaceOutcome.FinishedFirst;
             PlayerWon = playerWon;
             Outcome = outcome;
-            LastReward = Session.RecordResult(playerWon);
+            LastReward = Session.RecordResult(outcome);
             _input.SetInputEnabled(false);
             SetState(RaceState.Result);
 

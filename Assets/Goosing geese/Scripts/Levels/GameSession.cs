@@ -51,10 +51,14 @@ namespace GoosingGeese.Levels
             _race.Prepare();
         }
 
-        public int RecordResult(bool won)
+        public int RecordResult(RaceOutcome outcome)
         {
             CampaignStage stage = _campaign.GetStage(_level.Number);
-            int reward = Progress.RecordRace(won, _level.Number, stage.Reward, stage.FirstClearBonus);
+            int reward = Progress.RecordRace(outcome == RaceOutcome.FinishedFirst,
+                _level.Number,
+                stage.Reward,
+                stage.FirstClearBonus,
+                outcome == RaceOutcome.Overheated);
 
             try
             {

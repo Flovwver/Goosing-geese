@@ -47,6 +47,25 @@ public static class ProfileContractsTests
             "Win observers must receive one notification with the complete result.");
         raceProfile.RecordRace(false, 1, 100, 20);
         Require(notifications == 2 && observedRaces == 2 && observedBalance == 120, "Loss observers must receive updated counters without a reward.");
+        int overheatQuest = (int)QuestId.DailyOverheat;
+        DateTime today = DateTime.Today;
+        Require(raceProfile.Quests.GetProgress(overheatQuest, today) == 0, "Other race results must not count as an overheat.");
+        raceProfile.RecordRace(false, 1, 100, 20, overheated: true);
+        var savedRaceProfile = new PlayerProgress();
+        savedRaceProfile.RestoreJson(raceProfile.ToJson());
+        Require(savedRaceProfile.Quests.GetProgress(overheatQuest, today) == 1, "An overheat must count and survive reload.");
+        Require(savedRaceProfile.Quests.TryClaim(overheatQuest,
+            today)
+            && savedRaceProfile.Quests.TryClaim(overheatQuest,
+            today) == false
+            && savedRaceProfile.Balance == 145,
+            "The overheat reward must be available once.");
+        savedRaceProfile.Quests.RefreshDay(today.AddDays(1));
+        Require(savedRaceProfile.Quests.GetProgress(overheatQuest,
+            today.AddDays(1)) == 0
+            && savedRaceProfile.Quests.IsClaimed(overheatQuest,
+            today.AddDays(1)) == false,
+            "Day rollover must reset overheat progress and its claimed state.");
         data.Points = 0;
         Require(profile.Points == int.MaxValue - 1, "Model must own a copy of save data.");
         profile.AddReward(100);
@@ -63,7 +82,7 @@ public static class ProfileContractsTests
         upgrades.TopSpeed = 99;
         Require(profile.GetUpgrades("car").TopSpeed == 1, "Upgrade queries must not expose mutable state.");
         Require(profile.TryBuyUpgrade("car", (RacerUpgradeKind)99, 2, 25) == false && profile.Balance == 75, "Invalid upgrade must not spend currency.");
-        return "PASS: DTO isolation; saturating rewards; atomic spending; stable identity; defensive upgrade reads.";
+        return "PASS: DTO isolation; daily overheat quest, reward and rollover; saturating rewards; atomic spending; stable identity; defensive upgrade reads.";
     }
 
     private static void Require(bool condition, string message)

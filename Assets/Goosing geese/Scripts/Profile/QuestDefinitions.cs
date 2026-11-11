@@ -17,7 +17,11 @@ namespace GoosingGeese.Profile
             10,
             300,
             "Всего: 10 побед",
-            "Total: 10 wins") });
+            "Total: 10 wins"), new QuestDefinition(QuestId.DailyOverheat,
+            1,
+            25,
+            "Сегодня: перегреть гонщика",
+            "Today: overheat your racer") });
 
         public IReadOnlyList<QuestDefinition> Entries => _entries;
 

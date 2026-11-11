@@ -30,6 +30,8 @@ namespace GoosingGeese.Profile
         public bool DailyRacesClaimed;
         public bool DailyWinsClaimed;
         public bool GlobalWinsClaimed;
+        public bool DailyOverheat;
+        public bool DailyOverheatClaimed;
         public float MusicVolume = 0.3f;
         public float EffectsVolume = 0.7f;
         public bool English;
