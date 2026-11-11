@@ -62,7 +62,7 @@ public static class ResultAndIdentityTests
 
         try
         {
-            var view = new LeaderboardView(progress, new GameUiFactory(GameUiTheme.LoadFont(), null));
+            var view = new LeaderboardView(progress, new GameUiFactory(new GameUiTheme(), null));
             view.Render(parent.transform, entries, () =>
             {
             }, true);

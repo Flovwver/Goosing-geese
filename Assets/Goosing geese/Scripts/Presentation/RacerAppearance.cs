@@ -9,14 +9,12 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerAppearance")]
     public class RacerAppearance : MonoBehaviour
     {
-        [SerializeField, Min(0.1f)]
-        private float _modelLength = 5f;
+        [SerializeField, Min(0.1f)] private float _modelLength = 5f;
         private Renderer[] _originalRenderers;
         private GameObject _replacement;
         private OverheatTracker _overheat;
         private RacerOverheatView _explosionView;
-        [SerializeField, HideInInspector]
-        private List<Material> _ownedMaterials = new List<Material>();
+        [SerializeField, HideInInspector] private List<Material> _ownedMaterials = new List<Material>();
 
         public event Action AppearanceChanged;
 

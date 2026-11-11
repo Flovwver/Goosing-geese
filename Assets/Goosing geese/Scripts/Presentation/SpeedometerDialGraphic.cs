@@ -8,47 +8,28 @@ namespace GoosingGeese.Presentation
     {
         private const float SweepRadians = Mathf.PI;
         private const int HubSegments = 24;
+
         private readonly float[] _scaleMarks = new float[4];
-        [SerializeField, Range(24, 144)]
-        private int _segments = 72;
-        [SerializeField, Range(0.1f, 0.4f)]
-        private float _bandThickness = 0.22f;
-        [SerializeField, Range(0.7f, 1f)]
-        private float _radiusScale = 0.96f;
-        [SerializeField, Range(0.5f, 0.9f)]
-        private float _needleLength = 0.74f;
-        [SerializeField, Range(0.01f, 0.05f)]
-        private float _needleWidth = 0.025f;
-        [SerializeField, Range(0.04f, 0.12f)]
-        private float _hubRadius = 0.065f;
-        [SerializeField]
-        private Color _green = new Color(0.25f, 0.84f, 0.25f, 1f);
-        [SerializeField]
-        private Color _yellow = new Color(1f, 0.82f, 0.08f, 1f);
-        [SerializeField]
-        private Color _red = new Color(0.96f, 0.23f, 0.18f, 1f);
-        [SerializeField]
-        private Color _needleColor = new Color(0.03f, 0.16f, 0.21f, 1f);
-        [SerializeField]
-        private Color _dividerColor = Color.white;
-        [SerializeField, Min(0f)]
-        private float _dividerWidth = 1.5f;
-        [SerializeField, Min(0f)]
-        private float _scalePadding = 30f;
-        [SerializeField, Min(0f)]
-        private float _tickLength = 8f;
-        [SerializeField, Min(0f)]
-        private float _tickOffset = 3f;
-        [SerializeField, Min(0f)]
-        private float _labelOffset = 12f;
-        [SerializeField, Min(0f)]
-        private float _tickWidth = 2f;
-        [SerializeField, Range(1, 20)]
-        private int _minorDivisions = 10;
-        [SerializeField, Min(0f)]
-        private float _minorTickLength = 4f;
-        [SerializeField, Range(0f, 0.05f)]
-        private float _tickMergeFraction = 0.02f;
+        [SerializeField, Range(24, 144)] private int _segments = 72;
+        [SerializeField, Range(0.1f, 0.4f)] private float _bandThickness = 0.22f;
+        [SerializeField, Range(0.7f, 1f)] private float _radiusScale = 0.96f;
+        [SerializeField, Range(0.5f, 0.9f)] private float _needleLength = 0.74f;
+        [SerializeField, Range(0.01f, 0.05f)] private float _needleWidth = 0.025f;
+        [SerializeField, Range(0.04f, 0.12f)] private float _hubRadius = 0.065f;
+        [SerializeField] private Color _green = new Color(0.25f, 0.84f, 0.25f, 1f);
+        [SerializeField] private Color _yellow = new Color(1f, 0.82f, 0.08f, 1f);
+        [SerializeField] private Color _red = new Color(0.96f, 0.23f, 0.18f, 1f);
+        [SerializeField] private Color _needleColor = new Color(0.03f, 0.16f, 0.21f, 1f);
+        [SerializeField] private Color _dividerColor = Color.white;
+        [SerializeField, Min(0f)] private float _dividerWidth = 1.5f;
+        [SerializeField, Min(0f)] private float _scalePadding = 30f;
+        [SerializeField, Min(0f)] private float _tickLength = 8f;
+        [SerializeField, Min(0f)] private float _tickOffset = 3f;
+        [SerializeField, Min(0f)] private float _labelOffset = 12f;
+        [SerializeField, Min(0f)] private float _tickWidth = 2f;
+        [SerializeField, Range(1, 20)] private int _minorDivisions = 10;
+        [SerializeField, Min(0f)] private float _minorTickLength = 4f;
+        [SerializeField, Range(0f, 0.05f)] private float _tickMergeFraction = 0.02f;
         private int _scaleMarkCount;
         private float _speed;
         private float _greenEnd = 0.5f;

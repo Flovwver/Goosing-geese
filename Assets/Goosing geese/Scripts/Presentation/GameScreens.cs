@@ -13,17 +13,12 @@ namespace GoosingGeese.Presentation
     {
         private const int CanvasSortingOrder = 20;
         private const float BendNoticeDistance = 55f;
-        private static readonly Color PanelColor = GameUiTheme.Panel;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private Racer _player;
-        [SerializeField]
-        private OpponentSpawner _opponents;
-        [SerializeField]
-        private GarageView _garage;
-        [SerializeField]
-        private CampaignView _campaignView;
+
+        [SerializeField] private RaceController _race;
+        [SerializeField] private Racer _player;
+        [SerializeField] private OpponentSpawner _opponents;
+        [SerializeField] private GarageView _garage;
+        [SerializeField] private CampaignView _campaignView;
         private GameObject _pedal;
         private PedalPromptView _pedalPrompt;
         private RectTransform _safeArea;
@@ -35,11 +30,9 @@ namespace GoosingGeese.Presentation
         private QuestsView _questsView;
         private ScenerySelectionView _sceneryView;
         private GameUiFactory _ui;
-        private GameObject _canvasRoot;
-        [SerializeField]
-        private Speedometer _speedometer;
-        [SerializeField]
-        private PedalButton _pedalButton;
+        private Canvas _canvasRoot;
+        [SerializeField] private Speedometer _speedometer;
+        [SerializeField] private PedalButton _pedalButton;
         private RoadNavigator _playerNavigator;
         private Racer _displayOpponent;
         private RoadNavigator _opponentNavigator;
@@ -85,7 +78,7 @@ namespace GoosingGeese.Presentation
 
         private void Update()
         {
-            GameUiFactory.UpdateSafeArea(_safeArea);
+            _ui.UpdateSafeArea(_safeArea);
             UpdateRaceStatus();
             UpdateBendNotice();
         }
@@ -112,14 +105,14 @@ namespace GoosingGeese.Presentation
             bool showNavigation = _panel == null && menusHidden && _race.State != RaceState.Result;
             bool waiting = _race.State == RaceState.Waiting;
             bool showStartMenu = showNavigation && waiting;
-            _garageLabel.text = _race.Session.Text.Choose("ГАРАЖ", "GARAGE");
-            _trophyLabel.text = _race.Session.Text.Choose("РЕКОРД", "RECORD");
+            _garageLabel.text = _race.Session.Text.Get("garage");
+            _trophyLabel.text = _race.Session.Text.Get("record");
             _pedal.SetActive(showNavigation);
             _pedalPrompt.SetVisible(showStartMenu);
             _menuBackdrop.SetActive(showStartMenu);
             _levelButton.SetActive(showStartMenu);
-            _levelLabel.text = _race.Session.Text.Choose("УРОВЕНЬ ", "LEVEL ") + _race.Progress.Level + " →";
-            _wallet.text = _race.Progress.Balance + _race.Session.Text.Choose(" ОЧК.", " PTS");
+            _levelLabel.text = _race.Session.Text.Get("level") + _race.Progress.Level + " →";
+            _wallet.text = _race.Progress.Balance + _race.Session.Text.Get("pts.2");
             _gear.SetActive(showNavigation);
             _trophy.SetActive(showNavigation && waiting);
             _garageButton.SetActive(showNavigation && waiting);
@@ -149,7 +142,7 @@ namespace GoosingGeese.Presentation
                 }
 
                 bool ahead = _playerNavigator.DistanceAlongPath >= _opponentNavigator.DistanceAlongPath;
-                lead = ahead ? _race.Session.Text.Choose("Ты впереди", "You are ahead") : _race.Session.Text.Choose("Соперник впереди", "Rival is ahead");
+                lead = ahead ? _race.Session.Text.Get("you.are.ahead") : _race.Session.Text.Get("rival.is.ahead");
             }
 
             if (_lastStatus == lead && _lastStatusState == _race.State && _lastRemainingPercent == remainingPercent)
@@ -158,7 +151,7 @@ namespace GoosingGeese.Presentation
             _lastStatus = lead;
             _lastStatusState = _race.State;
             _lastRemainingPercent = remainingPercent;
-            string heading = remainingPercent < 0 ? GetStateText() : _race.Session.Text.Choose("До финиша: ", "To finish: ") + remainingPercent + "%";
+            string heading = remainingPercent < 0 ? GetStateText() : _race.Session.Text.Get("to.finish") + remainingPercent + "%";
             _status.text = heading + "\n" + lead;
         }
 
@@ -167,13 +160,13 @@ namespace GoosingGeese.Presentation
             switch (_race.State)
             {
                 case RaceState.Waiting:
-                    return _race.Session.Text.Choose("УРОВЕНЬ ", "LEVEL ") + _race.Session.LevelNumber;
+                    return _race.Session.Text.Get("level") + _race.Session.LevelNumber;
                 case RaceState.Result:
-                    return _race.Session.Text.Choose("Результат", "Result");
+                    return _race.Session.Text.Get("result");
                 case RaceState.Paused:
-                    return _race.Session.Text.Choose("Пауза", "Paused");
+                    return _race.Session.Text.Get("paused");
                 default:
-                    return _race.Session.Text.Choose("Гонка", "Race");
+                    return _race.Session.Text.Get("race");
             }
         }
 
@@ -186,9 +179,7 @@ namespace GoosingGeese.Presentation
                 return;
 
             bool shouldCoast = _player.NormalizedSpeed >= _player.YellowZoneThreshold;
-            string message = shouldCoast ? _race.Session.Text.Choose("Поворот • отпусти газ",
-                "Bend • release throttle") : _race.Session.Text.Choose("Поворот • держись в зелёной зоне",
-                "Bend • stay in the green zone");
+            string message = shouldCoast ? _race.Session.Text.Get("bend.release.throttle") : _race.Session.Text.Get("bend.stay.in.the.green.zone");
 
             if (_bendNotice.text != message)
                 _bendNotice.text = message;
@@ -196,8 +187,7 @@ namespace GoosingGeese.Presentation
 
         private void InitializeUi()
         {
-            Font font = GameUiTheme.LoadFont();
-            _ui = new GameUiFactory(font, GetComponent<GameAudio>().PlayClick);
+            _ui = GetComponent<GameUiBootstrap>().Factory;
             _settingsView = new SettingsView(_race.Progress, _ui, _race.Session.Commands);
             _leaderboardView = new LeaderboardView(_race.Progress, _ui);
             _questsView = new QuestsView(_race.Progress, _ui, _race.Session.Commands);
@@ -207,8 +197,8 @@ namespace GoosingGeese.Presentation
             {
                 _speedometer.transform.SetParent(transform, false);
                 _pedal.transform.SetParent(transform, false);
-                _canvasRoot.SetActive(false);
-                Destroy(_canvasRoot);
+                _canvasRoot.gameObject.SetActive(false);
+                Destroy(_canvasRoot.gameObject);
                 _panel = null;
             }
 
@@ -217,15 +207,15 @@ namespace GoosingGeese.Presentation
 
         private void BuildCanvas()
         {
-            var root = GameUiFactory.CreateCanvas("Game screens", transform, CanvasSortingOrder);
+            var root = _ui.CreateCanvas("Game screens", transform, CanvasSortingOrder);
             _canvasRoot = root;
-            _safeArea = GameUiFactory.CreateRect("Safe area", root.transform, Vector2.zero, Vector2.one);
+            _safeArea = _ui.CreateRect("Safe area", root.transform, Vector2.zero, Vector2.one);
             _status = _ui.CreateLabel(_safeArea, "", 23);
-            GameUiFactory.Place(_status.rectTransform, new Vector2(0.22f, 0.81f), new Vector2(0.9f, 0.88f));
+            _ui.Place(_status.rectTransform, new Vector2(0.22f, 0.81f), new Vector2(0.9f, 0.88f));
             _bendNotice = _ui.CreateLabel(_safeArea, "", 22);
             _bendNotice.color = new Color(0.25f, 0.84f, 0.25f, 1f);
             _bendNotice.gameObject.AddComponent<Outline>().effectColor = Color.black;
-            GameUiFactory.Place(_bendNotice.rectTransform, new Vector2(0.1f, 0.755f), new Vector2(0.9f, 0.81f));
+            _ui.Place(_bendNotice.rectTransform, new Vector2(0.1f, 0.755f), new Vector2(0.9f, 0.81f));
             _bendNotice.gameObject.SetActive(false);
             _gear = MakeIconButton("Settings", MenuSymbol.Gear, OpenSettings, new Vector2(0.025f, 0.89f), new Vector2(0.17f, 0.975f), Color.white);
             _trophy = MakeIconButton("Leaderboard",
@@ -248,44 +238,44 @@ namespace GoosingGeese.Presentation
                 new Color(0.7f,
                 0.86f,
                 1f));
-            _garageLabel = _ui.CreateLabel(_garageButton.transform, _race.Session.Text.Choose("ГАРАЖ", "GARAGE"), 18);
-            GameUiFactory.Place(_garageLabel.rectTransform, new Vector2(0f, -0.25f), new Vector2(1f, 0.02f));
-            _trophyLabel = _ui.CreateLabel(_trophy.transform, _race.Session.Text.Choose("РЕКОРД", "RECORD"), 18);
-            GameUiFactory.Place(_trophyLabel.rectTransform, new Vector2(-0.1f, -0.25f), new Vector2(1.1f, 0.02f));
+            _garageLabel = _ui.CreateLabel(_garageButton.transform, _race.Session.Text.Get("garage"), 18);
+            _ui.Place(_garageLabel.rectTransform, new Vector2(0f, -0.25f), new Vector2(1f, 0.02f));
+            _trophyLabel = _ui.CreateLabel(_trophy.transform, _race.Session.Text.Get("record"), 18);
+            _ui.Place(_trophyLabel.rectTransform, new Vector2(-0.1f, -0.25f), new Vector2(1.1f, 0.02f));
             Button levelButton = _ui.CreateButton(_safeArea, "", OpenCampaign);
             _levelButton = levelButton.gameObject;
             _levelLabel = levelButton.GetComponentInChildren<Text>();
             _levelLabel.fontSize = 22;
-            GameUiFactory.Place((RectTransform)_levelButton.transform, new Vector2(0.31f, 0.815f), new Vector2(0.79f, 0.855f));
+            _ui.Place((RectTransform)_levelButton.transform, new Vector2(0.31f, 0.815f), new Vector2(0.79f, 0.855f));
             BuildMenuChrome();
             ConfigureRaceHud();
         }
 
         private void BuildMenuChrome()
         {
-            var rect = GameUiFactory.CreateRect("Start menu chrome", _safeArea, Vector2.zero, Vector2.one);
+            var rect = _ui.CreateRect("Start menu chrome", _safeArea, Vector2.zero, Vector2.one);
             _menuBackdrop = rect.gameObject;
             rect.SetAsFirstSibling();
-            var header = GameUiFactory.CreateRect("Sky header", rect, new Vector2(0f, 0.875f), Vector2.one);
+            var header = _ui.CreateRect("Sky header", rect, new Vector2(0f, 0.875f), Vector2.one);
             var headerImage = header.gameObject.AddComponent<Image>();
-            headerImage.color = GameUiTheme.Header;
+            headerImage.color = _ui.Theme.Header;
             headerImage.raycastTarget = false;
-            var footer = GameUiFactory.CreateRect("Navigation dock", rect, Vector2.zero, new Vector2(1f, 0.17f));
+            var footer = _ui.CreateRect("Navigation dock", rect, Vector2.zero, new Vector2(1f, 0.17f));
             var footerImage = footer.gameObject.AddComponent<Image>();
-            footerImage.color = GameUiTheme.Header;
+            footerImage.color = _ui.Theme.Header;
             footerImage.raycastTarget = false;
-            Text title = _ui.CreateHeading(rect, "GOOSING\nGEESE", 68);
+            Text title = _ui.CreateHeading(rect, _race.Session.Text.Get("game.title"), 68);
             title.fontStyle = FontStyle.Normal;
             title.lineSpacing = 0.85f;
-            GameUiFactory.Place(title.rectTransform, new Vector2(0.12f, 0.65f), new Vector2(0.88f, 0.81f));
+            _ui.Place(title.rectTransform, new Vector2(0.12f, 0.65f), new Vector2(0.88f, 0.81f));
             var outline = title.gameObject.AddComponent<Outline>();
-            outline.effectColor = GameUiTheme.Ink;
+            outline.effectColor = _ui.Theme.Ink;
             outline.effectDistance = new Vector2(3f, -3f);
             _wallet = _ui.CreateLabel(rect, "", 24);
-            _wallet.color = GameUiTheme.Accent;
+            _wallet.color = _ui.Theme.Accent;
             _wallet.alignment = TextAnchor.MiddleRight;
             _wallet.fontStyle = FontStyle.Bold;
-            GameUiFactory.Place(_wallet.rectTransform, new Vector2(0.55f, 0.96f), new Vector2(0.96f, 0.995f));
+            _ui.Place(_wallet.rectTransform, new Vector2(0.55f, 0.96f), new Vector2(0.96f, 0.995f));
         }
 
         private GameObject MakeIconButton(string name, MenuSymbol symbol, Action action, Vector2 min, Vector2 max, Color tint)
@@ -294,9 +284,9 @@ namespace GoosingGeese.Presentation
             Text label = button.GetComponentInChildren<Text>();
             label.gameObject.SetActive(false);
             Destroy(label.gameObject);
-            button.GetComponent<Image>().color = GameUiTheme.Button;
-            GameUiFactory.Place((RectTransform)button.transform, min, max);
-            var iconRect = GameUiFactory.CreateRect("Symbol", button.transform, Vector2.zero, Vector2.one);
+            button.GetComponent<Image>().color = _ui.Theme.Button;
+            _ui.Place((RectTransform)button.transform, min, max);
+            var iconRect = _ui.CreateRect("Symbol", button.transform, Vector2.zero, Vector2.one);
             var icon = iconRect.gameObject.AddComponent<MenuSymbolGraphic>();
             icon.color = tint;
             icon.SetSymbol(symbol);
@@ -311,14 +301,14 @@ namespace GoosingGeese.Presentation
             RectTransform bar = _speedometer.GetComponent<RectTransform>();
             bar.SetParent(_safeArea, false);
             bar.localScale = Vector3.one;
-            GameUiFactory.Place(bar, new Vector2(0.27f, 0.875f), new Vector2(0.83f, 0.995f));
+            _ui.Place(bar, new Vector2(0.27f, 0.875f), new Vector2(0.83f, 0.995f));
             PedalButton pedal = _pedalButton;
             _pedal = pedal.gameObject;
             _pedalPrompt = pedal.GetComponent<PedalPromptView>();
             RectTransform pedalRect = pedal.GetComponent<RectTransform>();
             pedalRect.SetParent(_safeArea, false);
             pedalRect.localScale = Vector3.one;
-            GameUiFactory.Place(pedalRect, new Vector2(0.36f, 0.055f), new Vector2(0.64f, 0.215f));
+            _ui.Place(pedalRect, new Vector2(0.36f, 0.055f), new Vector2(0.64f, 0.215f));
         }
 
         private void ShowPanel(string title, string page)
@@ -331,9 +321,9 @@ namespace GoosingGeese.Presentation
 
             _garage.Hide();
             _campaignView.Hide();
-            var rect = GameUiFactory.CreateRect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
+            var rect = _ui.CreateRect("Panel " + page, _safeArea, new Vector2(0.06f, 0.12f), new Vector2(0.94f, 0.86f));
             _panel = rect.gameObject;
-            _panel.AddComponent<Image>().color = PanelColor;
+            _panel.AddComponent<Image>().color = _ui.Theme.Panel;
             var layout = _panel.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(24, 24, 24, 24);
             layout.spacing = 12f;
@@ -416,10 +406,10 @@ namespace GoosingGeese.Presentation
 
         private void ShowPause()
         {
-            ShowPanel(_race.Session.Text.Choose("Пауза", "Paused"), "pause");
-            _ui.CreateButton(_panel.transform, _race.Session.Text.Choose("Продолжить", "Resume"), _race.Resume);
-            _ui.CreateButton(_panel.transform, _race.Session.Text.Choose("Настройки", "Settings"), OpenSettings);
-            _ui.CreateButton(_panel.transform, _race.Session.Text.Choose("В главное меню", "Main menu"), _race.ReturnToMenu);
+            ShowPanel(_race.Session.Text.Get("paused"), "pause");
+            _ui.CreateButton(_panel.transform, _race.Session.Text.Get("resume"), _race.Resume);
+            _ui.CreateButton(_panel.transform, _race.Session.Text.Get("settings"), OpenSettings);
+            _ui.CreateButton(_panel.transform, _race.Session.Text.Get("main.menu"), _race.ReturnToMenu);
         }
 
         private void OpenSettings()
@@ -430,7 +420,7 @@ namespace GoosingGeese.Presentation
             if (_race.State == RaceState.Result)
                 return;
 
-            ShowPanel(_race.Session.Text.Choose("Настройки", "Settings"), "settings");
+            ShowPanel(_race.Session.Text.Get("settings"), "settings");
             _settingsView.Render(_panel.transform, OpenSettings, ShowQuests, ShowScenery, Back);
         }
 
@@ -441,11 +431,9 @@ namespace GoosingGeese.Presentation
 
         private void ShowLeaderboard(bool online)
         {
-            ShowPanel(_race.Session.Text.Choose("Рекорды", "Leaderboard"), "leaderboard");
+            ShowPanel(_race.Session.Text.Get("leaderboard"), "leaderboard");
             GameObject panel = _panel;
-            string switchLabel = online ? _race.Session.Text.Choose("Рекорды устройства",
-                "Device records") : _race.Session.Text.Choose("Глобальный рейтинг",
-                "Global leaderboard");
+            string switchLabel = online ? _race.Session.Text.Get("device.records") : _race.Session.Text.Get("global.leaderboard");
             _ui.CreateButton(panel.transform, switchLabel, () => ShowLeaderboard(online == false));
             Transform content = CreateLeaderboardContent(panel.transform);
 
@@ -455,7 +443,7 @@ namespace GoosingGeese.Presentation
                 return;
             }
 
-            ShowLeaderboardStatus(content, _race.Session.Text.Choose("Загружаем глобальный рейтинг…", "Loading global leaderboard…"));
+            ShowLeaderboardStatus(content, _race.Session.Text.Get("loading.global.leaderboard"));
             GoosingGeese.Infrastructure.GamePlatform.Current.RequestLeaderboard(_race.Progress.PlayerId, entries =>
             {
                 if (isActiveAndEnabled == false || panel == null || _panel != panel)
@@ -466,9 +454,9 @@ namespace GoosingGeese.Presentation
                 content = CreateLeaderboardContent(panel.transform);
 
                 if (entries == null)
-                    ShowLeaderboardStatus(content, _race.Session.Text.Choose("Глобальный рейтинг недоступен", "Global leaderboard unavailable"));
+                    ShowLeaderboardStatus(content, _race.Session.Text.Get("global.leaderboard.unavailable"));
                 else if (entries.Count == 0)
-                    ShowLeaderboardStatus(content, _race.Session.Text.Choose("В глобальном рейтинге пока нет результатов", "No global records yet"));
+                    ShowLeaderboardStatus(content, _race.Session.Text.Get("no.global.records.yet"));
                 else
                     _leaderboardView.Render(content, entries, Back, true);
             });
@@ -477,7 +465,7 @@ namespace GoosingGeese.Presentation
         private void ShowLeaderboardStatus(Transform content, string message)
         {
             _ui.CreateLabel(content, message, 24).GetComponent<LayoutElement>().preferredHeight = 130f;
-            _ui.CreateButton(content, _race.Session.Text.Choose("Назад", "Back"), Back);
+            _ui.CreateButton(content, _race.Session.Text.Get("back"), Back);
         }
 
         private Transform CreateLeaderboardContent(Transform parent)
@@ -494,13 +482,13 @@ namespace GoosingGeese.Presentation
 
         private void ShowQuests()
         {
-            ShowPanel(_race.Session.Text.Choose("Задания", "Quests"), "quests");
+            ShowPanel(_race.Session.Text.Get("quests"), "quests");
             _questsView.Render(_panel.transform, Back, ShowQuests);
         }
 
         private void ShowScenery()
         {
-            ShowPanel(_race.Session.Text.Choose("Окружение", "Scenery"), "appearance");
+            ShowPanel(_race.Session.Text.Get("scenery"), "appearance");
             _sceneryView.Render(_panel.transform, Back, ShowScenery);
         }
 

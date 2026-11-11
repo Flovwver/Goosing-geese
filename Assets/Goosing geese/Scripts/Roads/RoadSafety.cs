@@ -8,16 +8,11 @@ namespace GoosingGeese.Roads
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RoadSafety")]
     public class RoadSafety : MonoBehaviour
     {
-        [SerializeField]
-        private Level _level;
-        [SerializeField]
-        private Racer _player;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField, Min(0f)]
-        private float _roadHalfWidth = 12f;
-        [SerializeField, Min(0f)]
-        private float _offRoadGraceTime = 0.75f;
+        [SerializeField] private Level _level;
+        [SerializeField] private Racer _player;
+        [SerializeField] private RaceController _race;
+        [SerializeField, Min(0f)] private float _roadHalfWidth = 12f;
+        [SerializeField, Min(0f)] private float _offRoadGraceTime = 0.75f;
         private RoadNavigator _navigator;
         private bool _hasPath;
         private float _offRoadTimer;

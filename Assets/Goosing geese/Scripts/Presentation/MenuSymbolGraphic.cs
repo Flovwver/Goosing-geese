@@ -8,8 +8,8 @@ namespace GoosingGeese.Presentation
     {
         private const int RingSegments = 32;
         private const int GearTeeth = 8;
-        [SerializeField]
-        private MenuSymbol _symbol;
+
+        [SerializeField] private MenuSymbol _symbol;
 
         protected override void OnPopulateMesh(VertexHelper vertices)
         {

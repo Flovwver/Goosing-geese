@@ -13,14 +13,10 @@ namespace GoosingGeese.Racing
     public class RaceController : MonoBehaviour
     {
         private readonly EventPublisher _events = new EventPublisher();
-        [SerializeField]
-        private Level _level;
-        [SerializeField]
-        private Racer _player;
-        [SerializeField]
-        private ThrottleInput _input;
-        [SerializeField]
-        private CampaignSettings _campaign;
+        [SerializeField] private Level _level;
+        [SerializeField] private Racer _player;
+        [SerializeField] private ThrottleInput _input;
+        [SerializeField] private CampaignSettings _campaign;
         private OpponentSpawner _opponents;
         private RaceState _stateBeforePause;
         private float _resumeTimeScale = 1f;

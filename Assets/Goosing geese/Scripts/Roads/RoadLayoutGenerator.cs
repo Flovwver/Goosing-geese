@@ -31,7 +31,6 @@ namespace GoosingGeese.Roads
                     return layout;
             }
 
-            Debug.LogWarning("Road generation attempts exhausted; using a straight fallback.");
             var fallback = new RoadPieceType[pieceCount + finishRunoutPieces];
 
             for (int index = 0; index < fallback.Length; index++)

@@ -11,22 +11,19 @@ namespace GoosingGeese.Presentation
     {
         private const int CanvasSortingOrder = 25;
         private const float SwatchSize = 48f;
-        private static readonly Color PanelColor = GameUiTheme.Panel;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private RacerGarage _garage;
-        [SerializeField]
-        private GameAudio _audio;
+
+        [SerializeField] private RaceController _race;
+        [SerializeField] private RacerGarage _garage;
+        [SerializeField] private GameAudio _audio;
         private GameUiFactory _ui;
-        private GameObject _canvasRoot;
+        private Canvas _canvasRoot;
         private RectTransform _safeArea;
-        private GameObject _header;
-        private GameObject _footer;
+        private RectTransform _header;
+        private RectTransform _footer;
 
         public event Action<bool> VisibilityChanged;
 
-        public bool IsVisible => _canvasRoot != null && _canvasRoot.activeSelf;
+        public bool IsVisible => _canvasRoot != null && _canvasRoot.gameObject.activeSelf;
 
         private void Awake()
         {
@@ -51,7 +48,7 @@ namespace GoosingGeese.Presentation
         private void Update()
         {
             if (IsVisible)
-                GameUiFactory.UpdateSafeArea(_safeArea);
+                _ui.UpdateSafeArea(_safeArea);
         }
 
         private void OnDisable()
@@ -67,7 +64,7 @@ namespace GoosingGeese.Presentation
             if (_race.State != RaceState.Waiting)
                 return;
 
-            _canvasRoot.SetActive(true);
+            _canvasRoot.gameObject.SetActive(true);
             Refresh();
             VisibilityChanged?.Invoke(true);
         }
@@ -77,7 +74,7 @@ namespace GoosingGeese.Presentation
             if (IsVisible == false)
                 return;
 
-            _canvasRoot.SetActive(false);
+            _canvasRoot.gameObject.SetActive(false);
             _garage.EndPreview();
             VisibilityChanged?.Invoke(false);
         }
@@ -86,17 +83,17 @@ namespace GoosingGeese.Presentation
         {
             if (_canvasRoot != null)
             {
-                _canvasRoot.SetActive(false);
-                Destroy(_canvasRoot);
+                _canvasRoot.gameObject.SetActive(false);
+                Destroy(_canvasRoot.gameObject);
             }
 
             _header = null;
             _footer = null;
-            _ui = new GameUiFactory(GameUiTheme.LoadFont(), _audio.PlayClick);
-            _canvasRoot = GameUiFactory.CreateCanvas("Garage", transform, CanvasSortingOrder);
-            _canvasRoot.AddComponent<Image>().color = Color.clear;
-            _safeArea = GameUiFactory.CreateRect("Safe area", _canvasRoot.transform, Vector2.zero, Vector2.one);
-            _canvasRoot.SetActive(false);
+            _ui = GetComponent<GameUiBootstrap>().Factory;
+            _canvasRoot = _ui.CreateCanvas("Garage", transform, CanvasSortingOrder);
+            _canvasRoot.gameObject.AddComponent<Image>().color = Color.clear;
+            _safeArea = _ui.CreateRect("Safe area", _canvasRoot.transform, Vector2.zero, Vector2.one);
+            _canvasRoot.gameObject.SetActive(false);
         }
 
         private void Refresh()
@@ -106,37 +103,35 @@ namespace GoosingGeese.Presentation
 
             ClearPanels();
             RectTransform header = CreatePanel("Garage header", new Vector2(0f, 0.69f), Vector2.one);
-            _header = header.gameObject;
-            _ui.CreateHeading(header, _race.Session.Text.Choose("ГАРАЖ", "GARAGE"), 38);
+            _header = header;
+            _ui.CreateHeading(header, _race.Session.Text.Get("garage"), 38);
             Text balance = _ui.CreateLabel(header,
-                _race.Session.Text.Choose("Доступно: ",
-                "Available: ")
+                _race.Session.Text.Get("available")
                 + _garage.Balance
-                + _race.Session.Text.Choose(" • Всего: ",
-                " • Total: ")
+                + _race.Session.Text.Get("total")
                 + _garage.TotalPoints,
                 24);
-            balance.color = GameUiTheme.Accent;
+            balance.color = _ui.Theme.Accent;
             balance.fontStyle = FontStyle.Bold;
             var balanceOutline = balance.gameObject.AddComponent<Outline>();
-            balanceOutline.effectColor = GameUiTheme.Ink;
+            balanceOutline.effectColor = _ui.Theme.Ink;
             balanceOutline.effectDistance = new Vector2(1f, -1f);
             BuildModelSelector(header);
             BuildColorSelector(header);
             BuildPurchaseButton(header);
             RectTransform footer = CreatePanel("Garage upgrades", Vector2.zero, new Vector2(1f, 0.4f));
-            _footer = footer.gameObject;
+            _footer = footer;
 
             foreach (RacerUpgradeKind kind in Enum.GetValues(typeof(RacerUpgradeKind)))
                 AddUpgradeButton(footer, kind);
 
-            _ui.CreateButton(footer, _race.Session.Text.Choose("Назад к гонке", "Back to race"), Hide);
+            _ui.CreateButton(footer, _race.Session.Text.Get("back.to.race"), Hide);
         }
 
         private RectTransform CreatePanel(string name, Vector2 min, Vector2 max)
         {
-            var rect = GameUiFactory.CreateRect(name, _safeArea, min, max);
-            rect.gameObject.AddComponent<Image>().color = PanelColor;
+            var rect = _ui.CreateRect(name, _safeArea, min, max);
+            rect.gameObject.AddComponent<Image>().color = _ui.Theme.Panel;
             var layout = rect.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(16, 16, 16, 16);
             layout.spacing = 4f;
@@ -148,7 +143,7 @@ namespace GoosingGeese.Presentation
 
         private void BuildModelSelector(Transform parent)
         {
-            var row = GameUiFactory.CreateRect("Model selector", parent, Vector2.zero, Vector2.one);
+            var row = _ui.CreateRect("Model selector", parent, Vector2.zero, Vector2.one);
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 60f;
             var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 4f;
@@ -161,11 +156,9 @@ namespace GoosingGeese.Presentation
             Text name = _ui.CreateLabel(row,
                 _garage.PreviewEntry.GetModelName(_race.Progress.UseEnglish)
                 + "\n"
-                + _race.Session.Text.Choose("Скорость ",
-                "Speed ")
+                + _race.Session.Text.Get("speed")
                 + _garage.PreviewEntry.Stats.MaxSpeed.ToString("0")
-                + _race.Session.Text.Choose(" • Зел. до ",
-                " • Green cap ")
+                + _race.Session.Text.Get("green.cap")
                 + (_garage.PreviewEntry.MaximumGreenZone * 100f).ToString("0")
                 + "%",
                 24);
@@ -181,7 +174,7 @@ namespace GoosingGeese.Presentation
             if (colors.Length < 2)
                 return;
 
-            var row = GameUiFactory.CreateRect("Color selector", parent, Vector2.zero, Vector2.one);
+            var row = _ui.CreateRect("Color selector", parent, Vector2.zero, Vector2.one);
             row.gameObject.AddComponent<LayoutElement>().minHeight = SwatchSize;
             var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 12f;
@@ -193,20 +186,16 @@ namespace GoosingGeese.Presentation
 
             foreach (int index in colors)
             {
-                var rect = GameUiFactory.CreateRect("Color swatch " + index, row, Vector2.zero, Vector2.one);
+                var rect = _ui.CreateRect("Color swatch " + index, row, Vector2.zero, Vector2.one);
                 var size = rect.gameObject.AddComponent<LayoutElement>();
                 size.minWidth = SwatchSize;
                 size.minHeight = SwatchSize;
                 var graphic = rect.gameObject.AddComponent<GarageColorSwatch>();
-                graphic.Show(_garage.GetColor(index), index == _garage.PreviewIndex, index == _garage.SelectedIndex);
+                graphic.Show(_ui.Theme, _garage.GetColor(index), index == _garage.PreviewIndex, index == _garage.SelectedIndex);
                 var button = rect.gameObject.AddComponent<Button>();
                 button.targetGraphic = graphic;
                 button.transition = Selectable.Transition.None;
-                button.onClick.AddListener(() =>
-                {
-                    _audio.PlayClick();
-                    _garage.Browse(index);
-                });
+                graphic.Bind(button, _garage, _audio, index);
             }
         }
 
@@ -230,16 +219,12 @@ namespace GoosingGeese.Presentation
         private string GetPurchaseLabel(bool owned, bool selected)
         {
             if (owned)
-                return selected ? _race.Session.Text.Choose("Выбрано", "Selected") : _race.Session.Text.Choose("Выбрать", "Select");
+                return selected ? _race.Session.Text.Get("selected") : _race.Session.Text.Get("select");
 
             if (_garage.HighestCompletedLevel < _garage.PreviewEntry.UnlockLevel)
-                return _race.Session.Text.Choose("После уровня ",
-                    "After level ")
-                    + _garage.PreviewEntry.UnlockLevel
-                    + " • "
-                    + _garage.PreviewEntry.PurchasePrice;
+                return _race.Session.Text.Get("after.level") + _garage.PreviewEntry.UnlockLevel + " • " + _garage.PreviewEntry.PurchasePrice;
 
-            return _race.Session.Text.Choose("Купить: ", "Buy: ") + _garage.PreviewEntry.PurchasePrice + _race.Session.Text.Choose(" очк.", " pts");
+            return _race.Session.Text.Get("buy") + _garage.PreviewEntry.PurchasePrice + _race.Session.Text.Get("pts");
         }
 
         private string GetUpgradePrefix(RacerUpgradeKind kind)
@@ -247,11 +232,11 @@ namespace GoosingGeese.Presentation
             switch (kind)
             {
                 case RacerUpgradeKind.ThermalResistance:
-                    return _race.Session.Text.Choose("Красная зона: ", "Red zone: ");
+                    return _race.Session.Text.Get("red.zone");
                 case RacerUpgradeKind.Handling:
-                    return _race.Session.Text.Choose("Зелёная зона: ", "Green zone: ");
+                    return _race.Session.Text.Get("green.zone");
                 case RacerUpgradeKind.Cooling:
-                    return _race.Session.Text.Choose("Спад нагрева: ×", "Cooling rate: ×");
+                    return _race.Session.Text.Get("cooling.rate");
                 default:
                     return "";
             }
@@ -264,35 +249,42 @@ namespace GoosingGeese.Presentation
 
         private void AddUpgradeButton(Transform parent, RacerUpgradeKind kind)
         {
+            string text = GetUpgradeText(kind, out bool maximum);
+            Button button = _ui.CreateButton(parent, text, () => _garage.TryUpgrade(kind));
+            StyleUpgradeButton(button, kind, maximum);
+            button.interactable = _garage.CanUpgrade(kind);
+        }
+
+        private string GetUpgradeText(RacerUpgradeKind kind, out bool maximum)
+        {
             int level = _garage.GetUpgradeLevel(kind);
             bool thermalLock = kind == RacerUpgradeKind.Handling && _garage.IsHandlingThermallyLimited();
             bool unchanged = Mathf.Approximately(_garage.GetUpgradeValue(kind), _garage.GetUpgradeValue(kind, 1));
-            bool maximum = level >= _garage.MaximumUpgradeLevel || (unchanged && thermalLock == false);
-            string price = maximum ? _race.Session.Text.Choose("МАКС.", "MAX") : _garage.GetUpgradePrice(kind) + _race.Session.Text.Choose(" очк.", " pts");
-            string preview = unchanged
-                && thermalLock ? _race.Session.Text.Choose("Улучши термостойкость",
-                "Improve heat resistance") : GetPreview(kind,
-                maximum);
+            maximum = level >= _garage.MaximumUpgradeLevel || (unchanged && thermalLock == false);
+            string price = maximum ? _race.Session.Text.Get("max") : _garage.GetUpgradePrice(kind) + _race.Session.Text.Get("pts");
+            string preview = unchanged && thermalLock ? _race.Session.Text.Get("improve.heat.resistance") : GetPreview(kind, maximum);
 
             if (_garage.HighestCompletedLevel < _garage.GetUpgradeRequiredStage(kind) && maximum == false)
-                preview = _race.Session.Text.Choose("После уровня ", "After level ") + _garage.GetUpgradeRequiredStage(kind);
+                preview = _race.Session.Text.Get("after.level") + _garage.GetUpgradeRequiredStage(kind);
 
-            string text = GetUpgradeName(kind) + "  " + level + "/" + _garage.MaximumUpgradeLevel + " • " + price + "\n" + preview;
-            Button button = _ui.CreateButton(parent, text, () => _garage.TryUpgrade(kind));
+            return GetUpgradeName(kind) + "  " + level + "/" + _garage.MaximumUpgradeLevel + " • " + price + "\n" + preview;
+        }
+
+        private void StyleUpgradeButton(Button button, RacerUpgradeKind kind, bool maximum)
+        {
             button.GetComponent<LayoutElement>().preferredHeight = 68f;
-            button.GetComponent<Image>().color = (int)kind % 2 == 0 ? GameUiTheme.LightRow : GameUiTheme.AlternateRow;
+            button.GetComponent<Image>().color = (int)kind % 2 == 0 ? _ui.Theme.LightRow : _ui.Theme.AlternateRow;
             Text label = button.GetComponentInChildren<Text>();
             label.fontSize = 22;
-            label.color = GameUiTheme.Ink;
+            label.color = _ui.Theme.Ink;
             label.alignment = TextAnchor.MiddleLeft;
-            GameUiFactory.Place(label.rectTransform, new Vector2(0.04f, 0.04f), new Vector2(0.84f, 0.96f));
-            var action = GameUiFactory.CreateRect("Upgrade action", button.transform, new Vector2(0.86f, 0f), Vector2.one);
+            _ui.Place(label.rectTransform, new Vector2(0.04f, 0.04f), new Vector2(0.84f, 0.96f));
+            var action = _ui.CreateRect("Upgrade action", button.transform, new Vector2(0.86f, 0f), Vector2.one);
             var actionImage = action.gameObject.AddComponent<Image>();
-            actionImage.color = GameUiTheme.Button;
+            actionImage.color = _ui.Theme.Button;
             actionImage.raycastTarget = false;
-            Text actionLabel = _ui.CreateLabel(action, maximum ? "MAX" : "+", maximum ? 16 : 42);
-            actionLabel.color = GameUiTheme.Accent;
-            button.interactable = _garage.CanUpgrade(kind);
+            Text actionLabel = _ui.CreateLabel(action, maximum ? _race.Session.Text.Get("max") : "+", maximum ? 16 : 42);
+            actionLabel.color = _ui.Theme.Accent;
         }
 
         private string GetUpgradeName(RacerUpgradeKind kind)
@@ -300,15 +292,15 @@ namespace GoosingGeese.Presentation
             switch (kind)
             {
                 case RacerUpgradeKind.Acceleration:
-                    return _race.Session.Text.Choose("Разгон", "Acceleration");
+                    return _race.Session.Text.Get("acceleration");
                 case RacerUpgradeKind.TopSpeed:
-                    return _race.Session.Text.Choose("Максимальная скорость", "Top speed");
+                    return _race.Session.Text.Get("top.speed");
                 case RacerUpgradeKind.Cooling:
-                    return _race.Session.Text.Choose("Охлаждение", "Cooling");
+                    return _race.Session.Text.Get("cooling");
                 case RacerUpgradeKind.Handling:
-                    return _race.Session.Text.Choose("Управляемость", "Handling");
+                    return _race.Session.Text.Get("handling");
                 case RacerUpgradeKind.ThermalResistance:
-                    return _race.Session.Text.Choose("Термостойкость", "Heat resistance");
+                    return _race.Session.Text.Get("heat.resistance");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(kind));
             }
@@ -346,14 +338,14 @@ namespace GoosingGeese.Presentation
         {
             if (_header != null)
             {
-                _header.SetActive(false);
-                Destroy(_header);
+                _header.gameObject.SetActive(false);
+                Destroy(_header.gameObject);
             }
 
             if (_footer != null)
             {
-                _footer.SetActive(false);
-                Destroy(_footer);
+                _footer.gameObject.SetActive(false);
+                Destroy(_footer.gameObject);
             }
         }
     }

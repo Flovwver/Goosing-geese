@@ -6,8 +6,7 @@ namespace GoosingGeese.EditorTools
 {
     public sealed class MeshMirrorTool : EditorWindow
     {
-        [SerializeField]
-        private Mesh _source;
+        [SerializeField] private Mesh _source;
 
         private void OnGUI()
         {

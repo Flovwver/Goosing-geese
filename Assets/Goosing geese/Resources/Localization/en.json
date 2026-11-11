@@ -1,0 +1,308 @@
+{
+  "_entries": [
+    {
+      "_key": "acceleration",
+      "_text": "Acceleration"
+    },
+    {
+      "_key": "after.level",
+      "_text": "After level "
+    },
+    {
+      "_key": "available",
+      "_text": "Available: "
+    },
+    {
+      "_key": "back",
+      "_text": "Back"
+    },
+    {
+      "_key": "back.to.race",
+      "_text": "Back to race"
+    },
+    {
+      "_key": "bend.release.throttle",
+      "_text": "Bend • release throttle"
+    },
+    {
+      "_key": "bend.stay.in.the.green.zone",
+      "_text": "Bend • stay in the green zone"
+    },
+    {
+      "_key": "buy",
+      "_text": "Buy: "
+    },
+    {
+      "_key": "change.scenery",
+      "_text": "Change scenery"
+    },
+    {
+      "_key": "city",
+      "_text": "City"
+    },
+    {
+      "_key": "cleared",
+      "_text": " • Cleared"
+    },
+    {
+      "_key": "cooling",
+      "_text": "Cooling"
+    },
+    {
+      "_key": "cooling.rate",
+      "_text": "Cooling rate: ×"
+    },
+    {
+      "_key": "countryside",
+      "_text": "Countryside"
+    },
+    {
+      "_key": "device.record",
+      "_text": "Device record"
+    },
+    {
+      "_key": "device.records",
+      "_text": "Device records"
+    },
+    {
+      "_key": "effects",
+      "_text": "Effects"
+    },
+    {
+      "_key": "garage",
+      "_text": "GARAGE"
+    },
+    {
+      "_key": "global.leaderboard",
+      "_text": "Global leaderboard"
+    },
+    {
+      "_key": "global.leaderboard.unavailable",
+      "_text": "Global leaderboard unavailable"
+    },
+    {
+      "_key": "green.cap",
+      "_text": " • Green cap "
+    },
+    {
+      "_key": "green.zone",
+      "_text": "Green zone: "
+    },
+    {
+      "_key": "handling",
+      "_text": "Handling"
+    },
+    {
+      "_key": "heat.resistance",
+      "_text": "Heat resistance"
+    },
+    {
+      "_key": "improve.heat.resistance",
+      "_text": "Improve heat resistance"
+    },
+    {
+      "_key": "leaderboard",
+      "_text": "Leaderboard"
+    },
+    {
+      "_key": "level",
+      "_text": "LEVEL "
+    },
+    {
+      "_key": "levels",
+      "_text": "LEVELS"
+    },
+    {
+      "_key": "loading.global.leaderboard",
+      "_text": "Loading global leaderboard…"
+    },
+    {
+      "_key": "locked",
+      "_text": " • Locked"
+    },
+    {
+      "_key": "main.menu",
+      "_text": "Main menu"
+    },
+    {
+      "_key": "max",
+      "_text": "MAX"
+    },
+    {
+      "_key": "mountains",
+      "_text": "Mountains"
+    },
+    {
+      "_key": "music",
+      "_text": "Music"
+    },
+    {
+      "_key": "next.level",
+      "_text": "Next level"
+    },
+    {
+      "_key": "no.global.records.yet",
+      "_text": "No global records yet"
+    },
+    {
+      "_key": "off.the.road",
+      "_text": "Off the road"
+    },
+    {
+      "_key": "online.leaderboard",
+      "_text": "Online leaderboard"
+    },
+    {
+      "_key": "overheated",
+      "_text": "Overheated"
+    },
+    {
+      "_key": "paused",
+      "_text": "Paused"
+    },
+    {
+      "_key": "points",
+      "_text": " points"
+    },
+    {
+      "_key": "pts",
+      "_text": " pts"
+    },
+    {
+      "_key": "pts.2",
+      "_text": " PTS"
+    },
+    {
+      "_key": "quests",
+      "_text": "Quests"
+    },
+    {
+      "_key": "race",
+      "_text": "Race"
+    },
+    {
+      "_key": "record",
+      "_text": "RECORD"
+    },
+    {
+      "_key": "red.zone",
+      "_text": "Red zone: "
+    },
+    {
+      "_key": "result",
+      "_text": "Result"
+    },
+    {
+      "_key": "resume",
+      "_text": "Resume"
+    },
+    {
+      "_key": "retry.track",
+      "_text": "Retry track"
+    },
+    {
+      "_key": "rival.is.ahead",
+      "_text": "Rival is ahead"
+    },
+    {
+      "_key": "route.ended.before.the.finish",
+      "_text": "Route ended before the finish"
+    },
+    {
+      "_key": "scenery",
+      "_text": "Scenery"
+    },
+    {
+      "_key": "select",
+      "_text": "Select"
+    },
+    {
+      "_key": "selected",
+      "_text": "Selected"
+    },
+    {
+      "_key": "settings",
+      "_text": "Settings"
+    },
+    {
+      "_key": "speed",
+      "_text": "Speed "
+    },
+    {
+      "_key": "tap.a.completed.quest.to.claim.points",
+      "_text": "Tap a completed quest to claim points"
+    },
+    {
+      "_key": "the.rival.changes.on.a.new.track",
+      "_text": "The rival changes on a new track"
+    },
+    {
+      "_key": "to.finish",
+      "_text": "To finish: "
+    },
+    {
+      "_key": "today.1.win",
+      "_text": "Today: 1 win"
+    },
+    {
+      "_key": "today.3.races",
+      "_text": "Today: 3 races"
+    },
+    {
+      "_key": "today.overheat.your.racer",
+      "_text": "Today: overheat your racer"
+    },
+    {
+      "_key": "top.speed",
+      "_text": "Top speed"
+    },
+    {
+      "_key": "total",
+      "_text": " • Total: "
+    },
+    {
+      "_key": "total.10.wins",
+      "_text": "Total: 10 wins"
+    },
+    {
+      "_key": "try.again",
+      "_text": "Try again?"
+    },
+    {
+      "_key": "you.are.ahead",
+      "_text": "You are ahead"
+    },
+    {
+      "_key": "you.won",
+      "_text": "You won!"
+    },
+    {
+      "_key": "your.rival.finished.first",
+      "_text": "Your rival finished first"
+    },
+    {
+      "_key": "language.switch",
+      "_text": "Русский"
+    },
+    {
+      "_key": "pause.resume",
+      "_text": "Resume"
+    },
+    {
+      "_key": "pause.caption",
+      "_text": "Pause"
+    },
+    {
+      "_key": "game.title",
+      "_text": "GOOSING\nGEESE"
+    }
+  ],
+  "_pedalPrompts": [
+    "GO!",
+    "FLOOR IT!!!",
+    "LET'S RACE!",
+    "GAS IT UP!",
+    "PEDAL TO THE METAL!",
+    "READY, SET, GO!"
+  ]
+}

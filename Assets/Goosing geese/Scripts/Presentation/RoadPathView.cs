@@ -10,18 +10,13 @@ namespace GoosingGeese.Presentation
     public class RoadPathView : MonoBehaviour
     {
         private const float MinimumSampleSpacing = 0.25f;
-        [SerializeField]
-        private Level _level;
-        [SerializeField]
-        private Material _material;
-        [SerializeField, Min(0f), Tooltip("Total blend length in metres, centered on a straight/turn boundary.")]
-        private float _transitionLength = 12f;
-        [SerializeField, Min(MinimumSampleSpacing)]
-        private float _sampleSpacing = 2f;
-        [SerializeField]
-        private Color _straightColor = Color.yellow;
-        [SerializeField]
-        private Color _turnColor = Color.green;
+
+        [SerializeField] private Level _level;
+        [SerializeField] private Material _material;
+        [SerializeField, Min(0f), Tooltip("Total blend length in metres, centered on a straight/turn boundary.")] private float _transitionLength = 12f;
+        [SerializeField, Min(MinimumSampleSpacing)] private float _sampleSpacing = 2f;
+        [SerializeField] private Color _straightColor = Color.yellow;
+        [SerializeField] private Color _turnColor = Color.green;
         private GameObject _lines;
 
         private void OnEnable()

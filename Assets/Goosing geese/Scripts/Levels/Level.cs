@@ -13,21 +13,15 @@ namespace GoosingGeese.Levels
     public class Level : MonoBehaviour
     {
         private readonly EventPublisher _events = new EventPublisher();
-        [SerializeField]
-        private Transform _roadStartPoint;
-        [SerializeField]
-        private RoadSettings _settings;
-        [SerializeField]
-        private Racer _racer;
-        [SerializeField]
-        private FinishLine _finishLine;
+        [SerializeField] private Transform _roadStartPoint;
+        [SerializeField] private RoadSettings _settings;
+        [SerializeField] private Racer _racer;
+        [SerializeField] private FinishLine _finishLine;
         private ILevelSession _session;
         private OpponentSpawner _opponents;
         private string _opponentSnapshot;
-        [SerializeField, Min(0f)]
-        private float _minimumRoadSpacing = 24f;
-        [SerializeField, Min(1)]
-        private int _layoutValidationAttempts = 20;
+        [SerializeField, Min(0f)] private float _minimumRoadSpacing = 24f;
+        [SerializeField, Min(1)] private int _layoutValidationAttempts = 20;
         private RoadBuilder _roadBuilder;
         private RoadPath _roadPath;
         private List<RoadPiece> _builtPieces;
@@ -44,6 +38,8 @@ namespace GoosingGeese.Levels
 
         public event Action<RoadPath, RoadConfiguration> PathBuilt;
 
+        public string LastPreparationError { get; private set; }
+        public Exception LastObserverFailure => _events.LastFailure;
         public LevelDefinition CurrentDefinition { get; private set; }
         public int Seed { get; private set; }
         public int Number { get; private set; }
@@ -60,7 +56,9 @@ namespace GoosingGeese.Levels
             InitializeReferences();
             _finishLine.Crossed += OnFinishCrossed;
             _racer.ConfigurationChanged += OnRacerConfigurationChanged;
-            _restoreAfterReload = CurrentDefinition == null && _builtPieces.Count > 0;
+            bool hasSerializedRoad = _builtPieces.Count > 0;
+            bool needsDefinition = CurrentDefinition == null;
+            _restoreAfterReload = hasSerializedRoad && needsDefinition;
         }
 
         private void Start()
@@ -75,22 +73,6 @@ namespace GoosingGeese.Levels
 
             _restoreAfterReload = false;
             RestoreAfterReload();
-        }
-
-        private void OnDrawGizmos()
-        {
-            RoadConfiguration settings = CurrentDefinition?.Settings;
-
-            if (settings == null || settings.DrawPathGizmos == false || _roadPath == null)
-                return;
-
-            Gizmos.color = Color.yellow;
-
-            for (int i = 0; i < _roadPath.Count; i++)
-            {
-                if (_roadPath.TryGetWaypoint(i, out Transform waypoint))
-                    Gizmos.DrawWireSphere(waypoint.position, settings.WaypointGizmoRadius);
-            }
         }
 
         private void OnDisable()
@@ -118,7 +100,7 @@ namespace GoosingGeese.Levels
         public void BuildRoad()
         {
             if (TryBuildRoad(out string error) == false)
-                Debug.LogError("Level creation failed: " + error, this);
+                LastPreparationError = error;
         }
 
         public bool TryBuildRoad(out string error)
@@ -129,7 +111,7 @@ namespace GoosingGeese.Levels
         public void CreateLevel(int seed)
         {
             if (TryBuildRoad(seed, out string error) == false)
-                Debug.LogError("Level creation failed: " + error, this);
+                LastPreparationError = error;
         }
 
         public bool TryRestoreLevel(LevelDefinition definition, out string error)
@@ -385,7 +367,7 @@ namespace GoosingGeese.Levels
                     string.IsNullOrEmpty(_opponentSnapshot) ? null : JsonUtility.FromJson<OpponentSnapshot>(_opponentSnapshot).Restore());
 
                 if (TryRestoreLevel(definition, out string error) == false)
-                    Debug.LogError("Level reload recovery failed: " + error, this);
+                    LastPreparationError = error;
             }
             finally
             {

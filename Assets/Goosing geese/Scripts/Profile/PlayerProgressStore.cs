@@ -8,6 +8,7 @@ namespace GoosingGeese.Profile
     public sealed class PlayerProgressStore
     {
         private const string SaveKey = "GoosingGeese.Profile.v1";
+
         private readonly IGamePlatform _platform;
         private readonly string _localKey;
 

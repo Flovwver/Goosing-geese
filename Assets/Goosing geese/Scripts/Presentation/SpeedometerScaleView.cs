@@ -9,17 +9,14 @@ namespace GoosingGeese.Presentation
     public class SpeedometerScaleView : MonoBehaviour
     {
         private const int MarkCapacity = 4;
+
         private readonly float[] _marks = new float[MarkCapacity];
         private readonly Vector2[] _positions = new Vector2[MarkCapacity];
         private readonly float[] _widths = new float[MarkCapacity];
-        [SerializeField]
-        private Text[] _labels = new Text[MarkCapacity];
-        [SerializeField, Min(0f)]
-        private float _labelGap = 6f;
-        [SerializeField, Min(0f)]
-        private float _labelPadding = 4f;
-        [SerializeField, Min(1f)]
-        private float _labelHeight = 24f;
+        [SerializeField] private Text[] _labels = new Text[MarkCapacity];
+        [SerializeField, Min(0f)] private float _labelGap = 6f;
+        [SerializeField, Min(0f)] private float _labelPadding = 4f;
+        [SerializeField, Min(1f)] private float _labelHeight = 24f;
         private SpeedometerDialGraphic _dial;
         private float _maximumSpeed;
         private float _greenEnd;

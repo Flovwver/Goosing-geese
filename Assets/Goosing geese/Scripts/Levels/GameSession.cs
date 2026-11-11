@@ -26,6 +26,8 @@ namespace GoosingGeese.Levels
             Text = new Localizer(Progress);
         }
 
+        public System.Exception LastPersistenceFailure { get; private set; }
+        public string LastLevelSelectionError { get; private set; }
         public Localizer Text { get; }
         public PlayerProgress Progress { get; }
         public ProfileCommands Commands { get; }
@@ -68,7 +70,7 @@ namespace GoosingGeese.Levels
             }
             catch (System.Exception exception)
             {
-                Debug.LogException(exception, _race);
+                LastPersistenceFailure = exception;
             }
 
             return reward;
@@ -112,7 +114,7 @@ namespace GoosingGeese.Levels
 
             Progress.TrySelectLevel(previous, int.MaxValue);
             _store.Save(Progress);
-            Debug.LogError("Level selection failed: " + error, _level);
+            LastLevelSelectionError = error;
             return false;
         }
     }

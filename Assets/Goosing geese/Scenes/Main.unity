@@ -1197,6 +1197,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1066276311}
   m_CullTransparentMesh: 1
+--- !u!114 &987123451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081964703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a26ae0f087a24c64a7e2c04f9896450a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.GameUiBootstrap
 --- !u!1 &1081964703
 GameObject:
   m_ObjectHideFlags: 0
@@ -1214,6 +1226,7 @@ GameObject:
   - component: {fileID: 1081964710}
   - component: {fileID: 1081964712}
   - component: {fileID: 1081964713}
+  - component: {fileID: 987123451}
   - component: {fileID: 1081964714}
   - component: {fileID: 1081964717}
   - component: {fileID: 1081964716}
@@ -1413,7 +1426,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.RaceResultView
   _race: {fileID: 1081964708}
   _overheatView: {fileID: 1861684951}
-  _audio: {fileID: 1081964713}
 --- !u!114 &1081964715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1471,7 +1483,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GoosingGeese.Presentation.CampaignView
   _race: {fileID: 1081964708}
-  _audio: {fileID: 1081964713}
 --- !u!1 &1208900206
 GameObject:
   m_ObjectHideFlags: 0
@@ -1785,20 +1796,6 @@ MonoBehaviour:
   _race: {fileID: 1081964708}
   _halo: {fileID: 1466587191}
   _caption: {fileID: 1332132332}
-  _russianPrompts:
-  - "\u0416\u041C\u0418!"
-  - "\u0413\u0410\u0417\u0423\u0419!!!"
-  - "\u041F\u041E\u0413\u041D\u0410\u041B\u0418!"
-  - "\u0414\u0410\u0419 \u0413\u0410\u0417\u0423!"
-  - "\u041F\u0415\u0414\u0410\u041B\u042C \u0412 \u041F\u041E\u041B!"
-  - "\u041F\u041E\u0420\u0410 \u041D\u0410 \u0421\u0422\u0410\u0420\u0422!"
-  _englishPrompts:
-  - GO!
-  - FLOOR IT!!!
-  - LET'S RACE!
-  - GAS IT UP!
-  - PEDAL TO THE METAL!
-  - READY, SET, GO!
   _pulseFrequency: 1.4
   _captionAmplitude: 0.1
   _haloScaleRange: {x: 0.9, y: 1.12}
@@ -1956,8 +1953,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  _segments: 48
-  _rings: 12
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!222 &1466587192
 CanvasRenderer:
   m_ObjectHideFlags: 0

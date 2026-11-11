@@ -12,19 +12,17 @@ namespace GoosingGeese.Presentation
     {
         private const int PageSize = 6;
         private const int SortingOrder = 24;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private GameAudio _audio;
+
+        [SerializeField] private RaceController _race;
         private GameUiFactory _ui;
-        private GameObject _canvas;
+        private Canvas _canvas;
         private RectTransform _safeArea;
         private GameObject _panel;
         private int _page;
 
         public event Action<bool> VisibilityChanged;
 
-        public bool IsVisible => _canvas != null && _canvas.activeSelf;
+        public bool IsVisible => _canvas != null && _canvas.gameObject.activeSelf;
         private int VisibleStageCount => Mathf.Max(_race.Campaign.Count, _race.Progress.GetUnlockedLevel(int.MaxValue));
 
         private void Awake()
@@ -43,7 +41,7 @@ namespace GoosingGeese.Presentation
         private void Update()
         {
             if (IsVisible)
-                GameUiFactory.UpdateSafeArea(_safeArea);
+                _ui.UpdateSafeArea(_safeArea);
         }
 
         private void OnDisable()
@@ -58,7 +56,7 @@ namespace GoosingGeese.Presentation
                 return;
 
             _page = (_race.Progress.Level - 1) / PageSize;
-            _canvas.SetActive(true);
+            _canvas.gameObject.SetActive(true);
             Refresh();
             VisibilityChanged?.Invoke(true);
         }
@@ -68,7 +66,7 @@ namespace GoosingGeese.Presentation
             if (IsVisible == false)
                 return;
 
-            _canvas.SetActive(false);
+            _canvas.gameObject.SetActive(false);
             VisibilityChanged?.Invoke(false);
         }
 
@@ -76,16 +74,16 @@ namespace GoosingGeese.Presentation
         {
             if (_canvas != null)
             {
-                _canvas.SetActive(false);
-                Destroy(_canvas);
+                _canvas.gameObject.SetActive(false);
+                Destroy(_canvas.gameObject);
             }
 
             _panel = null;
-            _ui = new GameUiFactory(GameUiTheme.LoadFont(), _audio.PlayClick);
-            _canvas = GameUiFactory.CreateCanvas("Campaign", transform, SortingOrder);
-            _canvas.AddComponent<Image>().color = GameUiTheme.Panel;
-            _safeArea = GameUiFactory.CreateRect("Safe area", _canvas.transform, Vector2.zero, Vector2.one);
-            _canvas.SetActive(false);
+            _ui = GetComponent<GameUiBootstrap>().Factory;
+            _canvas = _ui.CreateCanvas("Campaign", transform, SortingOrder);
+            _canvas.gameObject.AddComponent<Image>().color = _ui.Theme.Panel;
+            _safeArea = _ui.CreateRect("Safe area", _canvas.transform, Vector2.zero, Vector2.one);
+            _canvas.gameObject.SetActive(false);
         }
 
         private void Refresh()
@@ -96,7 +94,7 @@ namespace GoosingGeese.Presentation
                 Destroy(_panel);
             }
 
-            var rect = GameUiFactory.CreateRect("Level selection", _safeArea, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.96f));
+            var rect = _ui.CreateRect("Level selection", _safeArea, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.96f));
             _panel = rect.gameObject;
             var layout = rect.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(16, 16, 16, 16);
@@ -104,7 +102,7 @@ namespace GoosingGeese.Presentation
             layout.childControlWidth = true;
             layout.childControlHeight = true;
             layout.childForceExpandHeight = false;
-            _ui.CreateHeading(rect, _race.Session.Text.Choose("УРОВНИ", "LEVELS"), 32);
+            _ui.CreateHeading(rect, _race.Session.Text.Get("levels"), 32);
 
             for (int index = _page * PageSize; index < Mathf.Min(VisibleStageCount, (_page + 1) * PageSize); index++)
             {
@@ -118,8 +116,7 @@ namespace GoosingGeese.Presentation
                     + stage.GetDifficultyName(_race.Progress.UseEnglish)
                     + " • "
                     + reward
-                    + _race.Session.Text.Choose(" очк.",
-                    " pts")
+                    + _race.Session.Text.Get("pts")
                     + GetStageStatus(completed,
                     unlocked);
                 Button button = _ui.CreateButton(rect, text, () => Select(number));
@@ -127,7 +124,7 @@ namespace GoosingGeese.Presentation
                 button.interactable = unlocked;
             }
 
-            var row = GameUiFactory.CreateRect("Pages", rect, Vector2.zero, Vector2.one);
+            var row = _ui.CreateRect("Pages", rect, Vector2.zero, Vector2.one);
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 68f;
             var horizontal = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             horizontal.spacing = 8f;
@@ -137,15 +134,15 @@ namespace GoosingGeese.Presentation
             _ui.CreateButton(row, "<", () => ChangePage(-1)).interactable = _page > 0;
             _ui.CreateLabel(row, (_page + 1) + " / " + Mathf.CeilToInt((float)VisibleStageCount / PageSize), 24);
             _ui.CreateButton(row, ">", () => ChangePage(1)).interactable = (_page + 1) * PageSize < VisibleStageCount;
-            _ui.CreateButton(rect, _race.Session.Text.Choose("Назад", "Back"), Hide);
+            _ui.CreateButton(rect, _race.Session.Text.Get("back"), Hide);
         }
 
         private string GetStageStatus(bool completed, bool unlocked)
         {
             if (completed)
-                return _race.Session.Text.Choose(" • Пройден", " • Cleared");
+                return _race.Session.Text.Get("cleared");
 
-            return unlocked ? "" : _race.Session.Text.Choose(" • Закрыт", " • Locked");
+            return unlocked ? "" : _race.Session.Text.Get("locked");
         }
 
         private void Select(int number)

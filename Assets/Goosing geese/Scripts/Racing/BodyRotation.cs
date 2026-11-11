@@ -6,6 +6,7 @@ namespace GoosingGeese.Racing
     public class BodyRotation
     {
         private const float MinimumSteeringAngleDegrees = 0.001f;
+
         private readonly Rigidbody _rigidbody;
 
         public BodyRotation(Rigidbody rigidbody)

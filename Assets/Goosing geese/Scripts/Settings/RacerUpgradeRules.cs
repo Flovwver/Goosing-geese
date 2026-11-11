@@ -10,29 +10,18 @@ namespace GoosingGeese.Settings
     public class RacerUpgradeRules : ScriptableObject
     {
         [Header("Prices and limits")]
-        [SerializeField, Min(1)]
-        private int _maximumLevel = 5;
-        [SerializeField, Min(1)]
-        private int _basePrice = 100;
-        [SerializeField, Min(0)]
-        private int _pricePerLevel = 100;
-        [SerializeField, Min(0)]
-        private int _firstUpgradeStage = 2;
-        [SerializeField, Min(1)]
-        private int _upgradeStageStep = 3;
+        [SerializeField, Min(1)] private int _maximumLevel = 5;
+        [SerializeField, Min(1)] private int _basePrice = 100;
+        [SerializeField, Min(0)] private int _pricePerLevel = 100;
+        [SerializeField, Min(0)] private int _firstUpgradeStage = 2;
+        [SerializeField, Min(1)] private int _upgradeStageStep = 3;
         [Header("Gain per level")]
-        [SerializeField, Min(0f)]
-        private float _accelerationGain = 0.1f;
-        [SerializeField, Min(0f)]
-        private float _topSpeedGain = 0.05f;
-        [SerializeField, Min(0f)]
-        private float _coolingGain = 0.2f;
-        [SerializeField, Range(0f, 1f)]
-        private float _greenZoneGain = 0.07f;
-        [SerializeField, Range(0f, 1f)]
-        private float _thermalGain = 0.04f;
-        [SerializeField, Range(0f, 1f)]
-        private float _minimumYellowZone;
+        [SerializeField, Min(0f)] private float _accelerationGain = 0.1f;
+        [SerializeField, Min(0f)] private float _topSpeedGain = 0.05f;
+        [SerializeField, Min(0f)] private float _coolingGain = 0.2f;
+        [SerializeField, Range(0f, 1f)] private float _greenZoneGain = 0.07f;
+        [SerializeField, Range(0f, 1f)] private float _thermalGain = 0.04f;
+        [SerializeField, Range(0f, 1f)] private float _minimumYellowZone;
 
         public int MaximumLevel => Mathf.Max(1, _maximumLevel);
 

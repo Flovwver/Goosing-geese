@@ -7,8 +7,7 @@ namespace GoosingGeese.Settings
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerAppearanceCatalog")]
     public class RacerAppearanceCatalog : ScriptableObject
     {
-        [SerializeField]
-        private RacerAppearanceDefinition[] _entries;
+        [SerializeField] private RacerAppearanceDefinition[] _entries;
 
         public int Count => _entries != null ? _entries.Length : 0;
 

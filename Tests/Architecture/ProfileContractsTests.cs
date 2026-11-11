@@ -79,8 +79,8 @@ public static class ProfileContractsTests
         profile.GrantModel("car");
         Require(profile.TryBuyUpgrade("car", RacerUpgradeKind.TopSpeed, 1, 25), "Owned upgrade purchase must work.");
         var upgrades = profile.GetUpgrades("car");
-        upgrades.TopSpeed = 99;
-        Require(profile.GetUpgrades("car").TopSpeed == 1, "Upgrade queries must not expose mutable state.");
+        upgrades.SetLevel(RacerUpgradeKind.TopSpeed, 99);
+        Require(profile.GetUpgrades("car").GetLevel(RacerUpgradeKind.TopSpeed) == 1, "Upgrade queries must not expose mutable state.");
         Require(profile.TryBuyUpgrade("car", (RacerUpgradeKind)99, 2, 25) == false && profile.Balance == 75, "Invalid upgrade must not spend currency.");
         return "PASS: DTO isolation; daily overheat quest, reward and rollover; saturating rewards; atomic spending; stable identity; defensive upgrade reads.";
     }

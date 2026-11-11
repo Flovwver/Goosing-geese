@@ -14,10 +14,10 @@ namespace GoosingGeese.Presentation
         private const float DropHeight = 5f;
         private const float DropTravel = 2f;
         private const float DropSize = 0.18f;
+
         private static readonly int ColorProperty = Shader.PropertyToID("_Color");
         private List<Material> _replacementMaterials = new List<Material>();
-        [SerializeField]
-        private Material _particleMaterial;
+        [SerializeField] private Material _particleMaterial;
         private Racer _racer;
         private RacerAppearance _appearance;
         private MeshRenderer[] _renderers;

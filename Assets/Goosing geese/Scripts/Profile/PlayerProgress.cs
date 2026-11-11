@@ -69,7 +69,7 @@ namespace GoosingGeese.Profile
 
         public RacerUpgradeProgress GetUpgrades(string modelId)
         {
-            RacerUpgradeProgress entry = _data.Upgrades.Find(item => item.ModelId == modelId);
+            RacerUpgradeProgress entry = _data.Upgrades.Find(item => item.Id == modelId);
             return entry == null ? null : JsonUtility.FromJson<RacerUpgradeProgress>(JsonUtility.ToJson(entry));
         }
 
@@ -87,7 +87,7 @@ namespace GoosingGeese.Profile
             if (Enum.IsDefined(typeof(RacerUpgradeKind), kind) == false || OwnsModel(modelId) == false)
                 return false;
 
-            RacerUpgradeProgress entry = _data.Upgrades.Find(item => item.ModelId == modelId);
+            RacerUpgradeProgress entry = _data.Upgrades.Find(item => item.Id == modelId);
             int currentLevel = entry == null ? 0 : entry.GetLevel(kind);
 
             if (nextLevel < 1 || (long)nextLevel != (long)currentLevel + 1L || TrySpend(price) == false)
@@ -95,10 +95,7 @@ namespace GoosingGeese.Profile
 
             if (entry == null)
             {
-                entry = new RacerUpgradeProgress
-                {
-                    ModelId = modelId
-                };
+                entry = new RacerUpgradeProgress(modelId);
                 _data.Upgrades.Add(entry);
             }
 
@@ -235,7 +232,7 @@ namespace GoosingGeese.Profile
             _data.Appearance = catalog != null ? Mathf.Clamp(_data.Appearance, 0, Mathf.Max(0, catalog.Count - 1)) : Mathf.Max(0, _data.Appearance);
             _data.Environment = Mathf.Max(0, _data.Environment);
             _data.Upgrades = (_data.Upgrades ?? new System.Collections.Generic.List<RacerUpgradeProgress>()).Where(item => item != null
-                && string.IsNullOrWhiteSpace(item.ModelId) == false).GroupBy(item => item.ModelId).Select(group => group.First()).ToList();
+                && string.IsNullOrWhiteSpace(item.Id) == false).GroupBy(item => item.Id).Select(group => group.First()).ToList();
             _data.OwnedModels = (_data.OwnedModels ?? new System.Collections.Generic.List<string>()).Where(id => string.IsNullOrWhiteSpace(id) == false).Distinct().ToList();
             GrantModel("goose");
 
@@ -245,7 +242,7 @@ namespace GoosingGeese.Profile
                     GrantModel(catalog.GetEntry(_data.Appearance).ModelId);
 
                 foreach (RacerUpgradeProgress upgrade in _data.Upgrades)
-                    GrantModel(upgrade.ModelId);
+                    GrantModel(upgrade.Id);
 
                 _data.OwnershipInitialized = catalog != null;
             }

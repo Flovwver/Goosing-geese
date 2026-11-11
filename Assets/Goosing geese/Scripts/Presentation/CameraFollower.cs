@@ -8,27 +8,26 @@ namespace GoosingGeese.Presentation
     public class CameraFollower : MonoBehaviour
     {
         private const float MinimumSmoothTime = 0.01f;
-        [SerializeField]
-        private Transform _target;
-        [SerializeField]
-        private CameraSettings _settings;
-        [SerializeField, Min(0f)]
-        private float _menuFocusHeight = 3f;
+
+        [SerializeField] private Transform _target;
+        [SerializeField] private CameraSettings _settings;
+        [SerializeField, Min(0f)] private float _menuFocusHeight = 3f;
         private Vector3 _velocity;
         private Racer _racer;
         private bool _followEnabled = true;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private OpponentSpawner _opponents;
+        [SerializeField] private RaceController _race;
+        [SerializeField] private OpponentSpawner _opponents;
         private Quaternion _followingRotation;
 
         private void Awake()
         {
             _racer = _target.GetComponent<Racer>();
 
-            if (_race == null || _opponents == null)
-                throw new System.InvalidOperationException("Assign the camera race and opponents in the Inspector.");
+            if (_race == null)
+                throw new System.ArgumentNullException(nameof(_race));
+
+            if (_opponents == null)
+                throw new System.ArgumentNullException(nameof(_opponents));
 
             _followingRotation = transform.rotation;
         }

@@ -6,6 +6,7 @@ namespace GoosingGeese.Racing
     public class Movement
     {
         private const float MaximumHeadingAngleDegrees = 180f;
+
         private readonly Rigidbody _rigidbody;
         private float _slipFactor;
 

@@ -10,24 +10,15 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "WorldPresentation")]
     public class WorldPresentation : MonoBehaviour
     {
-        [SerializeField]
-        private Level _level;
-        [SerializeField]
-        private Racer _player;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private GameObject[] _scenery;
-        [SerializeField]
-        private RacerGarage _garage;
-        [SerializeField, Min(1f)]
-        private float _decorationSpacing = 45f;
-        [SerializeField, Min(1f)]
-        private float _roadClearance = 20f;
-        [SerializeField, Min(1f)]
-        private float _groundSize = 10000f;
-        [SerializeField]
-        private SceneryBuilder _builder = new SceneryBuilder();
+        [SerializeField] private Level _level;
+        [SerializeField] private Racer _player;
+        [SerializeField] private RaceController _race;
+        [SerializeField] private GameObject[] _scenery;
+        [SerializeField] private RacerGarage _garage;
+        [SerializeField, Min(1f)] private float _decorationSpacing = 45f;
+        [SerializeField, Min(1f)] private float _roadClearance = 20f;
+        [SerializeField, Min(1f)] private float _groundSize = 10000f;
+        [SerializeField] private SceneryBuilder _builder = new SceneryBuilder();
         private GarageAppearanceBinding _appearanceBinding;
         private RoadPath _path;
         private int _theme = -1;

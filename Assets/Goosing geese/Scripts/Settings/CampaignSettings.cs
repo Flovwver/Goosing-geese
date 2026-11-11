@@ -10,18 +10,14 @@ namespace GoosingGeese.Settings
     {
         private const int GroupSize = 5;
         private const int SeedStride = 7919;
+
         private readonly Dictionary<int, CampaignStage> _generatedStages = new Dictionary<int, CampaignStage>();
-        [SerializeField]
-        private CampaignStage[] _stages;
+        [SerializeField] private CampaignStage[] _stages;
         [Header("After fixed stages")]
-        [SerializeField]
-        private int _proceduralSeed = 2601026;
-        [SerializeField, Min(1)]
-        private int _maximumPieces = 60;
-        [SerializeField, Min(0f)]
-        private float _speedPerLevel = 1.5f;
-        [SerializeField, Min(1f)]
-        private float _maximumOpponentSpeed = 220f;
+        [SerializeField] private int _proceduralSeed = 2601026;
+        [SerializeField, Min(1)] private int _maximumPieces = 60;
+        [SerializeField, Min(0f)] private float _speedPerLevel = 1.5f;
+        [SerializeField, Min(1f)] private float _maximumOpponentSpeed = 220f;
 
         public int Count => _stages != null ? _stages.Length : 0;
 

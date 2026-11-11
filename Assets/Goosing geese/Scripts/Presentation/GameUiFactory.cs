@@ -11,17 +11,20 @@ namespace GoosingGeese.Presentation
         private const float LabelHeightMultiplier = 2.4f;
         private const float ButtonHeight = 68f;
         private const int ButtonFontSize = 25;
-        private static readonly Color ButtonColor = GameUiTheme.Button;
+
         private readonly Font _font;
         private readonly Action _playClick;
 
-        public GameUiFactory(Font font, Action playClick)
+        public GameUiFactory(GameUiTheme theme, Action playClick)
         {
-            _font = font;
+            Theme = theme;
+            _font = theme.LoadFont();
             _playClick = playClick;
         }
 
-        public static RectTransform CreateRect(string name, Transform parent, Vector2 min, Vector2 max)
+        public GameUiTheme Theme { get; }
+
+        public RectTransform CreateRect(string name, Transform parent, Vector2 min, Vector2 max)
         {
             var go = new GameObject(name, typeof(RectTransform));
             var rect = (RectTransform)go.transform;
@@ -30,7 +33,7 @@ namespace GoosingGeese.Presentation
             return rect;
         }
 
-        public static void Place(RectTransform rect, Vector2 min, Vector2 max)
+        public void Place(RectTransform rect, Vector2 min, Vector2 max)
         {
             rect.anchorMin = min;
             rect.anchorMax = max;
@@ -38,7 +41,7 @@ namespace GoosingGeese.Presentation
             rect.offsetMax = Vector2.zero;
         }
 
-        public static GameObject CreateCanvas(string name, Transform parent, int sortingOrder)
+        public Canvas CreateCanvas(string name, Transform parent, int sortingOrder)
         {
             var root = new GameObject(name, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             root.transform.SetParent(parent, false);
@@ -49,10 +52,10 @@ namespace GoosingGeese.Presentation
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
             scaler.matchWidthOrHeight = 0.5f;
-            return root;
+            return canvas;
         }
 
-        public static void UpdateSafeArea(RectTransform rect)
+        public void UpdateSafeArea(RectTransform rect)
         {
             Rect safe = Screen.safeArea;
             rect.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
@@ -77,7 +80,7 @@ namespace GoosingGeese.Presentation
         public Text CreateHeading(Transform parent, string text, int size)
         {
             Text label = CreateLabel(parent, text, size);
-            label.font = GameUiTheme.LoadHeadingFont();
+            label.font = Theme.LoadHeadingFont();
             label.resizeTextForBestFit = true;
             label.resizeTextMinSize = ButtonFontSize;
             label.resizeTextMaxSize = size;
@@ -87,16 +90,12 @@ namespace GoosingGeese.Presentation
         public Button CreateButton(Transform parent, string text, Action action)
         {
             var rect = CreateRect(text, parent, Vector2.zero, Vector2.one);
-            rect.gameObject.AddComponent<Image>().color = ButtonColor;
+            rect.gameObject.AddComponent<Image>().color = Theme.Button;
             var shadow = rect.gameObject.AddComponent<Shadow>();
             shadow.effectColor = new Color(0.02f, 0.42f, 0.6f, 0.35f);
             shadow.effectDistance = new Vector2(0f, -3f);
             var button = rect.gameObject.AddComponent<Button>();
-            button.onClick.AddListener(() =>
-            {
-                _playClick?.Invoke();
-                action();
-            });
+            rect.gameObject.AddComponent<UiButtonAction>().Bind(_playClick, action);
             rect.gameObject.AddComponent<LayoutElement>().preferredHeight = ButtonHeight;
             CreateLabel(rect, text, ButtonFontSize);
             return button;

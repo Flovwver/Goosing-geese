@@ -8,6 +8,7 @@ namespace GoosingGeese.Presentation
     public sealed class LeaderboardView
     {
         private const int VisibleTopCount = 5;
+
         private readonly PlayerProgress _progress;
         private readonly Localizer _text;
         private readonly GameUiFactory _ui;
@@ -63,12 +64,8 @@ namespace GoosingGeese.Presentation
                 playerLabel.resizeTextMaxSize = 24;
             }
 
-            _ui.CreateLabel(parent,
-                isOnline ? _text.Choose("Онлайн-рейтинг",
-                "Online leaderboard") : _text.Choose("Рекорд этого устройства",
-                "Device record"),
-                23);
-            _ui.CreateButton(parent, _text.Choose("Назад", "Back"), back);
+            _ui.CreateLabel(parent, isOnline ? _text.Get("online.leaderboard") : _text.Get("device.record"), 23);
+            _ui.CreateButton(parent, _text.Get("back"), back);
         }
 
         private int GetRank(System.Collections.Generic.List<LeaderboardEntry> entries, int index)

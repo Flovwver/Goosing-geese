@@ -1,0 +1,308 @@
+{
+  "_entries": [
+    {
+      "_key": "acceleration",
+      "_text": "Разгон"
+    },
+    {
+      "_key": "after.level",
+      "_text": "После уровня "
+    },
+    {
+      "_key": "available",
+      "_text": "Доступно: "
+    },
+    {
+      "_key": "back",
+      "_text": "Назад"
+    },
+    {
+      "_key": "back.to.race",
+      "_text": "Назад к гонке"
+    },
+    {
+      "_key": "bend.release.throttle",
+      "_text": "Поворот • отпусти газ"
+    },
+    {
+      "_key": "bend.stay.in.the.green.zone",
+      "_text": "Поворот • держись в зелёной зоне"
+    },
+    {
+      "_key": "buy",
+      "_text": "Купить: "
+    },
+    {
+      "_key": "change.scenery",
+      "_text": "Сменить окружение"
+    },
+    {
+      "_key": "city",
+      "_text": "Город"
+    },
+    {
+      "_key": "cleared",
+      "_text": " • Пройден"
+    },
+    {
+      "_key": "cooling",
+      "_text": "Охлаждение"
+    },
+    {
+      "_key": "cooling.rate",
+      "_text": "Спад нагрева: ×"
+    },
+    {
+      "_key": "countryside",
+      "_text": "Сельская местность"
+    },
+    {
+      "_key": "device.record",
+      "_text": "Рекорд этого устройства"
+    },
+    {
+      "_key": "device.records",
+      "_text": "Рекорды устройства"
+    },
+    {
+      "_key": "effects",
+      "_text": "Эффекты"
+    },
+    {
+      "_key": "garage",
+      "_text": "ГАРАЖ"
+    },
+    {
+      "_key": "global.leaderboard",
+      "_text": "Глобальный рейтинг"
+    },
+    {
+      "_key": "global.leaderboard.unavailable",
+      "_text": "Глобальный рейтинг недоступен"
+    },
+    {
+      "_key": "green.cap",
+      "_text": " • Зел. до "
+    },
+    {
+      "_key": "green.zone",
+      "_text": "Зелёная зона: "
+    },
+    {
+      "_key": "handling",
+      "_text": "Управляемость"
+    },
+    {
+      "_key": "heat.resistance",
+      "_text": "Термостойкость"
+    },
+    {
+      "_key": "improve.heat.resistance",
+      "_text": "Улучши термостойкость"
+    },
+    {
+      "_key": "leaderboard",
+      "_text": "Рекорды"
+    },
+    {
+      "_key": "level",
+      "_text": "УРОВЕНЬ "
+    },
+    {
+      "_key": "levels",
+      "_text": "УРОВНИ"
+    },
+    {
+      "_key": "loading.global.leaderboard",
+      "_text": "Загружаем глобальный рейтинг…"
+    },
+    {
+      "_key": "locked",
+      "_text": " • Закрыт"
+    },
+    {
+      "_key": "main.menu",
+      "_text": "В главное меню"
+    },
+    {
+      "_key": "max",
+      "_text": "МАКС."
+    },
+    {
+      "_key": "mountains",
+      "_text": "Горы"
+    },
+    {
+      "_key": "music",
+      "_text": "Музыка"
+    },
+    {
+      "_key": "next.level",
+      "_text": "Следующий уровень"
+    },
+    {
+      "_key": "no.global.records.yet",
+      "_text": "В глобальном рейтинге пока нет результатов"
+    },
+    {
+      "_key": "off.the.road",
+      "_text": "Вылет с трассы"
+    },
+    {
+      "_key": "online.leaderboard",
+      "_text": "Онлайн-рейтинг"
+    },
+    {
+      "_key": "overheated",
+      "_text": "Перегрев"
+    },
+    {
+      "_key": "paused",
+      "_text": "Пауза"
+    },
+    {
+      "_key": "points",
+      "_text": " очков"
+    },
+    {
+      "_key": "pts",
+      "_text": " очк."
+    },
+    {
+      "_key": "pts.2",
+      "_text": " ОЧК."
+    },
+    {
+      "_key": "quests",
+      "_text": "Задания"
+    },
+    {
+      "_key": "race",
+      "_text": "Гонка"
+    },
+    {
+      "_key": "record",
+      "_text": "РЕКОРД"
+    },
+    {
+      "_key": "red.zone",
+      "_text": "Красная зона: "
+    },
+    {
+      "_key": "result",
+      "_text": "Результат"
+    },
+    {
+      "_key": "resume",
+      "_text": "Продолжить"
+    },
+    {
+      "_key": "retry.track",
+      "_text": "Повторить трассу"
+    },
+    {
+      "_key": "rival.is.ahead",
+      "_text": "Соперник впереди"
+    },
+    {
+      "_key": "route.ended.before.the.finish",
+      "_text": "Трасса закончилась до финиша"
+    },
+    {
+      "_key": "scenery",
+      "_text": "Окружение"
+    },
+    {
+      "_key": "select",
+      "_text": "Выбрать"
+    },
+    {
+      "_key": "selected",
+      "_text": "Выбрано"
+    },
+    {
+      "_key": "settings",
+      "_text": "Настройки"
+    },
+    {
+      "_key": "speed",
+      "_text": "Скорость "
+    },
+    {
+      "_key": "tap.a.completed.quest.to.claim.points",
+      "_text": "Нажми выполненное задание, чтобы получить очки"
+    },
+    {
+      "_key": "the.rival.changes.on.a.new.track",
+      "_text": "Соперник сменится на новой трассе"
+    },
+    {
+      "_key": "to.finish",
+      "_text": "До финиша: "
+    },
+    {
+      "_key": "today.1.win",
+      "_text": "Сегодня: 1 победа"
+    },
+    {
+      "_key": "today.3.races",
+      "_text": "Сегодня: 3 гонки"
+    },
+    {
+      "_key": "today.overheat.your.racer",
+      "_text": "Сегодня: перегреть гонщика"
+    },
+    {
+      "_key": "top.speed",
+      "_text": "Максимальная скорость"
+    },
+    {
+      "_key": "total",
+      "_text": " • Всего: "
+    },
+    {
+      "_key": "total.10.wins",
+      "_text": "Всего: 10 побед"
+    },
+    {
+      "_key": "try.again",
+      "_text": "Попробуем ещё?"
+    },
+    {
+      "_key": "you.are.ahead",
+      "_text": "Ты впереди"
+    },
+    {
+      "_key": "you.won",
+      "_text": "Победа!"
+    },
+    {
+      "_key": "your.rival.finished.first",
+      "_text": "Соперник финишировал первым"
+    },
+    {
+      "_key": "language.switch",
+      "_text": "English"
+    },
+    {
+      "_key": "pause.resume",
+      "_text": "Продолжить"
+    },
+    {
+      "_key": "pause.caption",
+      "_text": "Пауза"
+    },
+    {
+      "_key": "game.title",
+      "_text": "GOOSING\nGEESE"
+    }
+  ],
+  "_pedalPrompts": [
+    "ЖМИ!",
+    "ГАЗУЙ!!!",
+    "ПОГНАЛИ!",
+    "ДАЙ ГАЗУ!",
+    "ПЕДАЛЬ В ПОЛ!",
+    "ПОРА НА СТАРТ!"
+  ]
+}

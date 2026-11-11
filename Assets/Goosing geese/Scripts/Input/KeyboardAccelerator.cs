@@ -6,11 +6,11 @@ namespace GoosingGeese.Input
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "KeyboardAccelerator")]
     public class KeyboardAccelerator : MonoBehaviour
     {
-        [SerializeField]
-        private InputActionReference _accelerateAction;
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("_inputSwitch")]
-        private ThrottleInput _input;
+        private const string LegacyInputField = "_inputSwitch";
+
+        [SerializeField] private InputActionReference _accelerateAction;
+        [UnityEngine.Serialization.FormerlySerializedAs(LegacyInputField)]
+        [SerializeField] private ThrottleInput _input;
 
         private void OnEnable()
         {
