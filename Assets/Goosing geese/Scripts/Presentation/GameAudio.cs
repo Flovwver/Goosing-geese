@@ -12,6 +12,7 @@ namespace GoosingGeese.Presentation
         private const float ToneLevel = 0.15f;
         private const float LowEnginePitch = 0.7f;
         private const float HighEnginePitch = 1.8f;
+        private const float HeatWarningThreshold = 0.65f;
         [SerializeField]
         private RaceController _race;
         [SerializeField]
@@ -22,6 +23,9 @@ namespace GoosingGeese.Presentation
         private AudioClip _click;
         private AudioClip _win;
         private AudioClip _lose;
+        private AudioClip _heatWarning;
+        private AudioClip _explosion;
+        private bool _heatWarningPlayed;
 
         private void Awake()
         {
@@ -36,12 +40,15 @@ namespace GoosingGeese.Presentation
             _engine.clip = CreateTone("Skates", new[] { 90f }, EffectSeconds);
             _click = CreateTone("Click", new[] { 550f }, EffectSeconds);
             _win = CreateTone("Finish", new[] { 392f, 523.3f, 659.3f }, EffectSeconds);
-            _lose = CreateTone("Overheat", new[] { 220f, 146.8f, 73.4f }, EffectSeconds);
+            _lose = CreateTone("Rival finish", new[] { 294f, 220f, 196f }, EffectSeconds);
+            _heatWarning = CreateTone("Heat warning", new[] { 880f, 660f, 880f }, 0.10f);
+            _explosion = CreateExplosion();
         }
 
         private void OnEnable()
         {
             _race.RaceEnded += OnRaceEnded;
+            _player.OverheatProgressChanged += OnHeatProgressChanged;
         }
 
         private void Start()
@@ -62,6 +69,7 @@ namespace GoosingGeese.Presentation
         private void OnDisable()
         {
             _race.RaceEnded -= OnRaceEnded;
+            _player.OverheatProgressChanged -= OnHeatProgressChanged;
         }
 
         private void OnDestroy()
@@ -71,12 +79,34 @@ namespace GoosingGeese.Presentation
             Destroy(_click);
             Destroy(_win);
             Destroy(_lose);
+            Destroy(_heatWarning);
+            Destroy(_explosion);
         }
 
         public void PlayClick()
         {
-            _effects.volume = _race.Progress.EffectsVolume;
-            _effects.PlayOneShot(_click);
+            PlayEffect(_click);
+        }
+
+        private static AudioClip CreateExplosion()
+        {
+            const float Duration = 0.45f;
+            int count = Mathf.RoundToInt(SampleRate * Duration);
+            var samples = new float[count];
+            var random = new System.Random(151);
+
+            for (int index = 0; index < count; index++)
+            {
+                float age = (float)index / count;
+                float decay = (1f - age) * (1f - age);
+                float noise = (float)random.NextDouble() * 2f - 1f;
+                float bass = Mathf.Sin(2f * Mathf.PI * 28f * (2f * age - age * age));
+                samples[index] = (noise * 0.45f + bass * 0.55f) * decay * Mathf.Min(1f, index / 80f) * 0.45f;
+            }
+
+            AudioClip clip = AudioClip.Create("Explosion", count, 1, SampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
         }
 
         private static AudioClip CreateTone(string name, float[] frequencies, float noteDuration)
@@ -100,7 +130,28 @@ namespace GoosingGeese.Presentation
 
         private void OnRaceEnded(bool won)
         {
-            _effects.PlayOneShot(won ? _win : _lose);
+            if (_race.Outcome == RaceOutcome.Overheated || _race.Outcome == RaceOutcome.OffRoad)
+                PlayEffect(_explosion);
+            else
+                PlayEffect(won ? _win : _lose);
+        }
+
+        private void OnHeatProgressChanged(float progress)
+        {
+            if (progress <= HeatWarningThreshold * 0.5f)
+                _heatWarningPlayed = false;
+
+            if (_heatWarningPlayed || progress < HeatWarningThreshold || progress >= 1f || _race.State != RaceState.Racing)
+                return;
+
+            _heatWarningPlayed = true;
+            PlayEffect(_heatWarning);
+        }
+
+        private void PlayEffect(AudioClip clip)
+        {
+            _effects.volume = _race.Progress.EffectsVolume;
+            _effects.PlayOneShot(clip);
         }
     }
 }
