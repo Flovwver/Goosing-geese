@@ -41,7 +41,7 @@ namespace GoosingGeese.Presentation
             {
                 var drop = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 drop.name = "Sweat";
-                Destroy(drop.GetComponent<Collider>());
+                Destroy(drop.GetComponent<SphereCollider>());
                 drop.transform.SetParent(transform, false);
                 drop.transform.localScale = Vector3.one * DropSize;
                 drop.GetComponent<Renderer>().sharedMaterial = _sweatMaterial;
