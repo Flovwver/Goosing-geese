@@ -7,6 +7,7 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "PedalPromptView")]
     public class PedalPromptView : MonoBehaviour
     {
+        private const float CaptionAngle = -8f;
         [SerializeField]
         private RaceController _race;
         [SerializeField]
@@ -46,6 +47,15 @@ namespace GoosingGeese.Presentation
         private System.Random _random;
         private bool _isVisible;
         private int _promptIndex = -1;
+
+        private void Awake()
+        {
+            RectTransform caption = _caption.rectTransform;
+            caption.pivot = new Vector2(0.5f, 0.5f);
+            caption.anchoredPosition = Vector2.zero;
+            caption.localRotation = Quaternion.Euler(0f, 0f, CaptionAngle);
+            _caption.alignment = TextAnchor.MiddleCenter;
+        }
 
         private void Update()
         {
@@ -117,10 +127,6 @@ namespace GoosingGeese.Presentation
             tint.a *= Mathf.Lerp(_haloAlphaRange.x, _haloAlphaRange.y, amount);
             _halo.color = tint;
             _caption.rectTransform.localScale = Vector3.one * (1f + wave * _captionAmplitude);
-            _caption.rectTransform.localRotation = Quaternion.identity;
-            _caption.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            _caption.rectTransform.anchoredPosition = Vector2.zero;
-            _caption.alignment = TextAnchor.MiddleCenter;
 
             if (_promptIndex >= 0)
                 _caption.text = _race.Progress.UseEnglish ? _englishPrompts[_promptIndex] : _russianPrompts[_promptIndex];
