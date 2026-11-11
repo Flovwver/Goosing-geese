@@ -22,6 +22,8 @@ namespace GoosingGeese.Roads
         public NavigationConfiguration Configuration => _configuration;
         public int CurrentSegment => _currentSegment;
         public float DistanceAlongPath => _distanceAlongPath;
+        public float FinishDistance => _path?.Curve != null
+            && _path.FinishWaypointIndex > 0 ? _path.Curve.GetSegmentEndDistance(_path.FinishWaypointIndex - 1) : 0f;
         public Vector3 TargetPosition { get; private set; }
         public Vector3 ClosestPosition { get; private set; }
         public bool IsPathCompleted { get; private set; } = true;
@@ -101,7 +103,7 @@ namespace GoosingGeese.Roads
 
             ClosestPosition = curve.GetPointAtDistance(_distanceAlongPath);
 
-            if (IsFinishReached == false && _path.FinishWaypointIndex > 0 && _distanceAlongPath >= curve.GetSegmentEndDistance(_path.FinishWaypointIndex - 1))
+            if (IsFinishReached == false && _path.FinishWaypointIndex > 0 && _distanceAlongPath >= FinishDistance)
             {
                 Vector3 offsetFromRoute = currentPosition - ClosestPosition;
                 offsetFromRoute.y = 0f;

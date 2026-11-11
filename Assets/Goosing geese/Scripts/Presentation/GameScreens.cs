@@ -52,6 +52,7 @@ namespace GoosingGeese.Presentation
         private Text _levelLabel;
         private string _lastStatus;
         private RaceState _lastStatusState;
+        private int _lastRemainingPercent;
 
         private void Awake()
         {
@@ -128,6 +129,13 @@ namespace GoosingGeese.Presentation
         private void UpdateRaceStatus()
         {
             string lead = "";
+            int remainingPercent = -1;
+
+            if (_race.State == RaceState.Racing && _playerNavigator.FinishDistance > 0f)
+            {
+                float remaining = 1f - _playerNavigator.DistanceAlongPath / _playerNavigator.FinishDistance;
+                remainingPercent = Mathf.CeilToInt(Mathf.Clamp01(remaining) * 100f);
+            }
 
             if (_race.State == RaceState.Racing && _opponents.Opponent != null)
             {
@@ -141,12 +149,14 @@ namespace GoosingGeese.Presentation
                 lead = ahead ? _race.Session.Text.Choose("Ты впереди", "You are ahead") : _race.Session.Text.Choose("Соперник впереди", "Rival is ahead");
             }
 
-            if (_lastStatus == lead && _lastStatusState == _race.State)
+            if (_lastStatus == lead && _lastStatusState == _race.State && _lastRemainingPercent == remainingPercent)
                 return;
 
             _lastStatus = lead;
             _lastStatusState = _race.State;
-            _status.text = GetStateText() + "\n" + lead;
+            _lastRemainingPercent = remainingPercent;
+            string heading = remainingPercent < 0 ? GetStateText() : _race.Session.Text.Choose("До финиша: ", "To finish: ") + remainingPercent + "%";
+            _status.text = heading + "\n" + lead;
         }
 
         private string GetStateText()
