@@ -16,14 +16,19 @@ namespace GoosingGeese.Platforms
     {
         private const string LeaderboardName = "goosing_geese_points";
         private const string ReceiverName = "GoosingGeese.YandexPlatform";
-        private bool _isReadyReported;
 #if Leaderboards_yg && Authorization_yg
         private const float LeaderboardReadInterval = 16f;
+        private const float LeaderboardResponseTimeout = 8f;
+#endif
+        private bool _isReadyReported;
+#if Leaderboards_yg && Authorization_yg
         private string _localPlayerId;
         private string _requestedAccountId;
         private string _pendingScoreAccountId;
         private int _pendingScore;
         private float _nextLeaderboardRead;
+        private float _leaderboardResponseDeadline;
+        private float _leaderboardViewDeadline;
         private bool _needsLeaderboard;
         private Action<List<LeaderboardEntry>> _onLeaderboardLoaded;
 #endif
@@ -55,14 +60,6 @@ namespace GoosingGeese.Platforms
             }
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Register()
-        {
-            var receiver = new GameObject(ReceiverName);
-            DontDestroyOnLoad(receiver);
-            GamePlatform.Register(receiver.AddComponent<YandexGamePlatform>());
-        }
-
         private void OnDestroy()
         {
 #if Leaderboards_yg && Authorization_yg
@@ -81,12 +78,22 @@ namespace GoosingGeese.Platforms
 
         public void ReportGameplay(bool isReady, bool isActive)
         {
-            if (YG2.isSDKEnabled == false)
-                return;
-
 #if Leaderboards_yg && Authorization_yg
+            if (_leaderboardResponseDeadline > 0f && Time.realtimeSinceStartup >= _leaderboardResponseDeadline)
+                CompleteLeaderboardRequest(null);
+
+            if (_onLeaderboardLoaded != null && Time.realtimeSinceStartup >= _leaderboardViewDeadline)
+            {
+                Action<List<LeaderboardEntry>> onLoaded = _onLeaderboardLoaded;
+                _onLeaderboardLoaded = null;
+                onLoaded(null);
+            }
+
             TryRequestLeaderboard();
 #endif
+
+            if (YG2.isSDKEnabled == false)
+                return;
 
             if (isReady && _isReadyReported == false)
             {
@@ -105,10 +112,19 @@ namespace GoosingGeese.Platforms
         public void RequestLeaderboard(string localPlayerId, Action<List<LeaderboardEntry>> onLoaded)
         {
 #if Leaderboards_yg && Authorization_yg
+            if (YG2.infoYG.Leaderboards.enable == false)
+            {
+                onLoaded?.Invoke(null);
+                return;
+            }
+
             _localPlayerId = localPlayerId;
             _onLeaderboardLoaded = onLoaded;
+            _leaderboardViewDeadline = Math.Max(Time.realtimeSinceStartup, _nextLeaderboardRead) + LeaderboardResponseTimeout;
             _needsLeaderboard = true;
             TryRequestLeaderboard();
+#else
+            onLoaded?.Invoke(null);
 #endif
         }
 
@@ -140,6 +156,14 @@ namespace GoosingGeese.Platforms
 #endif
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Register()
+        {
+            var receiver = new GameObject(ReceiverName);
+            DontDestroyOnLoad(receiver);
+            GamePlatform.Register(receiver.AddComponent<YandexGamePlatform>());
+        }
+
 #if Leaderboards_yg && Authorization_yg
         private void TryRequestLeaderboard()
         {
@@ -148,6 +172,7 @@ namespace GoosingGeese.Platforms
 
             _needsLeaderboard = false;
             _nextLeaderboardRead = Time.realtimeSinceStartup + LeaderboardReadInterval;
+            _leaderboardResponseDeadline = Time.realtimeSinceStartup + LeaderboardResponseTimeout;
             _requestedAccountId = YG2.player.id;
             YG2.onGetLeaderboard -= OnLeaderboardLoaded;
             YG2.onGetLeaderboard += OnLeaderboardLoaded;
@@ -159,12 +184,11 @@ namespace GoosingGeese.Platforms
             if (data == null || data.technoName != LeaderboardName || YG2.player.id != _requestedAccountId)
                 return;
 
-            YG2.onGetLeaderboard -= OnLeaderboardLoaded;
-            Action<List<LeaderboardEntry>> onLoaded = _onLeaderboardLoaded;
-            _onLeaderboardLoaded = null;
-
             if (data.players == null || (data.players.Length == 1 && data.players[0].rank <= 0))
+            {
+                CompleteLeaderboardRequest(null);
                 return;
+            }
 
             int previousScore = data.currentPlayer?.score ?? 0;
             var entries = new List<LeaderboardEntry>();
@@ -190,8 +214,16 @@ namespace GoosingGeese.Platforms
 
             _pendingScore = 0;
 
-            if (entries.Count > 0)
-                onLoaded?.Invoke(entries);
+            CompleteLeaderboardRequest(entries);
+        }
+
+        private void CompleteLeaderboardRequest(List<LeaderboardEntry> entries)
+        {
+            YG2.onGetLeaderboard -= OnLeaderboardLoaded;
+            _leaderboardResponseDeadline = 0f;
+            Action<List<LeaderboardEntry>> onLoaded = _onLeaderboardLoaded;
+            _onLeaderboardLoaded = null;
+            onLoaded?.Invoke(entries);
         }
 #endif
 
