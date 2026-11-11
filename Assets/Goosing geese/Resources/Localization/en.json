@@ -149,6 +149,10 @@
       "_text": "Off the road"
     },
     {
+      "_key": "leaderboard.you",
+      "_text": "you"
+    },
+    {
       "_key": "online.leaderboard",
       "_text": "Online leaderboard"
     },

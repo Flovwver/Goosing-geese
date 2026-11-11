@@ -66,10 +66,20 @@ public static class ResultAndIdentityTests
             view.Render(parent.transform, entries, () =>
             {
             }, true);
-            Text playerRow = parent.GetComponentsInChildren<Text>().Single(label => label.text == "20. Current player — 100 •");
+            string playerMarker = progress.UseEnglish ? " (you)" : " (вы)";
+            Text playerRow = parent.GetComponentsInChildren<Text>().Single(label => label.text == "20. Current player — 100" + playerMarker);
             Require(playerRow.resizeTextForBestFit
                 && playerRow.GetComponent<LayoutElement>().preferredHeight >= playerRow.fontSize,
                 "The current player must have independent space outside the five top rows.");
+            var localParent = new GameObject("Local leaderboard regression", typeof(RectTransform));
+            localParent.transform.SetParent(parent.transform, false);
+            entries.Clear();
+            view.Render(localParent.transform, entries, () =>
+            {
+            });
+            Require(localParent.GetComponentsInChildren<Text>().Any(label => label.text.EndsWith(playerMarker,
+                StringComparison.Ordinal)),
+                "A local record without a stored entry must also identify the current player.");
         }
         finally
         {

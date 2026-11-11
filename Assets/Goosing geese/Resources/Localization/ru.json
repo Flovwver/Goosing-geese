@@ -149,6 +149,10 @@
       "_text": "Вылет с трассы"
     },
     {
+      "_key": "leaderboard.you",
+      "_text": "вы"
+    },
+    {
       "_key": "online.leaderboard",
       "_text": "Онлайн-рейтинг"
     },

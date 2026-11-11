@@ -24,6 +24,7 @@ namespace GoosingGeese.Presentation
         {
             string rows = "";
             string currentRow = null;
+            string playerMarker = " (" + _text.Get("leaderboard.you") + ")";
 
             for (int i = 0; i < entries.Count; i++)
             {
@@ -33,7 +34,7 @@ namespace GoosingGeese.Presentation
                     continue;
 
                 int rank = isOnline ? entries[i].Rank : GetRank(entries, i);
-                string row = rank + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "");
+                string row = rank + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? playerMarker : "");
 
                 if (i < VisibleTopCount)
                     rows += row + "\n";
@@ -43,7 +44,7 @@ namespace GoosingGeese.Presentation
 
             if (isOnline == false && entries.Find(entry => entry.PlayerId == _progress.PlayerId) == null)
             {
-                string localRow = (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
+                string localRow = (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + playerMarker;
 
                 if (entries.Count < VisibleTopCount)
                     rows += localRow;
