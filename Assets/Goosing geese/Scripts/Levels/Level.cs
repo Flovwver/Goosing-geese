@@ -242,7 +242,7 @@ namespace GoosingGeese.Levels
                 return null;
 
             Vector3 position = player.Position + player.Rotation * Vector3.right * _opponents.LaneOffset;
-            return _opponents.CaptureDefinition(stage, seed, position, player.Rotation);
+            return _opponents.CaptureDefinition(stage, seed, _session.SelectedSceneryIndex, position, player.Rotation);
         }
 
         private RoadPieceType[] GenerateLayout(int seed, CampaignStage stage, RoadConfiguration settings)

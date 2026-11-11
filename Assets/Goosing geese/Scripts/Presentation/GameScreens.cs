@@ -501,7 +501,7 @@ namespace GoosingGeese.Presentation
         private void ShowScenery()
         {
             ShowPanel(_race.Session.Text.Choose("Окружение", "Scenery"), "appearance");
-            _sceneryView.Render(_panel.transform, Back);
+            _sceneryView.Render(_panel.transform, Back, ShowScenery);
         }
 
         private void Back()

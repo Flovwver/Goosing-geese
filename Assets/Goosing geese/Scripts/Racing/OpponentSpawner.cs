@@ -17,7 +17,7 @@ namespace GoosingGeese.Racing
         [SerializeField]
         private Racer _opponentPrefab;
         [SerializeField]
-        private GameObject[] _vehiclePrefabs;
+        private VehicleSet[] _vehiclesByScenery;
         [SerializeField, Min(0f)]
         private float _laneOffset = 4f;
         [SerializeField, Min(0f)]
@@ -101,7 +101,7 @@ namespace GoosingGeese.Racing
                 _driver.Tick(deltaTime);
         }
 
-        public OpponentDefinition CaptureDefinition(CampaignStage stage, int seed, Vector3 position, Quaternion rotation)
+        public OpponentDefinition CaptureDefinition(CampaignStage stage, int seed, int sceneryIndex, Vector3 position, Quaternion rotation)
         {
             RacerStats source = _opponentPrefab.BaseStats;
             RacerStats stats = Instantiate(source);
@@ -120,17 +120,27 @@ namespace GoosingGeese.Racing
                     _opponentPrefab.GetComponent<RoadNavigator>().CaptureConfiguration(),
                     position,
                     rotation);
-                GameObject vehicle = null;
-
-                if (_vehiclePrefabs != null && _vehiclePrefabs.Length > 0)
-                    vehicle = _vehiclePrefabs[(int)((uint)seed % (uint)_vehiclePrefabs.Length)];
-
-                return new OpponentDefinition(racer, stage.CruiseSpeed, stage.CornerSpeed, LaneOffset, _brakingPreviewDistance, vehicle);
+                return new OpponentDefinition(racer,
+                    stage.CruiseSpeed,
+                    stage.CornerSpeed,
+                    LaneOffset,
+                    _brakingPreviewDistance,
+                    GetSceneryVehicle(seed,
+                    sceneryIndex));
             }
             finally
             {
                 Destroy(stats);
             }
+        }
+
+        private GameObject GetSceneryVehicle(int seed, int sceneryIndex)
+        {
+            if (_vehiclesByScenery == null || sceneryIndex < 0 || sceneryIndex >= _vehiclesByScenery.Length)
+                return null;
+
+            GameObject[] prefabs = _vehiclesByScenery[sceneryIndex]?.Prefabs;
+            return prefabs != null && prefabs.Length > 0 ? prefabs[(int)((uint)seed % (uint)prefabs.Length)] : null;
         }
 
         private void UpdateVehicle()
@@ -180,6 +190,12 @@ namespace GoosingGeese.Racing
         {
             if (_opponent != null)
                 _opponent.StopMovement();
+        }
+
+        [System.Serializable]
+        private sealed class VehicleSet
+        {
+            public GameObject[] Prefabs;
         }
     }
 }

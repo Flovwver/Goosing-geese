@@ -59,7 +59,21 @@ public static class PresentationContractsTests
             var changedRoot = (GameObject)typeof(SceneryBuilder).GetField("_root", Flags).GetValue(builder);
             Require(changedRoot != root && changedRoot.activeSelf, "Scenery must observe the model without a UI rebuild command.");
             Require(typeof(WorldPresentation).GetField("_path", Flags).GetValue(world) != null, "World must synchronize its current path.");
-            return "PASS: immediate localization refresh; reversible language; late world path recovery.";
+            var themedVehicles = new System.Collections.Generic.HashSet<GameObject>();
+
+            for (int theme = 0; theme < 3; theme++)
+            {
+                level.CreateLevel(definition.Seed);
+                Require(level.CurrentDefinition.Opponent.Vehicle != null
+                    && themedVehicles.Add(level.CurrentDefinition.Opponent.Vehicle),
+                    "Each scenery must use its own opponent vehicle.");
+                race.Progress.NextScenery(3);
+            }
+
+            int selectedScenery = race.Progress.SelectedSceneryIndex;
+            race.Progress.RestoreJson(race.Progress.ToJson(), Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
+            Require(race.Progress.SelectedSceneryIndex == selectedScenery, "Scenery selection must survive save and reload.");
+            return "PASS: reversible localization; late world path recovery; three scenery-specific rival pools and theme persistence.";
         }
         finally
         {

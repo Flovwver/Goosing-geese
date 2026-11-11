@@ -8,6 +8,8 @@ namespace GoosingGeese.Levels
 
         int SelectedLevelNumber { get; }
 
+        int SelectedSceneryIndex { get; }
+
         bool IsRacing { get; }
 
         bool IsWaiting { get; }

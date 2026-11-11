@@ -31,6 +31,7 @@ namespace GoosingGeese.Levels
         public ProfileCommands Commands { get; }
         public CampaignStage CurrentStage => _campaign.GetStage(Progress.Level);
         public int SelectedLevelNumber => Progress.Level;
+        public int SelectedSceneryIndex => Progress.SelectedSceneryIndex;
         public int LevelNumber => _level.Number;
         public bool HasNextLevel => _level.Number < int.MaxValue;
         public bool IsRacing => _race.isActiveAndEnabled && _race.State == RaceState.Racing;
