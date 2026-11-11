@@ -38,7 +38,7 @@ namespace GoosingGeese.Platforms
             get
             {
 #if Localization_yg
-                if (YG2.isSDKEnabled && string.IsNullOrEmpty(YG2.lang) == false)
+                if (HasPlatformSdk && YG2.isSDKEnabled && string.IsNullOrEmpty(YG2.lang) == false)
                     return YG2.lang == "ru" ? "ru" : "en";
 
                 return null;
@@ -56,6 +56,18 @@ namespace GoosingGeese.Platforms
                 return GoosingGeese_YandexReadProfile(0);
 #else
                 return null;
+#endif
+            }
+        }
+
+        private static bool HasPlatformSdk
+        {
+            get
+            {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                return GoosingGeese_YandexHasSdk() != 0;
+#else
+                return true;
 #endif
             }
         }
@@ -92,7 +104,7 @@ namespace GoosingGeese.Platforms
             TryRequestLeaderboard();
 #endif
 
-            if (YG2.isSDKEnabled == false)
+            if (HasPlatformSdk == false || YG2.isSDKEnabled == false)
                 return;
 
             if (isReady && _isReadyReported == false)
@@ -112,7 +124,7 @@ namespace GoosingGeese.Platforms
         public void RequestLeaderboard(string localPlayerId, Action<List<LeaderboardEntry>> onLoaded)
         {
 #if Leaderboards_yg && Authorization_yg
-            if (YG2.infoYG.Leaderboards.enable == false)
+            if (HasPlatformSdk == false || YG2.infoYG.Leaderboards.enable == false)
             {
                 onLoaded?.Invoke(null);
                 return;
@@ -131,7 +143,7 @@ namespace GoosingGeese.Platforms
         public void SetLanguage(string language)
         {
 #if Localization_yg
-            if (YG2.isSDKEnabled)
+            if (HasPlatformSdk && YG2.isSDKEnabled)
                 YG2.SwitchLanguage(language);
 #endif
         }
@@ -139,7 +151,7 @@ namespace GoosingGeese.Platforms
         public void SubmitScore(int score)
         {
 #if Leaderboards_yg && Authorization_yg
-            if (YG2.isSDKEnabled == false || YG2.player.auth == false || score <= 0)
+            if (HasPlatformSdk == false || YG2.isSDKEnabled == false || YG2.player.auth == false || score <= 0)
                 return;
 
             _pendingScore = _pendingScoreAccountId == YG2.player.id ? Math.Max(_pendingScore, score) : score;
@@ -228,6 +240,9 @@ namespace GoosingGeese.Platforms
 #endif
 
 #if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport("__Internal")]
+        private static extern int GoosingGeese_YandexHasSdk();
+
         [DllImport("__Internal")]
         private static extern string GoosingGeese_YandexReadProfile(int readSnapshot);
 

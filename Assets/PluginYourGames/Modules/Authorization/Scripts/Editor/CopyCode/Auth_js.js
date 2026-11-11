@@ -1,4 +1,4 @@
-﻿var playerData = NO_DATA;
+﻿var playerData = NotAuthorized();
 let player = null;
 
 async function InitPlayer() {

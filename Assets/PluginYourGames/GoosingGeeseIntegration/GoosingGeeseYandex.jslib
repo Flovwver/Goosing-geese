@@ -35,6 +35,10 @@ mergeInto(LibraryManager.library, {
         }
     },
 
+    GoosingGeese_YandexHasSdk: function () {
+        return typeof initYSDK !== "undefined" && initYSDK && typeof ysdk !== "undefined" && ysdk ? 1 : 0;
+    },
+
     GoosingGeese_YandexReadProfile__deps: ["$GoosingGeeseYandex", "malloc", "$lengthBytesUTF8", "$stringToUTF8"],
     GoosingGeese_YandexReadProfile: function (readSnapshot) {
         const session = GoosingGeeseYandex.getProfileSession();
