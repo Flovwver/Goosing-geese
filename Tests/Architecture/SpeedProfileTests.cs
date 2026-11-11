@@ -4,6 +4,7 @@ using System.Reflection;
 using GoosingGeese.EditorTools;
 using GoosingGeese.Levels;
 using GoosingGeese.Presentation;
+using GoosingGeese.Racing;
 using GoosingGeese.Roads;
 using GoosingGeese.Settings;
 using UnityEngine;
@@ -86,6 +87,15 @@ public static class SpeedProfileTests
         level.TryGetBuiltPath(out var path, out var settings);
         var lines = view.GetComponentsInChildren<LineRenderer>();
         Require(lines.Length == path.Pieces.Count, "Every road piece must have a guidance section.");
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var dial = UnityEngine.Object.FindFirstObjectByType<SpeedometerDialGraphic>(FindObjectsInactive.Include);
+        var green = (Color)typeof(SpeedometerDialGraphic).GetField("_green", Flags).GetValue(dial);
+        var yellow = (Color)typeof(SpeedometerDialGraphic).GetField("_yellow", Flags).GetValue(dial);
+        Require((Color)typeof(RoadPathView).GetField("_turnColor",
+            Flags).GetValue(view) == green
+            && (Color)typeof(RoadPathView).GetField("_straightColor",
+            Flags).GetValue(view) == yellow,
+            "Road guidance colors must match the speedometer.");
 
         for (int index = 0; index < lines.Length; index++)
         {
@@ -105,10 +115,10 @@ public static class SpeedProfileTests
         }
 
         var ids = lines.Select(line => line.GetInstanceID()).ToArray();
+        VerifyBendPreview(path);
         level.RestartRace();
         Require(ids.SequenceEqual(view.GetComponentsInChildren<LineRenderer>().Select(line => line.GetInstanceID())), "Repeat must retain rendered guidance.");
         var definition = level.CurrentDefinition;
-        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
         var field = typeof(Level).GetField("_settings", Flags);
         var original = (RoadSettings)field.GetValue(level);
         var source = UnityEngine.Object.Instantiate(original);
@@ -126,5 +136,20 @@ public static class SpeedProfileTests
             UnityEngine.Object.Destroy(source);
             Require(level.TryRestoreLevel(definition, out var error), error);
         }
+    }
+
+    private static void VerifyBendPreview(RoadPath path)
+    {
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        int bend = Array.FindIndex(path.Pieces.Take(path.FinishWaypointIndex).ToArray(), piece => piece.Type != RoadPieceType.Straight);
+        Require(bend > 0, "The scenario needs a bend after a straight.");
+        var race = UnityEngine.Object.FindFirstObjectByType<RaceController>();
+        var racer = (Racer)typeof(RaceController).GetField("_player", Flags).GetValue(race);
+        var navigator = racer.GetComponent<RoadNavigator>();
+        var segment = typeof(RoadNavigator).GetField("_currentSegment", Flags);
+        var distance = typeof(RoadNavigator).GetField("_distanceAlongPath", Flags);
+        segment.SetValue(navigator, bend - 1);
+        distance.SetValue(navigator, path.Curve.GetSegmentEndDistance(bend - 1) - 24f);
+        Require(navigator.HasBendWithin(55f) && navigator.HasBendWithin(5f) == false, "The bend preview must activate upstream at the requested distance.");
     }
 }

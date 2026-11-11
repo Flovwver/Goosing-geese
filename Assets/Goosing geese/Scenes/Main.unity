@@ -1276,8 +1276,8 @@ MonoBehaviour:
   _material: {fileID: 2100000, guid: 77dd07f8738af9b40bed9c8d9c417255, type: 2}
   _transitionLength: 12
   _sampleSpacing: 2
-  _straightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  _turnColor: {r: 0, g: 1, b: 0, a: 1}
+  _straightColor: {r: 1, g: 0.82, b: 0.08, a: 1}
+  _turnColor: {r: 0.25, g: 0.84, b: 0.25, a: 1}
 --- !u!114 &1081964708
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1309,11 +1309,14 @@ MonoBehaviour:
   _level: {fileID: 1081964704}
   _player: {fileID: 265920761}
   _opponentPrefab: {fileID: 5334310155782183356, guid: e7400662bbc0e40429d30d03231ca0b9, type: 3}
-  _vehiclePrefabs:
-  - {fileID: 118780, guid: 2204ec8a2d6a8fe45900f91c3ffb2300, type: 3}
-  - {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
-  - {fileID: 172936, guid: bdad8bf555bf147508f695d9b026e205, type: 3}
-  - {fileID: 3791262560391127436, guid: 515a296395b52b3419a053dc468bbd0c, type: 3}
+  _vehiclesByScenery:
+  - Prefabs:
+    - {fileID: 118780, guid: 2204ec8a2d6a8fe45900f91c3ffb2300, type: 3}
+  - Prefabs:
+    - {fileID: 3791262560391127436, guid: 515a296395b52b3419a053dc468bbd0c, type: 3}
+  - Prefabs:
+    - {fileID: 126226, guid: 06e33b9c32cf14a718767c4af92ab2f8, type: 3}
+    - {fileID: 172936, guid: bdad8bf555bf147508f695d9b026e205, type: 3}
   _laneOffset: 4
   _brakingPreviewDistance: 45
   _turnRateMultiplier: 2

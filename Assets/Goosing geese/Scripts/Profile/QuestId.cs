@@ -4,6 +4,7 @@ namespace GoosingGeese.Profile
     {
         DailyRaces,
         DailyWin,
-        TotalWins
+        TotalWins,
+        DailyOverheat
     }
 }

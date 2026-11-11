@@ -19,6 +19,7 @@ public static class RaceFlowTests
         var input = UnityEngine.Object.FindFirstObjectByType<ThrottleInput>();
         var finish = UnityEngine.Object.FindFirstObjectByType<FinishLine>();
         var camera = UnityEngine.Object.FindFirstObjectByType<CameraFollower>();
+        var opponents = UnityEngine.Object.FindFirstObjectByType<OpponentSpawner>();
         Action repeat = race.Retry;
         Action regenerate = level.BuildRoad;
         Action pause = () =>
@@ -40,7 +41,7 @@ public static class RaceFlowTests
 
         try
         {
-            for (int cycle = 0; cycle < 10; cycle++)
+            for (int cycle = 0; cycle < 12; cycle++)
             {
                 repeat();
                 Require(race.State == RaceState.Waiting && race.Outcome == RaceOutcome.None, "Repeat must prepare the race.");
@@ -58,20 +59,36 @@ public static class RaceFlowTests
                 Require(race.State == RaceState.Paused && Time.timeScale == 0f, "Pause button must pause.");
                 pause();
                 Require(race.State == RaceState.Racing && Time.timeScale > 0f, "Pause button must resume.");
+                RoadNavigator navigator = racer.GetComponent<RoadNavigator>();
+                Require(navigator.FinishDistance > 0f
+                    && navigator.FinishDistance < path.Curve.Length,
+                    "Remaining distance must end at the finish before the runout.");
+                RaceOutcome expected;
 
-                if (cycle % 2 == 0)
+                if (cycle % 3 == 0)
                 {
+                    expected = RaceOutcome.FinishedFirst;
                     trigger.Invoke(finish, new object[] { collider });
+                    child.transform.SetParent(opponents.Opponent.transform, false);
                     trigger.Invoke(finish, new object[] { collider });
                 }
-                else
+                else if (cycle % 3 == 1)
                 {
+                    expected = RaceOutcome.Overheated;
                     racer.GetComponent<Rigidbody>().linearVelocity = Vector3.forward * racer.Configuration.MaxSpeed;
                     racer.Tick(false, racer.Configuration.TimeToOverheat + 0.1f);
                     trigger.Invoke(finish, new object[] { collider });
                 }
+                else
+                {
+                    expected = RaceOutcome.OpponentFinished;
+                    child.transform.SetParent(opponents.Opponent.transform, false);
+                    trigger.Invoke(finish, new object[] { collider });
+                    child.transform.SetParent(racer.transform, false);
+                    trigger.Invoke(finish, new object[] { collider });
+                }
 
-                RaceOutcome expected = cycle % 2 == 0 ? RaceOutcome.FinishedFirst : RaceOutcome.Overheated;
+                child.transform.SetParent(racer.transform, false);
                 Require(race.State == RaceState.Result && race.Outcome == expected && results == cycle + 1, "Each attempt must produce one immutable result.");
                 Require(((bool)typeof(CameraFollower).GetField("_followEnabled", Flags).GetValue(camera) == false), "Result must stop the camera.");
                 input.SetPedalPressed(true);
@@ -110,7 +127,7 @@ public static class RaceFlowTests
                 Require(first.Length == 23 && first.SequenceEqual(second), "Saved seeds must reproduce complete layouts.");
             }
 
-            return "PASS: ten attempts including five finishes/five overheats; child collider detection; immutable result; pause, input and camera recovery; repeat/regeneration; 100 reproducible seeds.";
+            return "PASS: twelve attempts cover both finish orders and overheating; finish distance excludes runout; child collider detection; immutable result; pause, input and camera recovery; repeat/regeneration; 100 reproducible seeds.";
         }
         finally
         {

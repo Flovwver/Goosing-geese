@@ -26,13 +26,16 @@ namespace GoosingGeese.Profile
             _data.DailyWins = 0;
             _data.DailyRacesClaimed = false;
             _data.DailyWinsClaimed = false;
+            _data.DailyOverheat = false;
+            _data.DailyOverheatClaimed = false;
         }
 
-        public void RecordRace(bool won, DateTime date)
+        public void RecordRace(bool won, DateTime date, bool overheated = false)
         {
             RefreshDay(date);
             _data.Races = (int)Math.Min(int.MaxValue, (long)_data.Races + 1);
             _data.DailyRaces = (int)Math.Min(int.MaxValue, (long)_data.DailyRaces + 1);
+            _data.DailyOverheat |= overheated;
 
             if (won)
             {
@@ -52,6 +55,8 @@ namespace GoosingGeese.Profile
                     return currentDay ? _data.DailyRaces : 0;
                 case QuestId.DailyWin:
                     return currentDay ? _data.DailyWins : 0;
+                case QuestId.DailyOverheat:
+                    return currentDay && _data.DailyOverheat ? 1 : 0;
                 default:
                     return _data.Wins;
             }
@@ -70,7 +75,18 @@ namespace GoosingGeese.Profile
             if ((QuestId)quest == QuestId.TotalWins)
                 return _data.GlobalWinsClaimed;
 
-            return _data.DailyDate == date.ToString("yyyy-MM-dd") && ((QuestId)quest == QuestId.DailyRaces ? _data.DailyRacesClaimed : _data.DailyWinsClaimed);
+            if (_data.DailyDate != date.ToString("yyyy-MM-dd"))
+                return false;
+
+            switch ((QuestId)quest)
+            {
+                case QuestId.DailyRaces:
+                    return _data.DailyRacesClaimed;
+                case QuestId.DailyWin:
+                    return _data.DailyWinsClaimed;
+                default:
+                    return _data.DailyOverheatClaimed;
+            }
         }
 
         public bool TryClaim(int quest, DateTime date)
@@ -85,12 +101,21 @@ namespace GoosingGeese.Profile
 
             int reward = _definitions.Get(quest).Reward;
 
-            if ((QuestId)quest == QuestId.DailyRaces)
-                _data.DailyRacesClaimed = true;
-            else if ((QuestId)quest == QuestId.DailyWin)
-                _data.DailyWinsClaimed = true;
-            else
-                _data.GlobalWinsClaimed = true;
+            switch ((QuestId)quest)
+            {
+                case QuestId.DailyRaces:
+                    _data.DailyRacesClaimed = true;
+                    break;
+                case QuestId.DailyWin:
+                    _data.DailyWinsClaimed = true;
+                    break;
+                case QuestId.DailyOverheat:
+                    _data.DailyOverheatClaimed = true;
+                    break;
+                default:
+                    _data.GlobalWinsClaimed = true;
+                    break;
+            }
 
             _addReward(reward);
             return true;
