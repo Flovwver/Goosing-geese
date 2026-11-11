@@ -10,6 +10,7 @@ namespace GoosingGeese.Presentation
     public class GarageView : MonoBehaviour
     {
         private const int CanvasSortingOrder = 25;
+        private const float SwatchSize = 48f;
         private static readonly Color PanelColor = GameUiTheme.Panel;
         [SerializeField]
         private RaceController _race;
@@ -181,22 +182,31 @@ namespace GoosingGeese.Presentation
                 return;
 
             var row = GameUiFactory.CreateRect("Color selector", parent, Vector2.zero, Vector2.one);
-            row.gameObject.AddComponent<LayoutElement>().preferredHeight = 48f;
+            row.gameObject.AddComponent<LayoutElement>().minHeight = SwatchSize;
             var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             layout.spacing = 12f;
+            layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlWidth = true;
             layout.childControlHeight = true;
-            layout.childForceExpandWidth = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = false;
 
             foreach (int index in colors)
             {
-                Button swatch = _ui.CreateButton(row, index == _garage.PreviewIndex ? "✓" : "", () => _garage.Browse(index));
-                swatch.GetComponent<Image>().color = _garage.GetColor(index);
-                swatch.GetComponent<LayoutElement>().preferredHeight = 48f;
-                swatch.GetComponentInChildren<Text>().color = GameUiTheme.Ink;
-                var outline = swatch.gameObject.AddComponent<Outline>();
-                outline.effectColor = index == _garage.PreviewIndex ? GameUiTheme.Accent : GameUiTheme.Ink;
-                outline.effectDistance = Vector2.one * 2f;
+                var rect = GameUiFactory.CreateRect("Color swatch " + index, row, Vector2.zero, Vector2.one);
+                var size = rect.gameObject.AddComponent<LayoutElement>();
+                size.minWidth = SwatchSize;
+                size.minHeight = SwatchSize;
+                var graphic = rect.gameObject.AddComponent<GarageColorSwatch>();
+                graphic.Show(_garage.GetColor(index), index == _garage.PreviewIndex, index == _garage.SelectedIndex);
+                var button = rect.gameObject.AddComponent<Button>();
+                button.targetGraphic = graphic;
+                button.transition = Selectable.Transition.None;
+                button.onClick.AddListener(() =>
+                {
+                    _audio.PlayClick();
+                    _garage.Browse(index);
+                });
             }
         }
 
