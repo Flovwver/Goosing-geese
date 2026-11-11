@@ -7,6 +7,7 @@ namespace GoosingGeese.Presentation
 {
     public sealed class LeaderboardView
     {
+        private const int VisibleTopCount = 5;
         private readonly PlayerProgress _progress;
         private readonly Localizer _text;
         private readonly GameUiFactory _ui;
@@ -21,28 +22,47 @@ namespace GoosingGeese.Presentation
         public void Render(Transform parent, System.Collections.Generic.List<LeaderboardEntry> entries, Action back, bool isOnline = false)
         {
             string rows = "";
+            string currentRow = null;
 
             for (int i = 0; i < entries.Count; i++)
             {
                 bool currentPlayer = entries[i].PlayerId == _progress.PlayerId;
 
-                if (i < 5 || currentPlayer)
-                    rows += (isOnline ? entries[i].Rank : GetRank(entries,
-                        i))
-                        + ". "
-                        + entries[i].Name
-                        + " — "
-                        + entries[i].Score
-                        + (currentPlayer ? " •" : "")
-                        + "\n";
+                if (i >= VisibleTopCount && currentPlayer == false)
+                    continue;
+
+                int rank = isOnline ? entries[i].Rank : GetRank(entries, i);
+                string row = rank + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "");
+
+                if (i < VisibleTopCount)
+                    rows += row + "\n";
+                else
+                    currentRow = row;
             }
 
             if (isOnline == false && entries.Find(entry => entry.PlayerId == _progress.PlayerId) == null)
-                rows += (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
+            {
+                string localRow = (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
 
-            Text rowsLabel = _ui.CreateLabel(parent, rows, 24);
+                if (entries.Count < VisibleTopCount)
+                    rows += localRow;
+                else
+                    currentRow = localRow;
+            }
+
+            Text rowsLabel = _ui.CreateLabel(parent, rows.TrimEnd('\n'), 24);
             rowsLabel.supportRichText = false;
             rowsLabel.GetComponent<LayoutElement>().preferredHeight = 170f;
+
+            if (currentRow != null)
+            {
+                Text playerLabel = _ui.CreateLabel(parent, currentRow, 24);
+                playerLabel.supportRichText = false;
+                playerLabel.resizeTextForBestFit = true;
+                playerLabel.resizeTextMinSize = 16;
+                playerLabel.resizeTextMaxSize = 24;
+            }
+
             _ui.CreateLabel(parent,
                 isOnline ? _text.Choose("Онлайн-рейтинг",
                 "Online leaderboard") : _text.Choose("Рекорд этого устройства",
