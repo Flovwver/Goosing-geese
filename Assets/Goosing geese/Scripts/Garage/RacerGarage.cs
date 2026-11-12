@@ -9,12 +9,9 @@ namespace GoosingGeese.Garage
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerGarage")]
     public class RacerGarage : MonoBehaviour
     {
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private RacerAppearanceCatalog _appearances;
-        [SerializeField]
-        private RacerUpgradeRules _rules;
+        [SerializeField] private RaceController _race;
+        [SerializeField] private RacerAppearanceCatalog _appearances;
+        [SerializeField] private RacerUpgradeRules _rules;
         private int _previewIndex = -1;
 
         public event Action SelectionChanged;

@@ -8,6 +8,8 @@ namespace GoosingGeese.Levels
 {
     public sealed class GameSession : ILevelSession
     {
+        private const string RacerAppearanceCatalogTitle = "RacerAppearanceCatalog";
+
         private readonly PlayerProgressStore _store;
         private readonly LocalLeaderboard _leaderboard;
         private readonly Level _level;
@@ -21,7 +23,7 @@ namespace GoosingGeese.Levels
             _level = level;
             _campaign = campaign;
             _race = race;
-            Progress = _store.Load(Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
+            Progress = _store.Load(Resources.Load<RacerAppearanceCatalog>(RacerAppearanceCatalogTitle));
             Commands = new ProfileCommands(Progress, _store, _leaderboard);
             Text = new Localizer(Progress);
         }
