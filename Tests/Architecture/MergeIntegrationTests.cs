@@ -65,7 +65,12 @@ public static class MergeIntegrationTests
 
             int goatIndex = Enumerable.Range(0, garage.AppearanceCount).Single(index => catalog.GetEntry(index).ModelId == "goat");
             Require(garage.Browse(goatIndex), "The garage must preview the goat.");
-            var goatRenderer = appearance.transform.Find("Selected model").GetComponentInChildren<MeshRenderer>();
+            Transform goat = appearance.transform.Find("Selected model");
+            Require(goat.Find("Rider/Rider torso") != null, "The goat must have its rider.");
+            var skateParts = goat.Find("Roller skates").Cast<Transform>().ToArray();
+            Require(skateParts.Count(part => part.name == "Roller boot") == 4, "The goat must have a skate on each hoof.");
+            Require(skateParts.Count(part => part.name == "Roller wheel") == 12, "Each skate must have three wheels.");
+            var goatRenderer = goat.Find("Goat").GetComponentInChildren<MeshRenderer>();
             Material[] goatMaterials = goatRenderer.sharedMaterials;
             Require(goatMaterials.Length == 5 && goatMaterials[0].name == "Goat_Coat", "The garage must use the new goat model.");
             var goatBlock = new MaterialPropertyBlock();
