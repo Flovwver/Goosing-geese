@@ -8,9 +8,10 @@ namespace GoosingGeese.Input
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "PedalButton")]
     public class PedalButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
-        [SerializeField]
-        [UnityEngine.Serialization.FormerlySerializedAs("_inputSwitch")]
-        private ThrottleInput _input;
+        private const string LegacyInputField = "_inputSwitch";
+
+        [UnityEngine.Serialization.FormerlySerializedAs(LegacyInputField)]
+        [SerializeField] private ThrottleInput _input;
 
         private void OnDisable()
         {

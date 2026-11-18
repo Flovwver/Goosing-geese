@@ -8,10 +8,8 @@ namespace GoosingGeese.Garage
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerLoadout")]
     public class RacerLoadout : MonoBehaviour
     {
-        [SerializeField]
-        private Racer _racer;
-        [SerializeField]
-        private RacerGarage _garage;
+        [SerializeField] private Racer _racer;
+        [SerializeField] private RacerGarage _garage;
         private RacerStats _runtimeStats;
 
         private void OnEnable()

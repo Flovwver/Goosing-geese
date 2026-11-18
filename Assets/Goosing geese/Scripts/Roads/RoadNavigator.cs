@@ -9,8 +9,7 @@ namespace GoosingGeese.Roads
     public class RoadNavigator : MonoBehaviour
     {
         private readonly EventPublisher _events = new EventPublisher();
-        [SerializeField]
-        private NavigationSettings _settings;
+        [SerializeField] private NavigationSettings _settings;
         private RoadPath _path;
         private NavigationConfiguration _configuration;
         private int _currentSegment;
@@ -38,18 +37,6 @@ namespace GoosingGeese.Roads
         {
             if (_configuration == null)
                 _configuration = CaptureConfiguration();
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            if (_path == null || IsPathCompleted)
-                return;
-
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(ClosestPosition, _configuration.DebugPointRadius);
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(TargetPosition, _configuration.DebugPointRadius);
-            Gizmos.DrawLine(transform.position, TargetPosition);
         }
 
         public NavigationConfiguration CaptureConfiguration()

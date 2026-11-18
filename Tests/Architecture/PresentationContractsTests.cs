@@ -22,6 +22,7 @@ public static class PresentationContractsTests
 
         try
         {
+            CheckBackgroundAudio(race.GetComponent<GameAudio>());
             var label = (Text)typeof(GameScreens).GetField("_garageLabel", Flags).GetValue(screens);
             string before = label.text;
             race.Progress.ToggleLanguage();
@@ -73,13 +74,42 @@ public static class PresentationContractsTests
             int selectedScenery = race.Progress.SelectedSceneryIndex;
             race.Progress.RestoreJson(race.Progress.ToJson(), Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
             Require(race.Progress.SelectedSceneryIndex == selectedScenery, "Scenery selection must survive save and reload.");
-            return "PASS: reversible localization; late world path recovery; three scenery-specific rival pools and theme persistence.";
+            return "PASS: background audio; reversible localization; late world path recovery; three scenery-specific rival pools and theme persistence.";
         }
         finally
         {
             world.enabled = true;
             race.Progress.RestoreJson(profile, Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
             level.TryRestoreLevel(definition, out _);
+        }
+    }
+
+    private static void CheckBackgroundAudio(GameAudio audio)
+    {
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var focus = typeof(GameAudio).GetMethod("OnApplicationFocus", Flags);
+        var pause = typeof(GameAudio).GetMethod("OnApplicationPause", Flags);
+        var music = (AudioSource)typeof(GameAudio).GetField("_music", Flags).GetValue(audio);
+        var effects = (AudioSource)typeof(GameAudio).GetField("_effects", Flags).GetValue(audio);
+        var engine = (AudioSource)typeof(GameAudio).GetField("_engine", Flags).GetValue(audio);
+        bool hadFocus = (bool)typeof(GameAudio).GetField("_hasFocus", Flags).GetValue(audio);
+        bool wasPaused = (bool)typeof(GameAudio).GetField("_applicationPaused", Flags).GetValue(audio);
+
+        try
+        {
+            pause.Invoke(audio, new object[] { false });
+            focus.Invoke(audio, new object[] { false });
+            Require(music.mute && effects.mute && engine.mute, "Losing focus must silence the menu and race audio.");
+            pause.Invoke(audio, new object[] { true });
+            focus.Invoke(audio, new object[] { true });
+            Require(music.mute && effects.mute && engine.mute, "Regaining focus must not resume audio while the application is paused.");
+            pause.Invoke(audio, new object[] { false });
+            Require(music.mute == false && effects.mute == false && engine.mute == false, "Audio must resume after focus and pause have both cleared.");
+        }
+        finally
+        {
+            focus.Invoke(audio, new object[] { hadFocus });
+            pause.Invoke(audio, new object[] { wasPaused });
         }
     }
 

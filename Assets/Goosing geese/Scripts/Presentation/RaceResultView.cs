@@ -11,16 +11,13 @@ namespace GoosingGeese.Presentation
         private const int CanvasSortingOrder = 30;
         private const float MinimumExplosionSeconds = 0.65f;
         private const float ExplosionTimeoutSeconds = 5f;
+
         private static readonly Color ButtonColor = new Color(1f, 0.79f, 0.28f);
         private static readonly Color TextColor = new Color(0.05f, 0.09f, 0.12f);
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private RacerOverheatView _overheatView;
-        [SerializeField]
-        private GameAudio _audio;
+        [SerializeField] private RaceController _race;
+        [SerializeField] private RacerOverheatView _overheatView;
         private GameUiFactory _ui;
-        private GameObject _canvasRoot;
+        private Canvas _canvasRoot;
         private RectTransform _safeArea;
         private GameObject _panel;
         private GameObject _skipButton;
@@ -37,7 +34,7 @@ namespace GoosingGeese.Presentation
             if (_ui == null)
                 InitializeUi();
 
-            _canvasRoot.SetActive(true);
+            _canvasRoot.gameObject.SetActive(true);
             _race.StateChanged += OnStateChanged;
 
             if (_overheatView != null)
@@ -48,7 +45,7 @@ namespace GoosingGeese.Presentation
 
         private void Update()
         {
-            GameUiFactory.UpdateSafeArea(_safeArea);
+            _ui.UpdateSafeArea(_safeArea);
 
             if (_waitingForExplosion == false)
                 return;
@@ -69,22 +66,22 @@ namespace GoosingGeese.Presentation
                 _overheatView.ExplosionCompleted -= RevealResult;
 
             Hide();
-            _canvasRoot.SetActive(false);
+            _canvasRoot.gameObject.SetActive(false);
         }
 
         private void InitializeUi()
         {
             if (_canvasRoot != null)
             {
-                _canvasRoot.SetActive(false);
-                Destroy(_canvasRoot);
+                _canvasRoot.gameObject.SetActive(false);
+                Destroy(_canvasRoot.gameObject);
             }
 
             _panel = null;
-            _ui = new GameUiFactory(GameUiTheme.LoadFont(), _audio.PlayClick);
-            _canvasRoot = GameUiFactory.CreateCanvas("Race result", transform, CanvasSortingOrder);
-            _safeArea = GameUiFactory.CreateRect("Safe area", _canvasRoot.transform, Vector2.zero, Vector2.one);
-            var rect = GameUiFactory.CreateRect("Show result on tap", _canvasRoot.transform, Vector2.zero, Vector2.one);
+            _ui = GetComponent<GameUiBootstrap>().Factory;
+            _canvasRoot = _ui.CreateCanvas("Race result", transform, CanvasSortingOrder);
+            _safeArea = _ui.CreateRect("Safe area", _canvasRoot.transform, Vector2.zero, Vector2.one);
+            var rect = _ui.CreateRect("Show result on tap", _canvasRoot.transform, Vector2.zero, Vector2.one);
             _skipButton = rect.gameObject;
             _skipButton.AddComponent<Image>().color = Color.clear;
             var button = _skipButton.AddComponent<Button>();
@@ -124,7 +121,7 @@ namespace GoosingGeese.Presentation
 
         private void ShowResult()
         {
-            var rect = GameUiFactory.CreateRect("Panel result", _safeArea, new Vector2(0.06f, 0.025f), new Vector2(0.94f, 0.48f));
+            var rect = _ui.CreateRect("Panel result", _safeArea, new Vector2(0.06f, 0.025f), new Vector2(0.94f, 0.48f));
             _panel = rect.gameObject;
             var layout = _panel.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(24, 24, 24, 24);
@@ -132,18 +129,18 @@ namespace GoosingGeese.Presentation
             layout.childControlHeight = true;
             layout.childControlWidth = true;
             layout.childForceExpandHeight = false;
-            AddLabel(_race.PlayerWon ? _race.Session.Text.Choose("Победа!", "You won!") : _race.Session.Text.Choose("Попробуем ещё?", "Try again?"), 32);
+            AddLabel(_race.PlayerWon ? _race.Session.Text.Get("you.won") : _race.Session.Text.Get("try.again"), 32);
 
             if (_race.PlayerWon == false)
                 AddLabel(GetLossReason(), 24);
 
-            AddLabel("+" + _race.LastReward + _race.Session.Text.Choose(" очков", " points"), 30);
+            AddLabel("+" + _race.LastReward + _race.Session.Text.Get("points"), 30);
 
             if (_race.PlayerWon && _race.HasNextLevel)
-                AddButton(_race.Session.Text.Choose("Следующий уровень", "Next level"), _race.NextLevel);
+                AddButton(_race.Session.Text.Get("next.level"), _race.NextLevel);
 
-            AddButton(_race.Session.Text.Choose("Повторить трассу", "Retry track"), _race.Retry);
-            AddButton(_race.Session.Text.Choose("В главное меню", "Main menu"), _race.ReturnToMenu);
+            AddButton(_race.Session.Text.Get("retry.track"), _race.Retry);
+            AddButton(_race.Session.Text.Get("main.menu"), _race.ReturnToMenu);
         }
 
         private string GetLossReason()
@@ -151,13 +148,13 @@ namespace GoosingGeese.Presentation
             switch (_race.Outcome)
             {
                 case RaceOutcome.Overheated:
-                    return _race.Session.Text.Choose("Перегрев", "Overheated");
+                    return _race.Session.Text.Get("overheated");
                 case RaceOutcome.OffRoad:
-                    return _race.Session.Text.Choose("Вылет с трассы", "Off the road");
+                    return _race.Session.Text.Get("off.the.road");
                 case RaceOutcome.OpponentFinished:
-                    return _race.Session.Text.Choose("Соперник финишировал первым", "Your rival finished first");
+                    return _race.Session.Text.Get("your.rival.finished.first");
                 default:
-                    return _race.Session.Text.Choose("Трасса закончилась до финиша", "Route ended before the finish");
+                    return _race.Session.Text.Get("route.ended.before.the.finish");
             }
         }
 

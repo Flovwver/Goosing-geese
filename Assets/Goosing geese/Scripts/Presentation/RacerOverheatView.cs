@@ -11,8 +11,7 @@ namespace GoosingGeese.Presentation
         private static readonly int OverheatProgressParameter = Animator.StringToHash("OverheatProgress");
         private static readonly int ExplosionState = Animator.StringToHash("Base Layer.Explosion");
         private static readonly int ExplodedParameter = Animator.StringToHash("Exploded");
-        [SerializeField]
-        private Racer _racer;
+        [SerializeField] private Racer _racer;
         private Animator _animator;
         private ParticleSystem[] _explosionParticles;
         private bool _explosionActive;

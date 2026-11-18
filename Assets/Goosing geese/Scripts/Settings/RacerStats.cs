@@ -9,6 +9,7 @@ namespace GoosingGeese.Settings
     {
         public const float MaximumAllowedSteeringAngle = 80f;
         private const float MinimumTimeToOverheat = 0.01f;
+
         [Header("Movement")]
         public float MaxSpeed = 10f;
         public float Acceleration = 5f;

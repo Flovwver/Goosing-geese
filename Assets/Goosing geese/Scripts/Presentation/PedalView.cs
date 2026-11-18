@@ -9,34 +9,20 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "PedalView")]
     public class PedalView : MonoBehaviour
     {
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private ThrottleInput _input;
-        [SerializeField]
-        private RacerAppearanceCatalog _appearances;
-        [SerializeField]
-        private Image _artwork;
-        [SerializeField]
-        private Image _shadow;
-        [SerializeField, Min(0f)]
-        private float _amplitude = 0.06f;
-        [SerializeField, Min(0f)]
-        private float _frequency = 3f;
-        [SerializeField, Min(0f)]
-        private float _pressSpeed = 12f;
-        [SerializeField, Min(0f)]
-        private float _releaseSpeed = 8f;
-        [SerializeField, Range(0.1f, 1f)]
-        private float _pressedHeight = 0.62f;
-        [SerializeField, Range(0.1f, 1f)]
-        private float _pressedWidth = 0.94f;
-        [SerializeField, Range(0f, 60f)]
-        private float _pressedTilt = 18f;
-        [SerializeField, Min(0f)]
-        private float _pressedTravel = 10f;
-        [SerializeField, Range(0f, 1f)]
-        private float _pressedBrightness = 0.85f;
+        [SerializeField] private RaceController _race;
+        [SerializeField] private ThrottleInput _input;
+        [SerializeField] private RacerAppearanceCatalog _appearances;
+        [SerializeField] private Image _artwork;
+        [SerializeField] private Image _shadow;
+        [SerializeField, Min(0f)] private float _amplitude = 0.06f;
+        [SerializeField, Min(0f)] private float _frequency = 3f;
+        [SerializeField, Min(0f)] private float _pressSpeed = 12f;
+        [SerializeField, Min(0f)] private float _releaseSpeed = 8f;
+        [SerializeField, Range(0.1f, 1f)] private float _pressedHeight = 0.62f;
+        [SerializeField, Range(0.1f, 1f)] private float _pressedWidth = 0.94f;
+        [SerializeField, Range(0f, 60f)] private float _pressedTilt = 18f;
+        [SerializeField, Min(0f)] private float _pressedTravel = 10f;
+        [SerializeField, Range(0f, 1f)] private float _pressedBrightness = 0.85f;
         private Vector3 _baseScale;
         private Vector2 _releasedPosition;
         private float _pressAmount;

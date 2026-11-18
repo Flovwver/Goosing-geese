@@ -8,42 +8,15 @@ namespace GoosingGeese.Presentation
     public class PedalPromptView : MonoBehaviour
     {
         private const float CaptionAngle = -8f;
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private Graphic _halo;
-        [SerializeField]
-        private Text _caption;
-        [SerializeField]
-        private string[] _russianPrompts =
-        {
-            "ЖМИ!",
-            "ГАЗУЙ!!!",
-            "ПОГНАЛИ!",
-            "ДАЙ ГАЗУ!",
-            "ПЕДАЛЬ В ПОЛ!",
-            "ПОРА НА СТАРТ!"
-        };
-        [SerializeField]
-        private string[] _englishPrompts =
-        {
-            "GO!",
-            "FLOOR IT!!!",
-            "LET'S RACE!",
-            "GAS IT UP!",
-            "PEDAL TO THE METAL!",
-            "READY, SET, GO!"
-        };
-        [SerializeField, Min(0f)]
-        private float _pulseFrequency = 1.4f;
-        [SerializeField, Range(0f, 0.5f)]
-        private float _captionAmplitude = 0.1f;
-        [SerializeField]
-        private Vector2 _haloScaleRange = new Vector2(0.9f, 1.12f);
-        [SerializeField]
-        private Vector2 _haloAlphaRange = new Vector2(0.4f, 0.72f);
-        [SerializeField]
-        private Color _haloColor = new Color(1f, 0.76f, 0.18f, 1f);
+
+        [SerializeField] private RaceController _race;
+        [SerializeField] private Graphic _halo;
+        [SerializeField] private Text _caption;
+        [SerializeField, Min(0f)] private float _pulseFrequency = 1.4f;
+        [SerializeField, Range(0f, 0.5f)] private float _captionAmplitude = 0.1f;
+        [SerializeField] private Vector2 _haloScaleRange = new Vector2(0.9f, 1.12f);
+        [SerializeField] private Vector2 _haloAlphaRange = new Vector2(0.4f, 0.72f);
+        [SerializeField] private Color _haloColor = new Color(1f, 0.76f, 0.18f, 1f);
         private System.Random _random;
         private bool _isVisible;
         private int _promptIndex = -1;
@@ -93,7 +66,7 @@ namespace GoosingGeese.Presentation
 
         private void ChoosePrompt()
         {
-            int count = Mathf.Min(_russianPrompts.Length, _englishPrompts.Length);
+            int count = _race.Session.Text.PedalPromptCount;
 
             if (count == 0)
             {
@@ -129,7 +102,7 @@ namespace GoosingGeese.Presentation
             _caption.rectTransform.localScale = Vector3.one * (1f + wave * _captionAmplitude);
 
             if (_promptIndex >= 0)
-                _caption.text = _race.Progress.UseEnglish ? _englishPrompts[_promptIndex] : _russianPrompts[_promptIndex];
+                _caption.text = _race.Session.Text.GetPedalPrompt(_promptIndex);
         }
     }
 }

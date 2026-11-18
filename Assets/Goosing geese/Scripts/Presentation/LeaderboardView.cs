@@ -8,6 +8,7 @@ namespace GoosingGeese.Presentation
     public sealed class LeaderboardView
     {
         private const int VisibleTopCount = 5;
+
         private readonly PlayerProgress _progress;
         private readonly Localizer _text;
         private readonly GameUiFactory _ui;
@@ -23,6 +24,7 @@ namespace GoosingGeese.Presentation
         {
             string rows = "";
             string currentRow = null;
+            string playerMarker = " (" + _text.Get("leaderboard.you") + ")";
 
             for (int i = 0; i < entries.Count; i++)
             {
@@ -32,7 +34,7 @@ namespace GoosingGeese.Presentation
                     continue;
 
                 int rank = isOnline ? entries[i].Rank : GetRank(entries, i);
-                string row = rank + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? " •" : "");
+                string row = rank + ". " + entries[i].Name + " — " + entries[i].Score + (currentPlayer ? playerMarker : "");
 
                 if (i < VisibleTopCount)
                     rows += row + "\n";
@@ -42,7 +44,7 @@ namespace GoosingGeese.Presentation
 
             if (isOnline == false && entries.Find(entry => entry.PlayerId == _progress.PlayerId) == null)
             {
-                string localRow = (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + " •";
+                string localRow = (entries.Count + 1) + ". " + _progress.PlayerName + " — " + _progress.Points + playerMarker;
 
                 if (entries.Count < VisibleTopCount)
                     rows += localRow;
@@ -63,12 +65,8 @@ namespace GoosingGeese.Presentation
                 playerLabel.resizeTextMaxSize = 24;
             }
 
-            _ui.CreateLabel(parent,
-                isOnline ? _text.Choose("Онлайн-рейтинг",
-                "Online leaderboard") : _text.Choose("Рекорд этого устройства",
-                "Device record"),
-                23);
-            _ui.CreateButton(parent, _text.Choose("Назад", "Back"), back);
+            _ui.CreateLabel(parent, isOnline ? _text.Get("online.leaderboard") : _text.Get("device.record"), 23);
+            _ui.CreateButton(parent, _text.Get("back"), back);
         }
 
         private int GetRank(System.Collections.Generic.List<LeaderboardEntry> entries, int index)

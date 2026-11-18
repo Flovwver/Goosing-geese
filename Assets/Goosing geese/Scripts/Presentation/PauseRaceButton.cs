@@ -9,10 +9,8 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "PauseRaceButton")]
     public class PauseRaceButton : MonoBehaviour
     {
-        [SerializeField]
-        private RaceController _race;
-        [SerializeField]
-        private TMP_Text _label;
+        [SerializeField] private RaceController _race;
+        [SerializeField] private TMP_Text _label;
         private Button _button;
 
         private void Awake()
@@ -35,7 +33,7 @@ namespace GoosingGeese.Presentation
 
         private void OnStateChanged(RaceState state)
         {
-            _label.text = state == RaceState.Paused ? "Продолжить" : "Пауза";
+            _label.text = _race.Session.Text.Get(state == RaceState.Paused ? "pause.resume" : "pause.caption");
         }
 
         private void TogglePause()

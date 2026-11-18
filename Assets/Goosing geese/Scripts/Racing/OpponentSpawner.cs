@@ -10,24 +10,18 @@ namespace GoosingGeese.Racing
     public class OpponentSpawner : MonoBehaviour
     {
         private const float CornerGripMargin = 0.02f;
-        [SerializeField]
-        private Level _level;
-        [SerializeField]
-        private Racer _player;
-        [SerializeField]
-        private Racer _opponentPrefab;
-        [SerializeField]
-        private VehicleSet[] _vehiclesByScenery;
-        [SerializeField, Min(0f)]
-        private float _laneOffset = 4f;
-        [SerializeField, Min(0f)]
-        private float _brakingPreviewDistance = 45f;
+
+        [SerializeField] private Level _level;
+        [SerializeField] private Racer _player;
+        [SerializeField] private Racer _opponentPrefab;
+        [SerializeField] private VehicleSet[] _vehiclesByScenery;
+        [SerializeField, Min(0f)] private float _laneOffset = 4f;
+        [SerializeField, Min(0f)] private float _brakingPreviewDistance = 45f;
         private OpponentDriver _driver;
         private Racer _opponent;
         private RaceController _race;
         private RacerAppearance _appearance;
-        [SerializeField, Min(1f)]
-        private float _turnRateMultiplier = 2f;
+        [SerializeField, Min(1f)] private float _turnRateMultiplier = 2f;
 
         public Racer Opponent => _opponent;
         public float LaneOffset => _laneOffset;

@@ -15,14 +15,9 @@ public static class PreparationBoundaryTests
         var finishField = typeof(Level).GetField("_finishLine", Flags);
         object finish = finishField.GetValue(level);
         bool notified = false;
-        int expectedErrors = 0;
-        Action<RoadPath, RoadConfiguration> broken = (path, settings) => throw new Exception("Expected audit observer failure");
+        var failure = new InvalidOperationException();
+        Action<RoadPath, RoadConfiguration> broken = (path, settings) => throw failure;
         Action<RoadPath, RoadConfiguration> observer = (path, settings) => notified = true;
-        Application.LogCallback log = (message, stack, type) =>
-        {
-            if (message.Contains("Expected audit observer failure"))
-                expectedErrors++;
-        };
 
         try
         {
@@ -34,9 +29,8 @@ public static class PreparationBoundaryTests
             finishField.SetValue(level, finish);
             level.PathBuilt += broken;
             level.PathBuilt += observer;
-            Application.logMessageReceived += log;
             Require(level.TryRestoreLevel(definition, out _), "Observer failure must not turn committed replacement into failure.");
-            Require(notified && expectedErrors == 1, "Observer failure must be reported and later observers notified.");
+            Require(notified && ReferenceEquals(level.LastObserverFailure, failure), "Observer failure must be reported and later observers notified.");
             return "PASS: dependency validation preserves previous road; committed replacement isolates and reports observer errors.";
         }
         finally
@@ -44,7 +38,6 @@ public static class PreparationBoundaryTests
             finishField.SetValue(level, finish);
             level.PathBuilt -= broken;
             level.PathBuilt -= observer;
-            Application.logMessageReceived -= log;
         }
     }
 

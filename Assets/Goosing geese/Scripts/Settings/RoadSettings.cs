@@ -25,15 +25,13 @@ namespace GoosingGeese.Settings
         [Min(0f)]
         public float WaypointGizmoRadius = 0.3f;
         [Header("Generation")]
-        [SerializeField]
-        private RoadPieceType[] _availablePieceTypes =
+        [SerializeField] private RoadPieceType[] _availablePieceTypes =
         {
             RoadPieceType.Straight,
             RoadPieceType.LeftTurn,
             RoadPieceType.RightTurn
         };
-        [SerializeField]
-        private RoadPiecePrefabEntry[] _piecePrefabs;
+        [SerializeField] private RoadPiecePrefabEntry[] _piecePrefabs;
 
         public RoadPieceType[] AvailablePieceTypes => _availablePieceTypes;
         public IReadOnlyList<RoadPiecePrefabEntry> PiecePrefabs => _piecePrefabs;

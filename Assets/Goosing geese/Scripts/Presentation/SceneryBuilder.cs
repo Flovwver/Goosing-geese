@@ -9,12 +9,9 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "SceneryBuilder")]
     public sealed class SceneryBuilder : IDisposable
     {
-        [SerializeField]
-        private CompatibleMaterials _materials = new CompatibleMaterials();
-        [SerializeField]
-        private GameObject _root;
-        [SerializeField]
-        private Material _groundMaterial;
+        [SerializeField] private CompatibleMaterials _materials = new CompatibleMaterials();
+        [SerializeField] private GameObject _root;
+        [SerializeField] private Material _groundMaterial;
 
         public void Dispose()
         {

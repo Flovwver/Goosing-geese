@@ -7,8 +7,7 @@ namespace GoosingGeese.Racing
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "Mover")]
     public class Mover : MonoBehaviour
     {
-        [SerializeField]
-        private bool _lockVerticalPosition = true;
+        [SerializeField] private bool _lockVerticalPosition = true;
         private Steering _steering;
         private Rigidbody _rigidbody;
         private Movement _movement;
@@ -105,7 +104,6 @@ namespace GoosingGeese.Racing
                 return;
 
             _rigidbody = GetComponent<Rigidbody>();
-            // The track is flat; seam contacts must not launch the racer vertically.
 
             if (_lockVerticalPosition)
                 _rigidbody.constraints |= RigidbodyConstraints.FreezePositionY;

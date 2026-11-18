@@ -7,12 +7,19 @@ namespace GoosingGeese.Garage
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RacerUpgradeProgress")]
     public class RacerUpgradeProgress
     {
-        public string ModelId;
-        public int Acceleration;
-        public int TopSpeed;
-        public int Cooling;
-        public int Handling;
-        public int ThermalResistance;
+        [SerializeField] private string ModelId;
+        [SerializeField] private int Acceleration;
+        [SerializeField] private int TopSpeed;
+        [SerializeField] private int Cooling;
+        [SerializeField] private int Handling;
+        [SerializeField] private int ThermalResistance;
+
+        public RacerUpgradeProgress(string modelId)
+        {
+            ModelId = modelId;
+        }
+
+        public string Id => ModelId;
 
         public int GetLevel(RacerUpgradeKind kind)
         {

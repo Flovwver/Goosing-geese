@@ -7,12 +7,9 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "Speedometer")]
     public class Speedometer : MonoBehaviour
     {
-        [SerializeField]
-        private Racer _racer;
-        [SerializeField]
-        private SpeedometerDialGraphic _dial;
-        [SerializeField]
-        private SpeedometerScaleView _scale;
+        [SerializeField] private Racer _racer;
+        [SerializeField] private SpeedometerDialGraphic _dial;
+        [SerializeField] private SpeedometerScaleView _scale;
 
         private void Update()
         {

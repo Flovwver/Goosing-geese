@@ -1,0 +1,19 @@
+newmtl Goose_Feathers
+Kd 0.937255 0.929412 0.854902
+d 1
+illum 1
+
+newmtl Goose_Wings
+Kd 0.827451 0.835294 0.780392
+d 1
+illum 1
+
+newmtl Goose_BeakAndFeet
+Kd 0.921569 0.541176 0.180392
+d 1
+illum 1
+
+newmtl Goose_Eyes
+Kd 0.141176 0.145098 0.133333
+d 1
+illum 1

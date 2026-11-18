@@ -21,8 +21,11 @@ namespace GoosingGeese.Levels
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
-            if (layout == null || layout.Length != settings.RoadPieceCount + settings.FinishRunoutPieces)
-                throw new ArgumentException("Layout length must match the captured road configuration.");
+            if (layout == null)
+                throw new ArgumentNullException(nameof(layout));
+
+            if (layout.Length != settings.RoadPieceCount + settings.FinishRunoutPieces)
+                throw new ArgumentOutOfRangeException(nameof(layout), layout.Length, null);
 
             Opponent = opponent;
             Number = number;

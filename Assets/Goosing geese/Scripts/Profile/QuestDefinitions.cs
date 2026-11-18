@@ -8,20 +8,16 @@ namespace GoosingGeese.Profile
         private readonly IReadOnlyList<QuestDefinition> _entries = Array.AsReadOnly(new[] { new QuestDefinition(QuestId.DailyRaces,
             3,
             50,
-            "Сегодня: 3 гонки",
-            "Today: 3 races"), new QuestDefinition(QuestId.DailyWin,
+            "today.3.races"), new QuestDefinition(QuestId.DailyWin,
             1,
             75,
-            "Сегодня: 1 победа",
-            "Today: 1 win"), new QuestDefinition(QuestId.TotalWins,
+            "today.1.win"), new QuestDefinition(QuestId.TotalWins,
             10,
             300,
-            "Всего: 10 побед",
-            "Total: 10 wins"), new QuestDefinition(QuestId.DailyOverheat,
+            "total.10.wins"), new QuestDefinition(QuestId.DailyOverheat,
             1,
             25,
-            "Сегодня: перегреть гонщика",
-            "Today: overheat your racer") });
+            "today.overheat.your.racer") });
 
         public IReadOnlyList<QuestDefinition> Entries => _entries;
 

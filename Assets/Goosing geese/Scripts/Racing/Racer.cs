@@ -13,8 +13,7 @@ namespace GoosingGeese.Racing
     public class Racer : MonoBehaviour
     {
         private readonly EventPublisher _events = new EventPublisher();
-        [SerializeField]
-        private RacerStats _stats;
+        [SerializeField] private RacerStats _stats;
         private GripModel _gripModel;
         private OverheatTracker _overheatTracker;
         private Mover _mover;

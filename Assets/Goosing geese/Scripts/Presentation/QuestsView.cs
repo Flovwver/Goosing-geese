@@ -28,13 +28,7 @@ namespace GoosingGeese.Presentation
             for (int i = 0; i < definitions.Count; i++)
             {
                 int quest = (int)definitions[i].Id;
-                string title = _text.Choose(definitions[i].RussianTitle,
-                    definitions[i].EnglishTitle)
-                    + "  "
-                    + _progress.Quests.GetProgress(i,
-                    DateTime.Today)
-                    + "/"
-                    + definitions[i].Target;
+                string title = _text.Get(definitions[i].TitleKey) + "  " + _progress.Quests.GetProgress(i, DateTime.Today) + "/" + definitions[i].Target;
                 var button = _ui.CreateButton(parent, title, () =>
                 {
                     _commands.ClaimQuest(quest, DateTime.Today);
@@ -46,8 +40,8 @@ namespace GoosingGeese.Presentation
                     DateTime.Today) >= definitions[i].Target;
             }
 
-            _ui.CreateLabel(parent, _text.Choose("Нажми выполненное задание, чтобы получить очки", "Tap a completed quest to claim points"), 22);
-            _ui.CreateButton(parent, _text.Choose("Назад", "Back"), back);
+            _ui.CreateLabel(parent, _text.Get("tap.a.completed.quest.to.claim.points"), 22);
+            _ui.CreateButton(parent, _text.Get("back"), back);
         }
     }
 }

@@ -6,6 +6,7 @@ namespace GoosingGeese.Roads
     public class RoadLayoutGeometry
     {
         private const int MinimumSamples = 24;
+
         private readonly Dictionary<RoadPieceType, RoadPiece> _prefabs;
 
         public RoadLayoutGeometry(Dictionary<RoadPieceType, RoadPiece> prefabs)

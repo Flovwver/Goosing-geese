@@ -7,14 +7,10 @@ namespace GoosingGeese.Racing
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "OpponentDriver")]
     public class OpponentDriver : MonoBehaviour
     {
-        [SerializeField, Range(0f, 1f)]
-        private float _cruiseSpeed = 0.72f;
-        [SerializeField, Range(0f, 1f)]
-        private float _cornerSpeed = 0.45f;
-        [SerializeField, Min(0f)]
-        private float _laneOffset = 4f;
-        [SerializeField, Min(0f)]
-        private float _brakingPreviewDistance = 45f;
+        [SerializeField, Range(0f, 1f)] private float _cruiseSpeed = 0.72f;
+        [SerializeField, Range(0f, 1f)] private float _cornerSpeed = 0.45f;
+        [SerializeField, Min(0f)] private float _laneOffset = 4f;
+        [SerializeField, Min(0f)] private float _brakingPreviewDistance = 45f;
         private RaceController _race;
         private Racer _racer;
         private RoadNavigator _navigator;

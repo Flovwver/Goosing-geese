@@ -8,6 +8,8 @@ namespace GoosingGeese.Levels
 {
     public sealed class GameSession : ILevelSession
     {
+        private const string RacerAppearanceCatalogTitle = "RacerAppearanceCatalog";
+
         private readonly PlayerProgressStore _store;
         private readonly LocalLeaderboard _leaderboard;
         private readonly Level _level;
@@ -21,11 +23,13 @@ namespace GoosingGeese.Levels
             _level = level;
             _campaign = campaign;
             _race = race;
-            Progress = _store.Load(Resources.Load<RacerAppearanceCatalog>("RacerAppearanceCatalog"));
+            Progress = _store.Load(Resources.Load<RacerAppearanceCatalog>(RacerAppearanceCatalogTitle));
             Commands = new ProfileCommands(Progress, _store, _leaderboard);
             Text = new Localizer(Progress);
         }
 
+        public System.Exception LastPersistenceFailure { get; private set; }
+        public string LastLevelSelectionError { get; private set; }
         public Localizer Text { get; }
         public PlayerProgress Progress { get; }
         public ProfileCommands Commands { get; }
@@ -68,7 +72,7 @@ namespace GoosingGeese.Levels
             }
             catch (System.Exception exception)
             {
-                Debug.LogException(exception, _race);
+                LastPersistenceFailure = exception;
             }
 
             return reward;
@@ -112,7 +116,7 @@ namespace GoosingGeese.Levels
 
             Progress.TrySelectLevel(previous, int.MaxValue);
             _store.Save(Progress);
-            Debug.LogError("Level selection failed: " + error, _level);
+            LastLevelSelectionError = error;
             return false;
         }
     }

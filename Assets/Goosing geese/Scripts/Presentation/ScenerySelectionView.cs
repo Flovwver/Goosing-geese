@@ -23,13 +23,13 @@ namespace GoosingGeese.Presentation
         public void Render(Transform parent, Action back, Action refresh)
         {
             _ui.CreateLabel(parent, GetThemeName(), 28);
-            _ui.CreateButton(parent, _text.Choose("Сменить окружение", "Change scenery"), () =>
+            _ui.CreateButton(parent, _text.Get("change.scenery"), () =>
             {
                 _commands.NextScenery(3);
                 refresh();
             });
-            _ui.CreateLabel(parent, _text.Choose("Соперник сменится на новой трассе", "The rival changes on a new track"), 20);
-            _ui.CreateButton(parent, _text.Choose("Назад", "Back"), back);
+            _ui.CreateLabel(parent, _text.Get("the.rival.changes.on.a.new.track"), 20);
+            _ui.CreateButton(parent, _text.Get("back"), back);
         }
 
         private string GetThemeName()
@@ -37,11 +37,11 @@ namespace GoosingGeese.Presentation
             switch (_progress.SelectedSceneryIndex)
             {
                 case 1:
-                    return _text.Choose("Горы", "Mountains");
+                    return _text.Get("mountains");
                 case 2:
-                    return _text.Choose("Город", "City");
+                    return _text.Get("city");
                 default:
-                    return _text.Choose("Сельская местность", "Countryside");
+                    return _text.Get("countryside");
             }
         }
     }

@@ -8,11 +8,13 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "CompatibleMaterials")]
     public sealed class CompatibleMaterials : IDisposable
     {
+        private const string BaseColorProperty = "_BaseColor";
+        private const string BaseMapProperty = "_BaseMap";
+        private const string ErrorShaderName = "Hidden/InternalErrorShader";
+
         private readonly Dictionary<Material, Material> _cache = new Dictionary<Material, Material>();
-        [SerializeField]
-        private List<Material> _sources = new List<Material>();
-        [SerializeField]
-        private List<Material> _copies = new List<Material>();
+        [SerializeField] private List<Material> _sources = new List<Material>();
+        [SerializeField] private List<Material> _copies = new List<Material>();
 
         public void Dispose()
         {
@@ -43,15 +45,15 @@ namespace GoosingGeese.Presentation
                 {
                     Material source = materials[i];
 
-                    if (source == null || (source.shader != null && source.shader.isSupported && source.shader.name != "Hidden/InternalErrorShader"))
+                    if (source == null || (source.shader != null && source.shader.isSupported && source.shader.name != ErrorShaderName))
                         continue;
 
                     if (_cache.TryGetValue(source, out Material compatible) == false)
                     {
                         compatible = new Material(fallback);
-                        compatible.name = source.name + " (compatible)";
-                        compatible.color = Color.white;
-                        compatible.mainTexture = source.mainTexture;
+                        compatible.name = source.name;
+                        compatible.color = source.HasProperty(BaseColorProperty) ? source.GetColor(BaseColorProperty) : Color.white;
+                        compatible.mainTexture = source.HasProperty(BaseMapProperty) ? source.GetTexture(BaseMapProperty) : source.mainTexture;
                         compatible.mainTextureScale = source.mainTextureScale;
                         compatible.mainTextureOffset = source.mainTextureOffset;
                         _cache.Add(source, compatible);

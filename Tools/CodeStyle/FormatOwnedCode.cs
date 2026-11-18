@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,6 +39,7 @@ public static class FormatOwnedCode
 
                 var rewritten = new Rules().Visit(tree.GetRoot());
                 string formatted = WrapLines(SeparateFlow(SeparateMembers(rewritten.NormalizeWhitespace("    ", "\n").ToFullString()))) + "\n";
+                formatted = Regex.Replace(formatted, @"(?m)^( +)(\[SerializeField(?:, [^\n]+)?\])\n\1(?=(?:private|protected|internal|public) )", "$1$2 ");
                 formatted = string.Join("\n", formatted.Split('\n').Select(line => line.TrimEnd()));
 
                 if (source == formatted)
@@ -124,6 +126,11 @@ public static class FormatOwnedCode
                     && (current is FieldDeclarationSyntax
                     || current is EventFieldDeclarationSyntax
                     || current is PropertyDeclarationSyntax);
+
+                if (previous is FieldDeclarationSyntax previousField
+                    && current is FieldDeclarationSyntax currentField
+                    && previousField.Modifiers.Any(SyntaxKind.ConstKeyword) != currentField.Modifiers.Any(SyntaxKind.ConstKeyword))
+                    compact = false;
 
                 if (compact == false)
                     boundaries.Add(tree.GetLineSpan(current.Span).StartLinePosition.Line);

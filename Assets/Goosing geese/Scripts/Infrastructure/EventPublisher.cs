@@ -1,10 +1,11 @@
 using System;
-using UnityEngine;
 
 namespace GoosingGeese.Infrastructure
 {
     public sealed class EventPublisher
     {
+        public Exception LastFailure { get; private set; }
+
         public void Publish(Action handlers, UnityEngine.Object context)
         {
             if (handlers == null)
@@ -18,7 +19,7 @@ namespace GoosingGeese.Infrastructure
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+                    LastFailure = exception;
                 }
             }
         }
@@ -36,7 +37,7 @@ namespace GoosingGeese.Infrastructure
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+                    LastFailure = exception;
                 }
             }
         }
@@ -54,7 +55,7 @@ namespace GoosingGeese.Infrastructure
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+                    LastFailure = exception;
                 }
             }
         }

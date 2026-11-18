@@ -6,6 +6,7 @@ namespace GoosingGeese.Roads
     public class RoadCurve
     {
         private const float MinimumSegmentLength = 0.0001f;
+
         private readonly List<Vector3> _points = new List<Vector3>();
         private readonly List<float> _distances = new List<float>();
         private readonly List<int> _waypointIndices = new List<int>();

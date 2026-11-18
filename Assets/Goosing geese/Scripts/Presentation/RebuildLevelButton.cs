@@ -8,8 +8,7 @@ namespace GoosingGeese.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "", "Assembly-CSharp", "RegenerateLevelButton")]
     public class RebuildLevelButton : MonoBehaviour
     {
-        [SerializeField]
-        private Level _level;
+        [SerializeField] private Level _level;
         private Button _button;
 
         private void Awake()
