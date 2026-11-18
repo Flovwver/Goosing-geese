@@ -22,6 +22,8 @@ namespace GoosingGeese.Presentation
         private AudioClip _heatWarning;
         private AudioClip _explosion;
         private bool _heatWarningPlayed;
+        private bool _hasFocus;
+        private bool _applicationPaused;
 
         private void Awake()
         {
@@ -43,6 +45,8 @@ namespace GoosingGeese.Presentation
         {
             _race.RaceEnded += OnRaceEnded;
             _player.OverheatProgressChanged += OnHeatProgressChanged;
+            _hasFocus = Application.isFocused;
+            UpdateBackgroundAudio();
         }
 
         private void Start()
@@ -60,6 +64,18 @@ namespace GoosingGeese.Presentation
             _engine.pitch = Mathf.Lerp(LowEnginePitch, HighEnginePitch, Mathf.Clamp01(_player.NormalizedSpeed));
         }
 
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            _hasFocus = hasFocus;
+            UpdateBackgroundAudio();
+        }
+
+        private void OnApplicationPause(bool isPaused)
+        {
+            _applicationPaused = isPaused;
+            UpdateBackgroundAudio();
+        }
+
         private void OnDisable()
         {
             _race.RaceEnded -= OnRaceEnded;
@@ -69,6 +85,14 @@ namespace GoosingGeese.Presentation
         public void PlayClick()
         {
             PlayEffect(_click);
+        }
+
+        private void UpdateBackgroundAudio()
+        {
+            bool muted = _hasFocus == false || _applicationPaused;
+            _music.mute = muted;
+            _effects.mute = muted;
+            _engine.mute = muted;
         }
 
         private void OnRaceEnded(bool won)
