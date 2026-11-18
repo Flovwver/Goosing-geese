@@ -53,8 +53,10 @@ public static class MergeIntegrationTests
                 renderer.GetPropertyBlock(block, 0);
                 Require(block.GetColor("_Color") == catalog.GetEntry(color).Tint, "Animation overwrote the chosen color.");
                 Material[] materials = renderer.sharedMaterials;
-                Require(materials.Length == 4, "The goose must use four materials.");
+                Require(materials.Length == 5, "The goose must use four body materials and an accessory palette.");
                 Require(materials[0].name.StartsWith("Goose_Feathers", StringComparison.Ordinal), "The first slot must use the feather material.");
+                Require(materials[4].mainTexture != null, "The rider and skates must use their original palette texture.");
+                Require(renderer.GetComponent<MeshFilter>().sharedMesh.GetIndexCount(4) > 0, "The goose must include the rider and skate geometry.");
 
                 for (int slot = 1; slot < materials.Length; slot++)
                 {
