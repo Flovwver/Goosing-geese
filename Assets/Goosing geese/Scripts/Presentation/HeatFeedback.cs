@@ -16,12 +16,11 @@ namespace GoosingGeese.Presentation
         private const float DropSize = 0.18f;
 
         private static readonly int ColorProperty = Shader.PropertyToID("_Color");
+        private readonly List<(MeshRenderer Renderer, int Slot, Color BaseColor)> _surfaceColors = new();
         private List<Material> _replacementMaterials = new List<Material>();
         [SerializeField] private Material _particleMaterial;
         private Racer _racer;
         private RacerAppearance _appearance;
-        private MeshRenderer[] _renderers;
-        private Color[] _baseColors;
         private Transform[] _drops;
         private Material _sweatMaterial;
         private MaterialPropertyBlock _properties;
@@ -79,16 +78,16 @@ namespace GoosingGeese.Presentation
 
         private void LateUpdate()
         {
-            for (int index = 0; index < _renderers.Length; index++)
+            foreach (var surface in _surfaceColors)
             {
-                MeshRenderer renderer = _renderers[index];
+                MeshRenderer renderer = surface.Renderer;
 
                 if (renderer == null)
                     continue;
 
-                renderer.GetPropertyBlock(_properties);
-                _properties.SetColor(ColorProperty, Color.Lerp(_baseColors[index], Color.red, _progress));
-                renderer.SetPropertyBlock(_properties);
+                renderer.GetPropertyBlock(_properties, surface.Slot);
+                _properties.SetColor(ColorProperty, Color.Lerp(surface.BaseColor, Color.red, _progress));
+                renderer.SetPropertyBlock(_properties, surface.Slot);
             }
 
             for (int i = 0; i < _drops.Length; i++)
@@ -119,20 +118,25 @@ namespace GoosingGeese.Presentation
 
         private void RefreshRenderers()
         {
-            var renderers = new List<MeshRenderer>();
-            var colors = new List<Color>();
+            _surfaceColors.Clear();
 
             foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>(true))
             {
-                if (renderer.name == "Sweat" || renderer.enabled == false || renderer.gameObject.activeInHierarchy == false || renderer.sharedMaterial == null)
+                if (renderer.name == "Sweat" || renderer.enabled == false || renderer.gameObject.activeInHierarchy == false)
                     continue;
 
-                renderers.Add(renderer);
-                colors.Add(renderer.sharedMaterial.color);
-            }
+                Material[] materials = renderer.sharedMaterials;
 
-            _renderers = renderers.ToArray();
-            _baseColors = colors.ToArray();
+                for (int slot = 0; slot < materials.Length; slot++)
+                {
+                    Material material = materials[slot];
+
+                    if (material == null || material.HasProperty(ColorProperty) == false)
+                        continue;
+
+                    _surfaceColors.Add((renderer, slot, material.GetColor(ColorProperty)));
+                }
+            }
         }
 
         private void OnProgress(float progress)

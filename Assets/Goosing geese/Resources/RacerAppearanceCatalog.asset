@@ -83,7 +83,7 @@ MonoBehaviour:
     _russianName: "\u041A\u043E\u0437\u0451\u043B"
     _englishName: Goat
     _stats: {fileID: 11400000, guid: 7c3240e5dfa48df4fb6e433a847959b3, type: 2}
-    _model: {fileID: 3791262560391127436, guid: 515a296395b52b3419a053dc468bbd0c, type: 3}
+    _model: {fileID: 2088477596324369373, guid: a2147b3c0465de040b51eadde0a6e8fe, type: 3}
     _tint: {r: 1, g: 1, b: 1, a: 1}
     _pedalSprite: {fileID: 21300000, guid: c644c60ddd803bb449ccbe206b8aaac8, type: 3}
     _purchasePrice: 1800

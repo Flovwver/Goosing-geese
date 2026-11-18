@@ -50,10 +50,36 @@ public static class MergeIntegrationTests
                 typeof(HeatFeedback).GetMethod("LateUpdate", Flags).Invoke(heat, null);
                 var renderer = appearance.GetComponentsInChildren<MeshRenderer>().First(r => r.name != "Sweat");
                 var block = new MaterialPropertyBlock();
-                renderer.GetPropertyBlock(block);
+                renderer.GetPropertyBlock(block, 0);
                 Require(block.GetColor("_Color") == catalog.GetEntry(color).Tint, "Animation overwrote the chosen color.");
+                Material[] materials = renderer.sharedMaterials;
+                Require(materials.Length == 4, "The goose must use four materials.");
+                Require(materials[0].name.StartsWith("Goose_Feathers", StringComparison.Ordinal), "The first slot must use the feather material.");
+
+                for (int slot = 1; slot < materials.Length; slot++)
+                {
+                    renderer.GetPropertyBlock(block, slot);
+                    Require(block.GetColor("_Color") == materials[slot].color, "Goose tint must preserve accent colors.");
+                }
             }
 
+            int goatIndex = Enumerable.Range(0, garage.AppearanceCount).Single(index => catalog.GetEntry(index).ModelId == "goat");
+            Require(garage.Browse(goatIndex), "The garage must preview the goat.");
+            var goatRenderer = appearance.transform.Find("Selected model").GetComponentInChildren<MeshRenderer>();
+            Material[] goatMaterials = goatRenderer.sharedMaterials;
+            Require(goatMaterials.Length == 5 && goatMaterials[0].name == "Goat_Coat", "The garage must use the new goat model.");
+            var goatBlock = new MaterialPropertyBlock();
+            typeof(HeatFeedback).GetMethod("OnProgress", Flags).Invoke(heat, new object[] { 0.5f });
+            typeof(HeatFeedback).GetMethod("LateUpdate", Flags).Invoke(heat, null);
+
+            for (int slot = 0; slot < goatMaterials.Length; slot++)
+            {
+                goatRenderer.GetPropertyBlock(goatBlock, slot);
+                Color expectedColor = Color.Lerp(goatMaterials[slot].color, Color.red, 0.5f);
+                Require(goatBlock.GetColor("_Color") == expectedColor, "Goat heat feedback must use each material's own base color.");
+            }
+
+            typeof(HeatFeedback).GetMethod("OnProgress", Flags).Invoke(heat, new object[] { 0f });
             garage.EndPreview();
             var pieces = new List<RoadPiece>();
 
