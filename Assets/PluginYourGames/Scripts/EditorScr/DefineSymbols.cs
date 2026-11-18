@@ -142,7 +142,12 @@ namespace YG.EditorScr
             string currentPlatform = string.Empty;
             InfoYG infoRes = Resources.Load<InfoYG>(InfoYG.NAME_INFOYG_FILE);
 
-            if (infoRes != null && InfoYG.Inst().Basic.platform != null)
+            // InitializeOnLoad can run before the settings asset has been imported.
+            // Preserve the project's defines until the selected platform can be read.
+            if (infoRes == null || (EditorApplication.isUpdating && infoRes.Basic.platform == null))
+                return;
+
+            if (InfoYG.Inst().Basic.platform != null)
                 currentPlatform = PlatformSettings.currentPlatformFullName + "_yg";
 
             if (currentPlatform == "Error_yg" || currentPlatform == "ErrorPlatform_yg" || currentPlatform == "_yg" || currentPlatform == "NewPlatform")

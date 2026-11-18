@@ -7,6 +7,14 @@ The adapter registers automatically when PluginYG and its Yandex platform are en
 
 The shared game, save data and local leaderboard do not require PluginYG.
 
+Build the moderation archive from this branch:
+
+```powershell
+unity build --target WebGL --execute-method GoosingGeese.Platforms.Editor.YandexReleaseBuild.Build --output-path <output-directory>
+```
+
+The command checks that the Yandex adapter, account, leaderboard and locale modules are enabled and that the game controls the readiness signal. PluginYG places the ZIP next to the WebGL output directory. Keep the WebGL output directory name free of spaces and Cyrillic characters because Unity uses it in the names of the generated files.
+
 Authorization, InterstitialAdv, Leaderboards, Localization and RewardedAdv are installed from the [official PluginYG source](https://github.com/JustPlay-Max/Unity-PluginYG-2/tree/0928f7c) for core version 2.0092. This provides the module code and build scripts when the package server is unreachable. The upstream source does not ship Unity metadata for its sample scenes and prefabs, so those samples are excluded. The game continues to use its existing SDK adapter.
 
 The adapter uses the PluginYG Localization module to detect the platform language and handle explicit language changes. It uses Leaderboards to read the online table and submit a higher cumulative score for the account identified by Authorization. Local records remain available while the online request is pending or if it fails.
