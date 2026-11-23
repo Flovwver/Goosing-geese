@@ -17,12 +17,20 @@ canvas {
 
 body {
     margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #unity-container {
     width: 100%;
     height: 100%;
     position: relative;
+}
+
+#unity-container.unity-desktop {
+    max-width: 200vh;
+    max-height: 200vw;
 }
 
 #unity-canvas {
