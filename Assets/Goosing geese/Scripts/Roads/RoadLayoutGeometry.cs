@@ -21,11 +21,12 @@ namespace GoosingGeese.Roads
             RoadPiece straight = _prefabs[RoadPieceType.Straight];
             float extensionYaw = start.eulerAngles.y - straight.ExitPoint.eulerAngles.y;
             Quaternion extensionRotation = Quaternion.Euler(0f, extensionYaw, 0f);
-            Vector3 entry = start.position + extensionRotation * (straight.EntryPoint.position - straight.ExitPoint.position);
+            Vector3 extensionStep = extensionRotation * (straight.EntryPoint.position - straight.ExitPoint.position);
+            Vector3 entry = start.position + extensionStep * RoadBuilder.StartExtensionPieceCount;
             float yaw = straight.EntryPoint.eulerAngles.y + extensionYaw;
             float minimumSquaredDistance = minimumSpacing * minimumSpacing;
 
-            foreach (RoadPieceType type in layout.Prepend(RoadPieceType.Straight))
+            foreach (RoadPieceType type in Enumerable.Repeat(RoadPieceType.Straight, RoadBuilder.StartExtensionPieceCount).Concat(layout))
             {
                 RoadPiece prefab = _prefabs[type];
                 float rotationDelta = yaw - prefab.EntryPoint.eulerAngles.y;

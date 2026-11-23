@@ -6,6 +6,8 @@ namespace GoosingGeese.Roads
 {
     public class RoadBuilder
     {
+        internal const int StartExtensionPieceCount = 3;
+
         private readonly Dictionary<RoadPieceType, RoadPiece> _piecePrefabsByType;
         private GameObject _root;
 
@@ -26,9 +28,7 @@ namespace GoosingGeese.Roads
 
             try
             {
-                RoadPiece extension = UnityEngine.Object.Instantiate(_piecePrefabsByType[RoadPieceType.Straight], root.transform);
-                extension.name = "Road before start";
-                AlignPieceToPoint(extension.transform, extension.ExitPoint, startPosition, startRotation);
+                IReadOnlyList<RoadPiece> extension = BuildStartExtension(root.transform, startPosition, startRotation);
                 Vector3 position = startPosition;
                 Quaternion rotation = startRotation;
 
@@ -82,6 +82,24 @@ namespace GoosingGeese.Roads
             float rotationDelta = rotation.eulerAngles.y - connection.eulerAngles.y;
             piece.RotateAround(connection.position, Vector3.up, rotationDelta);
             piece.position += position - connection.position;
+        }
+
+        private IReadOnlyList<RoadPiece> BuildStartExtension(Transform root, Vector3 position, Quaternion rotation)
+        {
+            var extension = new RoadPiece[StartExtensionPieceCount];
+            RoadPiece straight = _piecePrefabsByType[RoadPieceType.Straight];
+
+            for (int index = extension.Length - 1; index >= 0; index--)
+            {
+                RoadPiece piece = UnityEngine.Object.Instantiate(straight, root);
+                piece.name = "Road before start " + (index + 1);
+                AlignPieceToPoint(piece.transform, piece.ExitPoint, position, rotation);
+                extension[index] = piece;
+                position = piece.EntryPoint.position;
+                rotation = piece.EntryPoint.rotation;
+            }
+
+            return Array.AsReadOnly(extension);
         }
 
         private void Validate(IReadOnlyList<RoadPieceType> layout)

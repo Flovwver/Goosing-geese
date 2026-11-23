@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,9 +10,9 @@ namespace GoosingGeese.Roads
         private readonly List<Transform> _waypoints = new List<Transform>();
         private IReadOnlyList<RoadPiece> _readOnlyView;
 
-        public RoadPath(IReadOnlyList<RoadPiece> pieces, RoadPiece startExtension = null)
+        public RoadPath(IReadOnlyList<RoadPiece> pieces, IReadOnlyList<RoadPiece> startExtension = null)
         {
-            StartExtension = startExtension;
+            StartExtension = startExtension ?? Array.Empty<RoadPiece>();
 
             foreach (RoadPiece piece in pieces)
             {
@@ -25,7 +26,7 @@ namespace GoosingGeese.Roads
         }
 
         public IReadOnlyList<RoadPiece> Pieces => _readOnlyView ?? (_readOnlyView = _pieces.AsReadOnly());
-        public RoadPiece StartExtension { get; }
+        public IReadOnlyList<RoadPiece> StartExtension { get; }
         public int FinishWaypointIndex { get; private set; }
         public Transform FinishPoint { get; private set; }
         public RoadCurve Curve { get; private set; }
