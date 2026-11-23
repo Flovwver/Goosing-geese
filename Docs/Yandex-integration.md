@@ -19,7 +19,7 @@ Authorization, InterstitialAdv, Leaderboards, Localization and RewardedAdv are i
 
 The adapter uses the PluginYG Localization module to detect the platform language and handle explicit language changes. It uses Leaderboards to read the online table and submit a higher cumulative score for the account identified by Authorization. Local records remain available while the online request is pending or if it fails.
 
-Create a descending numeric leaderboard with technical name `goosing_geese_points` in the Yandex Games Developer Console. If the game already uses another technical name, change `LeaderboardName` in `YandexGamePlatform.cs` to match it.
+The game uses the descending numeric leaderboard `goosingGeesePoints` in the Yandex Games Developer Console. Keep the technical name identical in the console and in `LeaderboardName` in `YandexGamePlatform.cs`.
 
 For authorized players the template uses the Player object from the Authorization module to load the cloud profile before Unity starts, with a three-second timeout. The game chooses the newer snapshot between the cloud and the account-specific local copy. Guest and standalone profiles keep their original local save and are separate from account profiles. If the cloud read fails, the game retains local saves and does not write to the cloud until a later successful startup.
 

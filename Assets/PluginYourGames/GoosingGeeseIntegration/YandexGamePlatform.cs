@@ -14,7 +14,7 @@ namespace GoosingGeese.Platforms
 {
     internal sealed class YandexGamePlatform : MonoBehaviour, IGamePlatform
     {
-        private const string LeaderboardName = "goosing_geese_points";
+        private const string LeaderboardName = "goosingGeesePoints";
         private const string ReceiverName = "GoosingGeese.YandexPlatform";
 #if Leaderboards_yg && Authorization_yg
         private const float LeaderboardReadInterval = 16f;
