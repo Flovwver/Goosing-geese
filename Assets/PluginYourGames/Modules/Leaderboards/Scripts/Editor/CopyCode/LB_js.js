@@ -1,11 +1,11 @@
 ﻿
-function SetLeaderboard(name, score, extraData) {
+async function SetLeaderboard(name, score, extraData) {
     if (!ysdk) return;
 
     try {
-        ysdk.leaderboards.setScore(name, score, extraData);
+        await ysdk.leaderboards.setScore(name, score, extraData);
     } catch (e) {
-        console.error('CRASH Set Leaderboard: ', e.message);
+        console.warn('Could not submit score to Yandex leaderboard:', name, e);
     }
 }
 
