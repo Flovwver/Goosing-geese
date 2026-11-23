@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GoosingGeese.Roads
@@ -17,11 +18,14 @@ namespace GoosingGeese.Roads
         public bool HasSampledClearance(RoadPieceType[] layout, Transform start, float minimumSpacing, int samples)
         {
             var curves = new List<List<Vector3>>();
-            Vector3 entry = start.position;
-            float yaw = start.eulerAngles.y;
+            RoadPiece straight = _prefabs[RoadPieceType.Straight];
+            float extensionYaw = start.eulerAngles.y - straight.ExitPoint.eulerAngles.y;
+            Quaternion extensionRotation = Quaternion.Euler(0f, extensionYaw, 0f);
+            Vector3 entry = start.position + extensionRotation * (straight.EntryPoint.position - straight.ExitPoint.position);
+            float yaw = straight.EntryPoint.eulerAngles.y + extensionYaw;
             float minimumSquaredDistance = minimumSpacing * minimumSpacing;
 
-            foreach (RoadPieceType type in layout)
+            foreach (RoadPieceType type in layout.Prepend(RoadPieceType.Straight))
             {
                 RoadPiece prefab = _prefabs[type];
                 float rotationDelta = yaw - prefab.EntryPoint.eulerAngles.y;

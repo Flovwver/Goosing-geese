@@ -27,6 +27,7 @@ public static class LevelSnapshotTests
         var definition = level.CurrentDefinition;
         level.TryGetBuiltPath(out var path, out _);
         var points = path.Curve.Points.ToArray();
+        Vector3 extensionStart = CheckStartExtension(path, definition);
         int seed = definition.Seed;
 
         try
@@ -55,6 +56,10 @@ public static class LevelSnapshotTests
                 "New levels must capture current source settings.");
             Require(level.TryRestoreLevel(definition, out error), "Restoring a definition failed: " + error);
             level.TryGetBuiltPath(out var restored, out _);
+            Require(Vector3.Distance(CheckStartExtension(restored,
+                definition),
+                extensionStart) < 0.001f,
+                "Restoring the level must reproduce the road before the start.");
             Require(definition.Seed == seed
                 && restored.Curve.Points.SequenceEqual(points),
                 "Restoration must reproduce the original geometry without random generation.");
@@ -93,6 +98,24 @@ public static class LevelSnapshotTests
             UnityEngine.Object.Destroy(navigation);
             Require(level.TryRestoreLevel(definition, out var restoreError), restoreError);
         }
+    }
+
+    private static Vector3 CheckStartExtension(RoadPath path, LevelDefinition definition)
+    {
+        RoadPiece extension = path.StartExtension;
+        Require(extension != null && extension.Type == RoadPieceType.Straight, "Expected a straight section before the start.");
+        Require(path.Pieces.Count == definition.Layout.Count
+            && path.FinishWaypointIndex == definition.Settings.RoadPieceCount,
+            "The section before the start must stay outside the counted route.");
+        Require(Vector3.Distance(extension.ExitPoint.position,
+            path.Pieces[0].EntryPoint.position) < 0.001f
+            && Quaternion.Angle(extension.ExitPoint.rotation,
+            path.Pieces[0].EntryPoint.rotation) < 0.01f,
+            "The start extension must meet the route flush.");
+        Require(Vector3.Distance(path.Curve.GetPointAtDistance(0f),
+            definition.StartPosition) < 0.001f,
+            "The race curve must still begin at the original start.");
+        return extension.EntryPoint.position;
     }
 
     private static void Require(bool condition, string message)
