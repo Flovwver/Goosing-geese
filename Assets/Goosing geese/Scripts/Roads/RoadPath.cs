@@ -9,8 +9,10 @@ namespace GoosingGeese.Roads
         private readonly List<Transform> _waypoints = new List<Transform>();
         private IReadOnlyList<RoadPiece> _readOnlyView;
 
-        public RoadPath(IReadOnlyList<RoadPiece> pieces)
+        public RoadPath(IReadOnlyList<RoadPiece> pieces, RoadPiece startExtension = null)
         {
+            StartExtension = startExtension;
+
             foreach (RoadPiece piece in pieces)
             {
                 _pieces.Add(piece);
@@ -23,6 +25,7 @@ namespace GoosingGeese.Roads
         }
 
         public IReadOnlyList<RoadPiece> Pieces => _readOnlyView ?? (_readOnlyView = _pieces.AsReadOnly());
+        public RoadPiece StartExtension { get; }
         public int FinishWaypointIndex { get; private set; }
         public Transform FinishPoint { get; private set; }
         public RoadCurve Curve { get; private set; }

@@ -26,19 +26,22 @@ namespace GoosingGeese.Roads
 
             try
             {
+                RoadPiece extension = UnityEngine.Object.Instantiate(_piecePrefabsByType[RoadPieceType.Straight], root.transform);
+                extension.name = "Road before start";
+                AlignPieceToPoint(extension.transform, extension.ExitPoint, startPosition, startRotation);
                 Vector3 position = startPosition;
                 Quaternion rotation = startRotation;
 
                 for (int pieceIndex = 0; pieceIndex < layout.Count; pieceIndex++)
                 {
                     RoadPiece piece = UnityEngine.Object.Instantiate(_piecePrefabsByType[layout[pieceIndex]], root.transform);
-                    AlignPieceToPoint(piece, position, rotation);
+                    AlignPieceToPoint(piece.transform, piece.EntryPoint, position, rotation);
                     pieces.Add(piece);
                     position = piece.ExitPoint.position;
                     rotation = piece.ExitPoint.rotation;
                 }
 
-                var path = new RoadPath(pieces);
+                var path = new RoadPath(pieces, extension);
                 Clear();
                 _root = root;
                 return path;
@@ -74,12 +77,11 @@ namespace GoosingGeese.Roads
                 UnityEngine.Object.DestroyImmediate(root);
         }
 
-        private void AlignPieceToPoint(RoadPiece piece, Vector3 position, Quaternion rotation)
+        private static void AlignPieceToPoint(Transform piece, Transform connection, Vector3 position, Quaternion rotation)
         {
-            float rotationDelta = rotation.eulerAngles.y - piece.EntryPoint.eulerAngles.y;
-            piece.transform.RotateAround(piece.EntryPoint.position, Vector3.up, rotationDelta);
-            Vector3 entryToPieceOffset = piece.transform.position - piece.EntryPoint.position;
-            piece.transform.position = position + entryToPieceOffset;
+            float rotationDelta = rotation.eulerAngles.y - connection.eulerAngles.y;
+            piece.RotateAround(connection.position, Vector3.up, rotationDelta);
+            piece.position += position - connection.position;
         }
 
         private void Validate(IReadOnlyList<RoadPieceType> layout)
@@ -87,14 +89,19 @@ namespace GoosingGeese.Roads
             if (layout == null || layout.Count == 0)
                 throw new ArgumentException("The road layout must contain at least one piece.");
 
-            foreach (RoadPieceType type in layout)
-            {
-                if (_piecePrefabsByType.TryGetValue(type, out RoadPiece prefab) == false || prefab == null)
-                    throw new ArgumentException($"A road prefab is missing for {type}.");
+            ValidatePrefab(RoadPieceType.Straight);
 
-                if (prefab.Type != type || prefab.EntryPoint == null || prefab.ExitPoint == null)
-                    throw new ArgumentException($"Road prefab {prefab.name} has invalid type or connection points.");
-            }
+            foreach (RoadPieceType type in layout)
+                ValidatePrefab(type);
+        }
+
+        private void ValidatePrefab(RoadPieceType type)
+        {
+            if (_piecePrefabsByType.TryGetValue(type, out RoadPiece prefab) == false || prefab == null)
+                throw new ArgumentException($"A road prefab is missing for {type}.");
+
+            if (prefab.Type != type || prefab.EntryPoint == null || prefab.ExitPoint == null)
+                throw new ArgumentException($"Road prefab {prefab.name} has invalid type or connection points.");
         }
     }
 }
