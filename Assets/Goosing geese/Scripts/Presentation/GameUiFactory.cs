@@ -8,6 +8,8 @@ namespace GoosingGeese.Presentation
     {
         private const float ReferenceWidth = 720f;
         private const float ReferenceHeight = 1280f;
+        private const float LandscapeReferenceHeight = 1100f;
+        private const float LandscapeUiWidthToHeight = 1.25f;
         private const float LabelHeightMultiplier = 2.4f;
         private const float ButtonHeight = 68f;
         private const int ButtonFontSize = 25;
@@ -50,16 +52,24 @@ namespace GoosingGeese.Presentation
             canvas.sortingOrder = sortingOrder;
             var scaler = root.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
-            scaler.matchWidthOrHeight = 0.5f;
+            UpdateCanvasScale(scaler, Screen.width > Screen.height);
             return canvas;
         }
 
         public void UpdateSafeArea(RectTransform rect)
         {
             Rect safe = Screen.safeArea;
+            bool landscape = Screen.width > Screen.height;
+
+            if (landscape)
+            {
+                float width = Mathf.Min(safe.width, safe.height * LandscapeUiWidthToHeight);
+                safe = new Rect(safe.center.x - width * 0.5f, safe.y, width, safe.height);
+            }
+
             rect.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
             rect.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
+            UpdateCanvasScale(rect.parent.GetComponent<CanvasScaler>(), landscape);
         }
 
         public Text CreateLabel(Transform parent, string text, int size)
@@ -99,6 +109,12 @@ namespace GoosingGeese.Presentation
             rect.gameObject.AddComponent<LayoutElement>().preferredHeight = ButtonHeight;
             CreateLabel(rect, text, ButtonFontSize);
             return button;
+        }
+
+        private static void UpdateCanvasScale(CanvasScaler scaler, bool landscape)
+        {
+            scaler.referenceResolution = new Vector2(ReferenceWidth, landscape ? LandscapeReferenceHeight : ReferenceHeight);
+            scaler.matchWidthOrHeight = landscape ? 1f : 0.5f;
         }
     }
 }
