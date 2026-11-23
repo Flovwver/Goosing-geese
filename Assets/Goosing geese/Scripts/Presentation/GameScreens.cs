@@ -301,7 +301,7 @@ namespace GoosingGeese.Presentation
             RectTransform bar = _speedometer.GetComponent<RectTransform>();
             bar.SetParent(_safeArea, false);
             bar.localScale = Vector3.one;
-            _ui.Place(bar, new Vector2(0.27f, 0.875f), new Vector2(0.83f, 0.995f));
+            _ui.Place(bar, new Vector2(0.22f, 0.875f), new Vector2(0.78f, 0.995f));
             PedalButton pedal = _pedalButton;
             _pedal = pedal.gameObject;
             _pedalPrompt = pedal.GetComponent<PedalPromptView>();
