@@ -102,20 +102,29 @@ public static class LevelSnapshotTests
 
     private static Vector3 CheckStartExtension(RoadPath path, LevelDefinition definition)
     {
-        RoadPiece extension = path.StartExtension;
-        Require(extension != null && extension.Type == RoadPieceType.Straight, "Expected a straight section before the start.");
+        var extension = path.StartExtension;
+        Require(extension.Count == 3, "Expected three sections before the start.");
         Require(path.Pieces.Count == definition.Layout.Count
             && path.FinishWaypointIndex == definition.Settings.RoadPieceCount,
-            "The section before the start must stay outside the counted route.");
-        Require(Vector3.Distance(extension.ExitPoint.position,
-            path.Pieces[0].EntryPoint.position) < 0.001f
-            && Quaternion.Angle(extension.ExitPoint.rotation,
-            path.Pieces[0].EntryPoint.rotation) < 0.01f,
-            "The start extension must meet the route flush.");
+            "The sections before the start must stay outside the counted route.");
+        Transform nextEntry = path.Pieces[0].EntryPoint;
+
+        for (int index = extension.Count - 1; index >= 0; index--)
+        {
+            RoadPiece piece = extension[index];
+            Require(piece.Type == RoadPieceType.Straight, "Expected a straight section before the start.");
+            Require(Vector3.Distance(piece.ExitPoint.position,
+                nextEntry.position) < 0.001f
+                && Quaternion.Angle(piece.ExitPoint.rotation,
+                nextEntry.rotation) < 0.01f,
+                "Each section before the start must meet the next section flush.");
+            nextEntry = piece.EntryPoint;
+        }
+
         Require(Vector3.Distance(path.Curve.GetPointAtDistance(0f),
             definition.StartPosition) < 0.001f,
             "The race curve must still begin at the original start.");
-        return extension.EntryPoint.position;
+        return extension[0].EntryPoint.position;
     }
 
     private static void Require(bool condition, string message)
